@@ -1,11 +1,11 @@
+import 'package:core_portal/pages/Main/main_view.dart';
+import 'package:core_portal/routes/page_route.dart';
+import 'package:core_portal/screens/modules/request/request_view.dart';
 import 'package:core_portal/widgets/dashboard_card.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
-import 'package:core_portal/routes/page_route.dart';
-import 'package:core_portal/pages/Main/main_view.dart';
-import 'package:core_portal/screens/modules/request/request_view.dart';
 
 part 'homepage_binding.dart';
 part 'homepage_controller.dart';
@@ -311,7 +311,7 @@ class HomePageView extends GetView<HomePageController> {
 }
 Widget progressCard() {
   return Container(
-    padding: const EdgeInsets.all(16),
+    padding: const EdgeInsets.all(18),
     decoration: BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(20),
