@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Authentication Callback</title>
+</head>
+<body>
+  <script>
+    // Extract redirect URL and post to the parent window
+    if (window.opener) {
+      window.opener.postMessage(window.location.href, window.location.origin);
+      window.close();
+    } else {
+      // Fallback if window.opener is not set (e.g. redirected within same window)
+      // redirect back to home page
+      window.location.href = window.location.origin;
+    }
+  </script>
+</body>
+</html>
