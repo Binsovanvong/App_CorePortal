@@ -1,0 +1,119 @@
+﻿Created At: 2026-08-03T16:31:53Z
+Completed At: 2026-08-03T16:31:53Z
+File Path: `file:///d:/StudioProjects/Project/core_portal/lib/screens/super_admin/super_admin_view.dart`
+Total Lines: 4261
+Total Bytes: 164210
+Showing lines 3760 to 3870
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+3760:                   Row(
+3761:                     crossAxisAlignment: CrossAxisAlignment.start,
+3762:                     children: [
+3763:                       Expanded(
+3764:                         child: Column(
+3765:                           crossAxisAlignment: CrossAxisAlignment.start,
+3766:                           children: [
+3767:                             _buildInputLabel("ážˆáŸ’áž˜áŸ„áŸ‡áž€áž˜áŸ’áž˜ážœáž·áž’áž¸ (ážáŸ’áž˜áŸ‚ážš) *"),
+3768:                             TextField(
+3769:                               controller: nameKhCtrl,
+3770:                               decoration: _buildInputDecoration(
+3771:                                 "áž”áž‰áŸ’áž…áž¼áž›ážˆáŸ’áž˜áŸ„áŸ‡áž€áž˜áŸ’áž˜ážœáž·áž’áž¸áž‡áž¶áž—áž¶ážŸáž¶ážáŸ’áž˜áŸ‚ážš",
+3772:                               ),
+3773:                             ),
+3774:                           ],
+3775:                         ),
+3776:                       ),
+3777:                       const SizedBox(width: 16),
+3778:                       Expanded(
+3779:                         child: Column(
+3780:                           crossAxisAlignment: CrossAxisAlignment.start,
+3781:                           children: [
+3782:                             _buildInputLabel("ážˆáŸ’áž˜áŸ„áŸ‡áž€áž˜áŸ’áž˜ážœáž·áž’áž¸ (áž¢áž„áŸ‹áž‚áŸ’áž›áŸážŸ) *"),
+3783:                             TextField(
+3784:                               controller: nameEnCtrl,
+3785:                               decoration: _buildInputDecoration(
+3786:                                 "áž”áž‰áŸ’áž…áž¼áž›ážˆáŸ’áž˜áŸ„áŸ‡áž€áž˜áŸ’áž˜ážœáž·áž’áž¸áž‡áž¶áž—áž¶ážŸáž¶áž¢áž„áŸ‹áž‚áŸ’áž›áŸážŸ",
+3787:                               ),
+3788:                             ),
+3789:                           ],
+3790:                         ),
+3791:                       ),
+3792:                     ],
+3793:                   ),
+3794:                   const SizedBox(height: 16),
+3795: 
+3796:                   _buildInputLabel("URL *"),
+3797:                   TextField(
+3798:                     controller: urlCtrl,
+3799:                     decoration: _buildInputDecoration(
+3800:                       "áž”áž‰áŸ’áž…áž¼áž› URL (áž§. https://example.moi.gov.kh)",
+3801:                     ),
+3802:                   ),
+3803:                   const SizedBox(height: 16),
+3804: 
+3805:                   _buildInputLabel("áž…áŸ’áž”áž¶áž”áŸ‹áž…áž¼áž›áž”áŸ’ážšáž¾ *"),
+3806:                   Row(
+3807:                     children: [
+3808:                       Expanded(
+3809:                         child: Column(
+3810:                           crossAxisAlignment: CrossAxisAlignment.start,
+3811:                           children: [
+3812:                             _buildSubInputLabel("áž”áŸ’ážšáž—áŸáž‘áž…áŸ’áž”áž¶áž”áŸ‹"),
+3813:                             DropdownButtonFormField<String>(
+3814:                               value:
+3815:                                   ruleTypeOptions.any(
+3816:                                     (o) => o['value'] == ruleTypeCtrl.text,
+3817:                                   )
+3818:                                   ? ruleTypeCtrl.text
+3819:                                   : 'GENERAL_DEPARTMENT',
+3820:                               items: ruleTypeOptions
+3821:                                   .map(
+3822:                                     (opt) => DropdownMenuItem<String>(
+3823:                                       value: opt['value'],
+3824:                                       child: Text(
+3825:                                         opt['label']!,
+3826:                                         style: GoogleFonts.kantumruyPro(
+3827:                                           fontSize: 13,
+3828:                                         ),
+3829:                                       ),
+3830:                                     ),
+3831:                                   )
+3832:                                   .toList(),
+3833:                               onChanged: (val) {
+3834:                                 if (val != null) {
+3835:                                   setState(() {
+3836:                                     ruleTypeCtrl.text = val;
+3837:                                   });
+3838:                                   _fetchRuleValuesForType(val);
+3839:                                 }
+3840:                               },
+3841:                               decoration: _buildInputDecoration(""),
+3842:                             ),
+3843:                           ],
+3844:                         ),
+3845:                       ),
+3846:                       const SizedBox(width: 16),
+3847:                       Expanded(
+3848:                         child: Column(
+3849:                           crossAxisAlignment: CrossAxisAlignment.start,
+3850:                           children: [
+3851:                             _buildSubInputLabel("ážáž˜áŸ’áž›áŸƒáž…áŸ’áž”áž¶áž”áŸ‹"),
+3852:                             isLoadingRuleValues
+3853:                                 ? const Padding(
+3854:                                     padding: EdgeInsets.symmetric(vertical: 12),
+3855:                                     child: Center(
+3856:                                       child: SizedBox(
+3857:                                         width: 20,
+3858:                                         height: 20,
+3859:                                         child: CircularProgressIndicator(
+3860:                                           strokeWidth: 2,
+3861:                                           color: Color(0xff8A6514),
+3862:                                         ),
+3863:                                       ),
+3864:                                     ),
+3865:                                   )
+3866:                                 : dynamicRuleOptions.isEmpty
+3867:                                 ? TextField(
+3868:                                     controller: ruleValueCtrl,
+3869:                                     decoration: _buildInputDecoration(
+3870:                                       'áž”áž‰áŸ’áž…áž¼áž›ážáž˜áŸ’áž›áŸƒáž…áŸ’áž”áž¶áž”áŸ‹',
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

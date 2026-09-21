@@ -1,0 +1,209 @@
+﻿Created At: 2026-08-03T16:28:02Z
+Completed At: 2026-08-03T16:28:03Z
+File Path: `file:///d:/StudioProjects/Project/core_portal/lib/screens/super_admin/super_admin_view.dart`
+Total Lines: 4235
+Total Bytes: 162893
+Showing lines 3430 to 3630
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+3430:   bool isLoadingRuleValues = false;
+3431:   List<Map<String, String>> dynamicRuleOptions = [
+3432:     {
+3433:       'value': 'GDDTM',
+3434:       'label': 'GDDTM - áž¢áž‚áŸ’áž‚áž“áž¶áž™áž€ážŠáŸ’áž‹áž¶áž“áž”áž…áŸ’áž…áŸáž€ážœáž·áž‘áŸ’áž™áž¶ážŒáž¸áž‡áž¸ážáž› áž“áž·áž„áž•áŸ’ážŸáž–áŸ’ážœáž•áŸ’ážŸáž¶áž™',
+3435:     },
+3436:     {'value': 'GDI', 'label': 'GDI - áž¢áž‚áŸ’áž‚áž“áž¶áž™áž€ážŠáŸ’áž‹áž¶áž“áž¢áž“áŸ’ážáŸ„áž”áŸ’ážšážœáŸážŸáž“áŸ'},
+3437:     {'value': 'GS', 'label': 'GS - áž¢áž‚áŸ’áž‚áž›áŸážáž¶áž’áž·áž€áž¶ážšážŠáŸ’áž‹áž¶áž“'},
+3438:     {'value': 'GNP', 'label': 'GNP - áž¢áž‚áŸ’áž‚ážŸáŸ’áž“áž„áž€áž¶ážšážŠáŸ’áž‹áž¶áž“áž“áž‚ážšáž”áž¶áž›áž‡áž¶ážáž·'},
+3439:     {'value': 'GI', 'label': 'GI - áž¢áž‚áŸ’áž‚áž¶áž’áž·áž€áž¶ážšážŠáŸ’áž‹áž¶áž“'},
+3440:     {'value': 'GID', 'label': 'GID - áž¢áž‚áŸ’áž‚áž“áž¶áž™áž€ážŠáŸ’áž‹áž¶áž“áž¢ážáŸ’ážážŸáž‰áŸ’áž‰áž¶ážŽáž€áž˜áŸ’áž˜'},
+3441:     {'value': 'GIA', 'label': 'GIA - áž¢áž‚áŸ’áž‚áž“áž¶áž™áž€ážŠáŸ’áž‹áž¶áž“ážŸážœáž“áž€áž˜áŸ’áž˜áž•áŸ’áž‘áŸƒáž€áŸ’áž“áž»áž„'},
+3442:     {'value': 'GLF', 'label': 'GLF - áž¢áž‚áŸ’áž‚áž“áž¶áž™ážŠáŸ’áž‹áž¶áž“áž—ážŸáŸ’ážáž»áž—áž¶ážš áž“áž·áž„áž áž·ážšáž‰áŸ’áž‰ážœážáŸ’ážáž»'},
+3443:     {'value': 'PAC', 'label': 'PAC - áž”ážŽáŸ’ážŒáž·ážážŸáž—áž¶áž“áž‚ážšáž”áž¶áž›áž€áž˜áŸ’áž–áž»áž‡áž¶'},
+3444:     {'value': 'LC', 'label': 'LC - áž€áŸ’ážšáž»áž˜áž”áŸ’ážšáž¹áž€áŸ’ážŸáž¶áž“áž¸ážáž·áž€áž˜áŸ’áž˜'},
+3445:   ];
+3446: 
+3447:   // ruleTypeCtrl now stores the backend enum (e.g. 'GENERAL_DEPARTMENT')
+3448:   // No mapping needed â€” the enum is used directly in API calls and saved to backend
+3449: 
+3450:   // selectedRuleType is already a backend enum (e.g. 'GENERAL_DEPARTMENT')
+3451:   Future<void> _fetchRuleValuesForType(String apiRuleType) async {
+3452:     setState(() {
+3453:       isLoadingRuleValues = true;
+3454:     });
+3455:     try {
+3456:       final List<Map<String, String>> options = [];
+3457:       final Set<String> addedValues = {};
+3458: 
+3459:       try {
+3460:         final authService = AuthService();
+3461:         final res = await authService.fetchRuleValues(apiRuleType);
+3462: 
+3463:         if (res != null) {
+3464:           List list = res is List
+3465:               ? res
+3466:               : (res['data'] ?? res['items'] ?? res['value'] ?? []);
+3467:           for (var item in list) {
+3468:             if (item is Map) {
+3469:               final val =
+3470:                   (item['value'] ?? item['code'] ?? item['ruleValue'] ?? '')
+3471:                       .toString()
+3472:                       .trim();
+3473:               final rawLbl = (item['label'] ?? item['name'] ?? val)
+3474:                   .toString()
+3475:                   .trim();
+3476:               final lbl = (rawLbl != val && rawLbl.isNotEmpty)
+3477:                   ? "$val - $rawLbl"
+3478:                   : val;
+3479: 
+3480:               if (val.isNotEmpty && !addedValues.contains(val)) {
+3481:                 addedValues.add(val);
+3482:                 options.add({'value': val, 'label': lbl});
+3483:               }
+3484:             } else if (item is String && item.trim().isNotEmpty) {
+3485:               final val = item.trim();
+3486:               if (!addedValues.contains(val)) {
+3487:                 addedValues.add(val);
+3488:                 options.add({'value': val, 'label': val});
+3489:               }
+3490:             }
+3491:           }
+3492:         }
+3493:       } catch (e) {
+3494:         debugPrint("Error fetching rule-values for $apiRuleType: $e");
+3495:       }
+3496: 
+3497:       // Execute fallbacks ONLY if network request returned zero options
+3498:       if (options.isEmpty) {
+3499:         if (apiRuleType == 'GENERAL_DEPARTMENT') {
+3500:           final apiDepartments = [
+3501:             {'value': 'LC', 'label': 'LC - áž€áŸ’ážšáž»áž˜áž”áŸ’ážšáž¹áž€áŸ’ážŸáž¶áž“áž¸ážáž·áž€áž˜áŸ’áž˜'},
+3502:             {'value': 'PAC', 'label': 'PAC - áž”ážŽáŸ’ážŒáž·ážážŸáž—áž¶áž“áž‚ážšáž”áž¶áž›áž€áž˜áŸ’áž–áž»áž‡áž¶'},
+3503:             {
+3504:               'value': 'GDDTM',
+3505:               'label': 'GDDTM - áž¢áž‚áŸ’áž‚áž“áž¶áž™áž€ážŠáŸ’áž‹áž¶áž“áž”áž…áŸ’áž…áŸáž€ážœáž·áž‘áŸ’áž™áž¶ážŒáž¸áž‡áž¸ážáž› áž“áž·áž„áž•áŸ’ážŸáž–áŸ’ážœáž•áŸ’ážŸáž¶áž™',
+3506:             },
+3507:             {'value': 'GIA', 'label': 'GIA - áž¢áž‚áŸ’áž‚áž“áž¶áž™áž€ážŠáŸ’áž‹áž¶áž“ážŸážœáž“áž€áž˜áŸ’áž˜áž•áŸ’áž‘áŸƒáž€áŸ’áž“áž»áž„'},
+3508:             {'value': 'GID', 'label': 'GID - áž¢áž‚áŸ’áž‚áž“áž¶áž™áž€ážŠáŸ’áž‹áž¶áž“áž¢ážáŸ’ážážŸáž‰áŸ’áž‰áž¶ážŽáž€áž˜áŸ’áž˜'},
+3509:             {'value': 'GDI', 'label': 'GDI - áž¢áž‚áŸ’áž‚áž“áž¶áž™áž€ážŠáŸ’áž‹áž¶áž“áž¢áž“áŸ’ážáŸ„áž”áŸ’ážšážœáŸážŸáž“áŸ'},
+3510:             {
+3511:               'value': 'GLF',
+3512:               'label': 'GLF - áž¢áž‚áŸ’áž‚áž“áž¶áž™ážŠáŸ’áž‹áž¶áž“áž—ážŸáŸ’ážáž»áž—áž¶ážš áž“áž·áž„áž áž·ážšáž‰áŸ’áž‰ážœážáŸ’ážáž»',
+3513:             },
+3514:             {'value': 'GS', 'label': 'GS - áž¢áž‚áŸ’áž‚áž›áŸážáž¶áž’áž·áž€áž¶ážšážŠáŸ’áž‹áž¶áž“'},
+3515:             {'value': 'GNP', 'label': 'GNP - áž¢áž‚áŸ’áž‚ážŸáŸ’áž“áž„áž€áž¶ážšážŠáŸ’áž‹áž¶áž“áž“áž‚ážšáž”áž¶áž›áž‡áž¶ážáž·'},
+3516:             {'value': 'GI', 'label': 'GI - áž¢áž‚áŸ’áž‚áž¶áž’áž·áž€áž¶ážšážŠáŸ’áž‹áž¶áž“'},
+3517:           ];
+3518:           for (var dept in apiDepartments) {
+3519:             if (!addedValues.contains(dept['value'])) {
+3520:               addedValues.add(dept['value']!);
+3521:               options.add(dept);
+3522:             }
+3523:           }
+3524:         } else if (apiRuleType == 'DEPARTMENT') {
+3525:           final deps = [
+3526:             {'value': 'GDDTM-D1', 'label': 'GDDTM-D1 - áž“áž¶áž™áž€ážŠáŸ’áž‹áž¶áž“áž”áž…áŸ’áž…áŸáž€ážœáž·áž‘áŸ’áž™áž¶'},
+3527:             {'value': 'GDDTM-D2', 'label': 'GDDTM-D2 - áž“áž¶áž™áž€ážŠáŸ’áž‹áž¶áž“áž–áŸážáŸŒáž˜áž¶áž“ážœáž·áž‘áŸ’áž™áž¶'},
+3528:             {'value': 'GDI-D1', 'label': 'GDI-D1 - áž“áž¶áž™áž€ážŠáŸ’áž‹áž¶áž“áž¢áž“áŸ’ážáŸ„áž”áŸ’ážšážœáŸážŸáž“áŸ I'},
+3529:             {'value': 'GID-D1', 'label': 'GID-D1 - áž“áž¶áž™áž€ážŠáŸ’áž‹áž¶áž“áž¢ážáŸ’ážážŸáž‰áŸ’áž‰áž¶ážŽáž€áž˜áŸ’áž˜ I'},
+3530:             {'value': 'GIA-D1', 'label': 'GIA-D1 - áž“áž¶áž™áž€ážŠáŸ’áž‹áž¶áž“ážŸážœáž“áž€áž˜áŸ’áž˜ I'},
+3531:             {'value': 'GS-D1', 'label': 'GS-D1 - áž“áž¶áž™áž€ážŠáŸ’áž‹áž¶áž“áž›áŸážáž¶áž’áž·áž€áž¶ážš'},
+3532:           ];
+3533:           for (var d in deps) {
+3534:             if (!addedValues.contains(d['value'])) {
+3535:               addedValues.add(d['value']!);
+3536:               options.add(d);
+3537:             }
+3538:           }
+3539:         } else if (apiRuleType == 'BUREAU') {
+3540:           final bureaus = [
+3541:             {
+3542:               'value': 'GDDTM-N1-B1',
+3543:               'label': 'GDDTM-N1-B1 - áž€áž¶ážšáž·áž™áž¶áž›áŸáž™áž”áž…áŸ’áž…áŸáž€áž‘áŸážŸ',
+3544:             },
+3545:             {
+3546:               'value': 'GDI-N1-B1',
+3547:               'label': 'GDI-N1-B1 - áž€áž¶ážšáž·áž™áž¶áž›áŸáž™áž¢áž“áŸ’ážáŸ„áž”áŸ’ážšážœáŸážŸáž“áŸ',
+3548:             },
+3549:             {'value': 'GID-N1-B1', 'label': 'GID-N1-B1 - áž€áž¶ážšáž·áž™áž¶áž›áŸáž™áž¢ážáŸ’ážážŸáž‰áŸ’áž‰áž¶ážŽ'},
+3550:           ];
+3551:           for (var b in bureaus) {
+3552:             if (!addedValues.contains(b['value'])) {
+3553:               addedValues.add(b['value']!);
+3554:               options.add(b);
+3555:             }
+3556:           }
+3557:         } else if (apiRuleType == 'JOB_TITLE') {
+3558:           final controller = Get.find<SuperAdminController>();
+3559:           for (var item in controller.rolesList) {
+3560:             final code =
+3561:                 (item['code'] ?? item['roleCode'] ?? item['name'] ?? '')
+3562:                     .toString();
+3563:             if (code.isNotEmpty && !addedValues.contains(code)) {
+3564:               addedValues.add(code);
+3565:               options.add({'value': code, 'label': code});
+3566:             }
+3567:           }
+3568:           if (options.isEmpty) {
+3569:             for (var v in ['DIRECTOR', 'DEPUTY_DIRECTOR', 'CHIEF', 'OFFICER']) {
+3570:               options.add({'value': v, 'label': v});
+3571:             }
+3572:           }
+3573:         } else if (apiRuleType == 'ROLE') {
+3574:           final controller = Get.find<SuperAdminController>();
+3575:           for (var item in controller.rolesList) {
+3576:             final code =
+3577:                 (item['code'] ?? item['roleCode'] ?? item['name'] ?? '')
+3578:                     .toString();
+3579:             if (code.isNotEmpty && !addedValues.contains(code)) {
+3580:               addedValues.add(code);
+3581:               options.add({'value': code, 'label': code});
+3582:             }
+3583:           }
+3584:         } else if (apiRuleType == 'GROUP' || apiRuleType == 'DENY_GROUP') {
+3585:           final controller = Get.find<SuperAdminController>();
+3586:           for (var app in controller.appsList) {
+3587:             final rv = (app['ruleValue'] ?? '').toString();
+3588:             if (rv.isNotEmpty && !addedValues.contains(rv)) {
+3589:               addedValues.add(rv);
+3590:               options.add({'value': rv, 'label': rv});
+3591:             }
+3592:           }
+3593:         } else if (apiRuleType == 'USER' || apiRuleType == 'DENY_USER') {
+3594:           final controller = Get.find<SuperAdminController>();
+3595:           for (var item in controller.usersList) {
+3596:             final uname =
+3597:                 (item['username'] ??
+3598:                         item['email'] ??
+3599:                         item['keycloakUserId'] ??
+3600:                         '')
+3601:                     .toString();
+3602:             if (uname.isNotEmpty && !addedValues.contains(uname)) {
+3603:               addedValues.add(uname);
+3604:               options.add({'value': uname, 'label': uname});
+3605:             }
+3606:           }
+3607:         }
+3608:       }
+3609: 
+3610:       setState(() {
+3611:         dynamicRuleOptions = options;
+3612:         isLoadingRuleValues = false;
+3613:         if (ruleValueCtrl.text.isEmpty ||
+3614:             !options.any((o) => o['value'] == ruleValueCtrl.text)) {
+3615:           if (options.isNotEmpty) {
+3616:             ruleValueCtrl.text = options.first['value']!;
+3617:           }
+3618:         }
+3619:       });
+3620:     } catch (e) {
+3621:       debugPrint("Error fetching rule values: $e");
+3622:       setState(() {
+3623:         isLoadingRuleValues = false;
+3624:       });
+3625:     }
+3626:   }
+3627: 
+3628:   @override
+3629:   void initState() {
+3630:     super.initState();
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

@@ -8,11 +8,13 @@ class AppTheme {
     useMaterial3: true,
 
     scaffoldBackgroundColor: AppColors.background,
+    cardColor: Colors.white,
 
     primaryColor: AppColors.primary,
 
     colorScheme: ColorScheme.fromSeed(
       seedColor: AppColors.primary,
+      surface: AppColors.background,
     ),
 
     appBarTheme: const AppBarTheme(
@@ -25,7 +27,7 @@ class AppTheme {
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
-        minimumSize: const Size(double.infinity, 50),
+        minimumSize: const Size(0, 48),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),

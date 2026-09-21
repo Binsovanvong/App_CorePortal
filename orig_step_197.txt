@@ -1,0 +1,24 @@
+﻿Created At: 2026-08-03T16:31:12Z
+Completed At: 2026-08-03T16:31:13Z
+File Path: `file:///d:/StudioProjects/Project/core_portal/lib/screens/super_admin/super_admin_view.dart`
+Total Lines: 4261
+Total Bytes: 164210
+Showing lines 3690 to 3705
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+3690:     String ruleType = 'GENERAL_DEPARTMENT';
+3691:     String ruleValue = 'GDDTM';
+3692:     if (widget.isEdit && widget.appData != null) {
+3693:       nameKh = widget.appData!['titleKh'] ?? '';
+3694:       nameEn = widget.appData!['titleEn'] ?? '';
+3695:                                         style: GoogleFonts.kantumruyPro(
+3696:                                           fontSize: 13,
+3697:                                         ),
+3698:                                       ),
+3699:                                     ),
+3700:                                   )
+3701:                                   .toList(),
+3702:                               onChanged: (val) {
+3703:                                 if (val != null) {
+3704:                                   setState(() {
+3705:                                     ruleTypeCtrl.text = val;
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

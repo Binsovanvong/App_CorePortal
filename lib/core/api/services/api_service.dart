@@ -1,19 +1,21 @@
-import 'package:core_portal/core/api/api_config.dart';
+import 'package:core_portal/core/api/api_client.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 
 class ApiService {
-final ApiConfig apiConfig = ApiConfig();
+final Dio dio = ApiClient.dio;
 
   Future<dynamic> post({
     required String endpoint,
-    Map<String, dynamic>? data,
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
     Map<String, dynamic>? headers,
   }) async {
     try {
-      var response = await apiConfig.dio.post(
+      var response = await dio.post(
         endpoint,
         data: data,
+        queryParameters: queryParameters,
         options: Options(headers: headers),
       );
       return response.data;
@@ -30,7 +32,7 @@ final ApiConfig apiConfig = ApiConfig();
     Map<String, dynamic>? headers, // <-- Add this parameter
   }) async {
     try {
-      var response = await apiConfig.dio.get(
+      var response = await dio.get(
         endpoint,
         queryParameters: queryParameters,
         options: Options(headers: headers), // <-- Pass headers to Dio
@@ -45,11 +47,11 @@ final ApiConfig apiConfig = ApiConfig();
 
   Future<dynamic> put({
     required String endpoint,
-    Map<String, dynamic>? data,
+    dynamic data,
     Map<String, dynamic>? headers,
   }) async {
     try {
-      var response = await apiConfig.dio.put(
+      var response = await dio.put(
         endpoint,
         data: data,
         options: Options(headers: headers),
@@ -60,4 +62,21 @@ final ApiConfig apiConfig = ApiConfig();
       rethrow;
     }
   }
+
+  Future<dynamic> delete({
+    required String endpoint,
+    Map<String, dynamic>? headers,
+  }) async {
+    try {
+      var response = await dio.delete(
+        endpoint,
+        options: Options(headers: headers),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      debugPrint("Error ${e.toString()}");
+      rethrow;
+    }
+  }
 }
+

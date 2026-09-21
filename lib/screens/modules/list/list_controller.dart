@@ -37,13 +37,7 @@ class ListViewController extends GetxController {
     requests.remove(request);
     if (total.value > 0) total.value--;
     if (users.value > 0) users.value--;
-    Get.snackbar(
-      'ជោគជ័យ',
-      'បានលុបកំណត់ត្រាដោយជោគជ័យ',
-      backgroundColor: const Color(0xFFDCFCE7),
-      colorText: const Color(0xFF16803D),
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    CustomSnackbar.showSuccess(message: 'បានលុបកំណត់ត្រាដោយជោគជ័យ');
   }
 
   void approveRequest(RequestModel request) {
@@ -58,13 +52,7 @@ class ListViewController extends GetxController {
         status: "Pending", // displays as "បានអនុម័ត"
       );
       requests[index] = updated;
-      Get.snackbar(
-        'ជោគជ័យ',
-        'បានអនុម័តសំណើដោយជោគជ័យ',
-        backgroundColor: const Color(0xFFDCFCE7),
-        colorText: const Color(0xFF16803D),
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      CustomSnackbar.showSuccess(message: 'បានអនុម័តសំណើដោយជោគជ័យ');
     }
   }
 
@@ -80,13 +68,7 @@ class ListViewController extends GetxController {
         status: "Approved", // displays as "កំពុងស្នាក់នៅ"
       );
       requests[index] = updated;
-      Get.snackbar(
-        'ជោគជ័យ',
-        'បានកត់ត្រាការចូលស្នាក់នៅដោយជោគជ័យ',
-        backgroundColor: const Color(0xFFDCFCE7),
-        colorText: const Color(0xFF16803D),
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      CustomSnackbar.showSuccess(message: 'បានកត់ត្រាការចូលស្នាក់នៅដោយជោគជ័យ');
     }
   }
 }

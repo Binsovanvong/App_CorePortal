@@ -9,365 +9,493 @@ class FirstLoginChangePasswordView
 
   @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 10),
-
-                  /// Centered Logo & Ministry Text
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(2),
-                        decoration: const BoxDecoration(shape: BoxShape.circle),
-                        child: CircleAvatar(
-                          radius: 36,
-                          backgroundColor: Colors.white,
-                          child: ClipOval(
-                            child: Image.asset(
-                              "assets/img/about-moi-logo.png",
-                              width: 80,
-                              height: 80,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "ក្រសួងមហាផ្ទៃ",
-                            style: GoogleFonts.kantumruyPro(
-                              fontSize: 26,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xff8A6514),
-                            ),
-                          ),
-                          Text(
-                            "MINISTRY OF INTERIOR",
-                            style: GoogleFonts.poppins(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xff8A6514),
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 36),
-
-                  /// Page Title and Subtitle
-                  Text(
-                    "ផ្លាស់ប្តូរពាក្យសម្ងាត់",
-                    style: GoogleFonts.kantumruyPro(
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xff1E293B),
+      backgroundColor: const Color(0xFF163774),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: IntrinsicHeight(
+                child: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Color(0xFF163774), Color(0xFF102652)],
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "សម្រាប់គណនីចូលប្រើប្រាស់លើកដំបូង",
-                    style: GoogleFonts.kantumruyPro(
-                      fontSize: 14,
-                      color: const Color(0xff64748B),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  /// Warning / Guidelines Alert Box
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFEFDF0), // Light yellow background
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: const Color(0xFFF6EBC2), // Gold border
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  child: CustomPaint(
+                    painter: _WaveBackgroundPainter(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const Icon(
-                          Icons.error_outline_rounded,
-                          color: Color(0xffD4AF37),
-                          size: 24,
+                        // Top Navy Section (Ministry Emblem & Golden Titles)
+                        Container(
+                          constraints: BoxConstraints(
+                            minHeight: constraints.maxHeight * 0.38,
+                          ),
+                          child: SafeArea(
+                            bottom: false,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 20),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const SizedBox(height: 12),
+                                  // Ministry Emblem
+                                  Container(
+                                    width: 110,
+                                    height: 110,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white,
+                                      border: Border.all(
+                                        color: const Color(0xFFD4AF37),
+                                        width: 3.0,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.20),
+                                          blurRadius: 18,
+                                          offset: const Offset(0, 6),
+                                        ),
+                                      ],
+                                    ),
+                                    padding: const EdgeInsets.all(4),
+                                    child: ClipOval(
+                                      child: Image.asset(
+                                        "assets/img/about-moi-logo.png",
+                                        fit: BoxFit.contain,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 14),
+
+                                  // Ministry Title (Golden Khmer Text)
+                                  Text(
+                                    'ministry_title'.tr,
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.kantumruyPro(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.w800,
+                                      color: const Color(0xFFF1B722),
+                                      letterSpacing: 0.3,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 3),
+
+                                  // Subtitle (Soft Gold Text)
+                                  Text(
+                                    'portal_subtitle'.tr,
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.kantumruyPro(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: const Color(0xFFDFBC66),
+                                      letterSpacing: 0.2,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
-                        const SizedBox(width: 12),
+
+                        // White Rounded Bottom Card Container
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "លោកអ្នកត្រូវផ្លាស់ប្តូរពាក្យសម្ងាត់ ដើម្បីដំណើរការគណនីរបស់អ្នក",
-                                style: GoogleFonts.kantumruyPro(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
-                                  color: const Color(0xFF8A6514),
-                                  height: 1.5,
+                          child: Container(
+                            width: double.infinity,
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(32),
+                                topRight: Radius.circular(32),
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Color(0x14000000),
+                                  blurRadius: 20,
+                                  offset: Offset(0, -6),
                                 ),
-                              ),
-                              const SizedBox(height: 8),
-                              _buildBulletPoint(
-                                "ពាក្យសម្ងាត់ថ្មីត្រូវមានយ៉ាងហោចណាស់ ៨ តួអក្សរ",
-                              ),
-                              _buildBulletPoint(
-                                "ត្រូវមានអក្សរធំ អក្សរតូច លេខ និងសញ្ញាពិសេស",
-                              ),
-                              _buildBulletPoint(
-                                "ជៀសវាងការប្រើឈ្មោះគណនី ថ្ងៃខែឆ្នាំកំណើត ឬពាក្យសម្ងាត់ចាស់។",
-                              ),
-                              _buildBulletPoint("ឧទាហរណ៍: m4ze*Q9!"),
-                            ],
+                              ],
+                            ),
+                            padding: EdgeInsets.fromLTRB(
+                              24,
+                              28,
+                              24,
+                              bottomInset > 0 ? bottomInset + 20 : 32,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Page Title and Subtitle
+                                Text(
+                                  'change_password'.tr,
+                                  style: GoogleFonts.kantumruyPro(
+                                    fontSize: 23,
+                                    fontWeight: FontWeight.w800,
+                                    color: const Color(0xFF111827),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'for_first_login'.tr,
+                                  style: GoogleFonts.kantumruyPro(
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.w400,
+                                    color: const Color(0xFF94A3B8),
+                                  ),
+                                ),
+
+                                const SizedBox(height: 20),
+
+                                // Guidelines Box (Soft Navy Tint)
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFEFF6FF),
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(
+                                      color: const Color(0xFFBFDBFE),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.shield_outlined,
+                                        color: Color(0xFF163774),
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Text(
+                                          'password_guideline'.tr,
+                                          style: GoogleFonts.kantumruyPro(
+                                            fontSize: 12.5,
+                                            fontWeight: FontWeight.w600,
+                                            color: const Color(0xFF163774),
+                                            height: 1.4,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                const SizedBox(height: 22),
+
+                                // New Password Label & Field
+                                Text(
+                                  'new_password'.tr,
+                                  style: GoogleFonts.kantumruyPro(
+                                    fontSize: 14.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFF1E293B),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Obx(
+                                  () => TextField(
+                                    controller: controller.newPasswordController,
+                                    obscureText: controller.obscureNewPassword.value,
+                                    textInputAction: TextInputAction.next,
+                                    style: GoogleFonts.kantumruyPro(
+                                      fontSize: 14.5,
+                                      color: const Color(0xFF1E293B),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    decoration: InputDecoration(
+                                      hintText: 'enter_new_password'.tr,
+                                      hintStyle: GoogleFonts.kantumruyPro(
+                                        color: const Color(0xFF94A3B8),
+                                        fontSize: 14,
+                                      ),
+                                      prefixIcon: const Icon(
+                                        Icons.lock_outline_rounded,
+                                        color: Color(0xFF94A3B8),
+                                        size: 21,
+                                      ),
+                                      suffixIcon: IconButton(
+                                        icon: Icon(
+                                          controller.obscureNewPassword.value
+                                              ? Icons.visibility_off_outlined
+                                              : Icons.visibility_outlined,
+                                          color: const Color(0xFF94A3B8),
+                                          size: 20,
+                                        ),
+                                        onPressed: () {
+                                          controller.obscureNewPassword.toggle();
+                                        },
+                                      ),
+                                      filled: true,
+                                      fillColor: const Color(0xFFF8FAFC),
+                                      contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 16,
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(14),
+                                        borderSide: const BorderSide(
+                                          color: Color(0xFFE2E8F0),
+                                          width: 1.5,
+                                        ),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(14),
+                                        borderSide: const BorderSide(
+                                          color: Color(0xFF163774),
+                                          width: 2.0,
+                                        ),
+                                      ),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(14),
+                                        borderSide: const BorderSide(
+                                          color: Color(0xFFE2E8F0),
+                                          width: 1.5,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                const SizedBox(height: 18),
+
+                                // Confirm Password Label & Field
+                                Text(
+                                  'confirm_new_password'.tr,
+                                  style: GoogleFonts.kantumruyPro(
+                                    fontSize: 14.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFF1E293B),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Obx(
+                                  () => TextField(
+                                    controller: controller.confirmPasswordController,
+                                    obscureText:
+                                        controller.obscureConfirmPassword.value,
+                                    textInputAction: TextInputAction.done,
+                                    onSubmitted: (_) {
+                                      if (!controller.isLoading.value) {
+                                        controller.submitPasswordChange();
+                                      }
+                                    },
+                                    style: GoogleFonts.kantumruyPro(
+                                      fontSize: 14.5,
+                                      color: const Color(0xFF1E293B),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    decoration: InputDecoration(
+                                      hintText: 'enter_confirm_password'.tr,
+                                      hintStyle: GoogleFonts.kantumruyPro(
+                                        color: const Color(0xFF94A3B8),
+                                        fontSize: 14,
+                                      ),
+                                      prefixIcon: const Icon(
+                                        Icons.lock_outline_rounded,
+                                        color: Color(0xFF94A3B8),
+                                        size: 21,
+                                      ),
+                                      suffixIcon: IconButton(
+                                        icon: Icon(
+                                          controller.obscureConfirmPassword.value
+                                              ? Icons.visibility_off_outlined
+                                              : Icons.visibility_outlined,
+                                          color: const Color(0xFF94A3B8),
+                                          size: 20,
+                                        ),
+                                        onPressed: () {
+                                          controller.obscureConfirmPassword.toggle();
+                                        },
+                                      ),
+                                      filled: true,
+                                      fillColor: const Color(0xFFF8FAFC),
+                                      contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 16,
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(14),
+                                        borderSide: const BorderSide(
+                                          color: Color(0xFFE2E8F0),
+                                          width: 1.5,
+                                        ),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(14),
+                                        borderSide: const BorderSide(
+                                          color: Color(0xFF163774),
+                                          width: 2.0,
+                                        ),
+                                      ),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(14),
+                                        borderSide: const BorderSide(
+                                          color: Color(0xFFE2E8F0),
+                                          width: 1.5,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                const SizedBox(height: 28),
+
+                                // Submit Button (Ministry Navy)
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 52,
+                                  child: Obx(
+                                    () => ElevatedButton(
+                                      onPressed: controller.isLoading.value
+                                          ? null
+                                          : controller.submitPasswordChange,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFF163774),
+                                        disabledBackgroundColor: const Color(
+                                          0xFF163774,
+                                        ).withOpacity(0.65),
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        elevation: 2,
+                                        shadowColor: const Color(
+                                          0xFF163774,
+                                        ).withOpacity(0.4),
+                                      ),
+                                      child: controller.isLoading.value
+                                          ? const SizedBox(
+                                              width: 22,
+                                              height: 22,
+                                              child: CircularProgressIndicator(
+                                                color: Colors.white,
+                                                strokeWidth: 2.4,
+                                              ),
+                                            )
+                                          : Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  '${'save'.tr} ${'password'.tr}',
+                                                  style: GoogleFonts.kantumruyPro(
+                                                    fontSize: 15.5,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                const Icon(
+                                                  Icons.arrow_forward_rounded,
+                                                  color: Colors.white,
+                                                  size: 19,
+                                                ),
+                                              ],
+                                            ),
+                                    ),
+                                  ),
+                                ),
+
+                                const SizedBox(height: 24),
+
+                                // Footer Copyright Text
+                                Center(
+                                  child: Text(
+                                    'copyright'.tr,
+                                    style: GoogleFonts.kantumruyPro(
+                                      fontSize: 11,
+                                      color: const Color(0xFF94A3B8),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
-
-                  const SizedBox(height: 28),
-
-                  /// Input Form
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      /// New Password Label
-                      Text(
-                        "ពាក្យសម្ងាត់ថ្មី",
-                        style: GoogleFonts.kantumruyPro(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xff1E293B),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-
-                      /// New Password Input
-                      Obx(
-                        () => TextField(
-                          controller: controller.newPasswordController,
-                          obscureText: controller.obscureNewPassword.value,
-                          style: GoogleFonts.kantumruyPro(fontSize: 15),
-                          decoration: InputDecoration(
-                            hintText: "បញ្ចូលពាក្យសម្ងាត់ថ្មី",
-                            hintStyle: GoogleFonts.kantumruyPro(
-                              color: const Color(0xff94A3B8),
-                              fontSize: 15,
-                            ),
-                            prefixIcon: const Icon(
-                              Icons.lock_outline_rounded,
-                              color: Color(0xff94A3B8),
-                            ),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                controller.obscureNewPassword.value
-                                    ? Icons.visibility_off_outlined
-                                    : Icons.visibility_outlined,
-                                color: const Color(0xff94A3B8),
-                              ),
-                              onPressed: () {
-                                controller.obscureNewPassword.toggle();
-                              },
-                            ),
-                            filled: true,
-                            fillColor: const Color(0xffF8FAFC),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 16,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(
-                                color: Color(0xffE2E8F0),
-                                width: 1.5,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(
-                                color: Color(0xff8A6514),
-                                width: 1.5,
-                              ),
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      /// Confirm Password Label
-                      Text(
-                        "បញ្ជាក់ពាក្យសម្ងាត់ថ្មី",
-                        style: GoogleFonts.kantumruyPro(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xff1E293B),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-
-                      /// Confirm Password Input
-                      Obx(
-                        () => TextField(
-                          controller: controller.confirmPasswordController,
-                          obscureText: controller.obscureConfirmPassword.value,
-                          style: GoogleFonts.kantumruyPro(fontSize: 15),
-                          decoration: InputDecoration(
-                            hintText: "បញ្ចូលពាក្យសម្ងាត់ថ្មីម្តងទៀត",
-                            hintStyle: GoogleFonts.kantumruyPro(
-                              color: const Color(0xff94A3B8),
-                              fontSize: 15,
-                            ),
-                            prefixIcon: const Icon(
-                              Icons.lock_outline_rounded,
-                              color: Color(0xff94A3B8),
-                            ),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                controller.obscureConfirmPassword.value
-                                    ? Icons.visibility_off_outlined
-                                    : Icons.visibility_outlined,
-                                color: const Color(0xff94A3B8),
-                              ),
-                              onPressed: () {
-                                controller.obscureConfirmPassword.toggle();
-                              },
-                            ),
-                            filled: true,
-                            fillColor: const Color(0xffF8FAFC),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 16,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(
-                                color: Color(0xffE2E8F0),
-                                width: 1.5,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(
-                                color: Color(0xff8A6514),
-                                width: 1.5,
-                              ),
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  /// Submit Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 58,
-                    child: Obx(
-                      () => ElevatedButton(
-                        onPressed: controller.isLoading.value
-                            ? null
-                            : controller.submitPasswordChange,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(
-                            0xff6B5005,
-                          ), // Olive gold background
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: controller.isLoading.value
-                            ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2.5,
-                                ),
-                              )
-                            : Text(
-                                "រក្សាទុកពាក្យសម្ងាត់",
-                                style: GoogleFonts.kantumruyPro(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                ),
-                              ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 48),
-
-                  /// Footer Copyright Text
-                  Text(
-                    "© 2026 ក្រសួងមហាផ្ទៃ - ព្រះរាជាណាចក្រកម្ពុជា",
-                    style: GoogleFonts.kantumruyPro(
-                      fontSize: 11,
-                      color: const Color(0xff94A3B8),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
+}
 
-  Widget _buildBulletPoint(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "- ",
-            style: GoogleFonts.kantumruyPro(
-              fontSize: 13,
-              color: const Color(0xFF8A6514),
-              height: 1.4,
-            ),
-          ),
-          Expanded(
-            child: Text(
-              text,
-              style: GoogleFonts.kantumruyPro(
-                fontSize: 13,
-                color: const Color(0xFF8A6514),
-                height: 1.4,
-              ),
-            ),
-          ),
-        ],
-      ),
+// Subtle Curved Light Blue Wave Lines in Navy Background (matching login)
+class _WaveBackgroundPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint1 = Paint()
+      ..color = const Color(0xFF3B82F6).withOpacity(0.12)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    final paint2 = Paint()
+      ..color = const Color(0xFF60A5FA).withOpacity(0.09)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+
+    final paint3 = Paint()
+      ..color = const Color(0xFF2563EB).withOpacity(0.14)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5;
+
+    // Wave 1
+    final path1 = Path();
+    path1.moveTo(0, size.height * 0.22);
+    path1.cubicTo(
+      size.width * 0.35,
+      size.height * 0.16,
+      size.width * 0.65,
+      size.height * 0.30,
+      size.width,
+      size.height * 0.20,
     );
+    canvas.drawPath(path1, paint1);
+
+    // Wave 2
+    final path2 = Path();
+    path2.moveTo(0, size.height * 0.27);
+    path2.cubicTo(
+      size.width * 0.28,
+      size.height * 0.21,
+      size.width * 0.72,
+      size.height * 0.35,
+      size.width,
+      size.height * 0.25,
+    );
+    canvas.drawPath(path2, paint2);
+
+    // Wave 3
+    final path3 = Path();
+    path3.moveTo(0, size.height * 0.32);
+    path3.cubicTo(
+      size.width * 0.40,
+      size.height * 0.25,
+      size.width * 0.60,
+      size.height * 0.38,
+      size.width,
+      size.height * 0.30,
+    );
+    canvas.drawPath(path3, paint3);
   }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

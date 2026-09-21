@@ -1,0 +1,98 @@
+﻿Created At: 2026-08-03T16:38:10Z
+Completed At: 2026-08-03T16:38:11Z
+File Path: `file:///d:/StudioProjects/Project/core_portal/orig_step_214.txt`
+Total Lines: 90
+Total Bytes: 4942
+Showing lines 1 to 90
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: Created At: 2026-08-03T16:31:45Z
+2: Completed At: 2026-08-03T16:31:45Z
+3: File Path: `file:///d:/StudioProjects/Project/core_portal/lib/screens/super_admin/super_admin_view.dart`
+4: Total Lines: 4261
+5: Total Bytes: 164210
+6: Showing lines 3680 to 3760
+7: The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+8: 3680:       });
+9: 3681:     }
+10: 3682:   }
+11: 3683: 
+12: 3684:   @override
+13: 3685:   void initState() {
+14: 3686:     super.initState();
+15: 3687:     String nameKh = '';
+16: 3688:     String nameEn = '';
+17: 3689:     String url = '';
+18: 3690:     String ruleType = 'GENERAL_DEPARTMENT';
+19: 3691:     String ruleValue = 'GDDTM';
+20: 3692:     if (widget.isEdit && widget.appData != null) {
+21: 3693:       nameKh = widget.appData!['titleKh'] ?? '';
+22: 3694:       nameEn = widget.appData!['titleEn'] ?? '';
+23: 3695:                                         style: GoogleFonts.kantumruyPro(
+24: 3696:                                           fontSize: 13,
+25: 3697:                                         ),
+26: 3698:                                       ),
+27: 3699:                                     ),
+28: 3700:                                   )
+29: 3701:                                   .toList(),
+30: 3702:                               onChanged: (val) {
+31: 3703:                                 if (val != null) {
+32: 3704:                                   setState(() {
+33: 3705:                                     ruleTypeCtrl.text = val;
+34: 3706:                                   });
+35: 3707:                                   _fetchRuleValuesForType(val);
+36: 3708:                                 }
+37: 3709:                               },
+38: 3710:                               decoration: _buildInputDecoration(""),
+39: 3711:                             ),           : "Ã¡Å¾â€Ã¡Å¾â€žÃ¡Å¸â€™Ã¡Å¾â‚¬Ã¡Å¾Â¾Ã¡Å¾ÂÃ¡Å¾â‚¬Ã¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾ËœÃ¡Å¾Å“Ã¡Å¾Â·Ã¡Å¾â€™Ã¡Å¾Â¸Ã¡Å¾â€Ã¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾Â¾Ã¡Å¾â€Ã¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾Â¶Ã¡Å¾Å¸Ã¡Å¸â€¹Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾ËœÃ¡Å¾Â¸",
+40: 3712:           style: GoogleFonts.kantumruyPro(
+41: 3713:             fontWeight: FontWeight.bold,
+42: 3714:             fontSize: 16,
+43: 3715:             color: const Color(0xff0F172A),
+44: 3716:           ),
+45: 3717:         ),
+46: 3718:       ),
+47: 3719:       body: SingleChildScrollView(
+48: 3720:         child: Column(
+49: 3721:           crossAxisAlignment: CrossAxisAlignment.start,
+50: 3722:           children: [
+51: 3723:             Container(
+52: 3724:               width: double.infinity,
+53: 3725:               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+54: 3726:               decoration: const BoxDecoration(
+55: 3727:                 color: Colors.white,
+56: 3728:                 border: Border(bottom: BorderSide(color: Color(0xffE2E8F0))),
+57: 3729:               ),
+58: 3730:               child: Column(
+59: 3731:                 crossAxisAlignment: CrossAxisAlignment.start,
+60: 3732:                 children: [
+61: 3733:                   Text(
+62: 3734:                     widget.isEdit
+63: 3735:                         ? "Ã¡Å¾â‚¬Ã¡Å¸â€šÃ¡Å¾â€Ã¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¸â€šÃ¡Å¾â‚¬Ã¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾ËœÃ¡Å¾Å“Ã¡Å¾Â·Ã¡Å¾â€™Ã¡Å¾Â¸Ã¡Å¾â€Ã¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾Â¾Ã¡Å¾â€Ã¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾Â¶Ã¡Å¾Å¸Ã¡Å¸â€¹"
+64: 3736:                         : "Ã¡Å¾â€Ã¡Å¾â€žÃ¡Å¸â€™Ã¡Å¾â‚¬Ã¡Å¾Â¾Ã¡Å¾ÂÃ¡Å¾â‚¬Ã¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾ËœÃ¡Å¾Å“Ã¡Å¾Â·Ã¡Å¾â€™Ã¡Å¾Â¸Ã¡Å¾â€Ã¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾Â¾Ã¡Å¾â€Ã¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾Â¶Ã¡Å¾Å¸Ã¡Å¸â€¹Ã¡Å¾ÂÃ¡Å¸â€™Ã¡Å¾ËœÃ¡Å¾Â¸",
+65: 3737:                     style: GoogleFonts.kantumruyPro(
+66: 3738:                       fontSize: 22,
+67: 3739:                       fontWeight: FontWeight.bold,
+68: 3740:                       color: const Color(0xff0F172A),
+69: 3741:                     ),
+70: 3742:                   ),
+71: 3743:                   const SizedBox(height: 4),
+72: 3744:                   Text(
+73: 3745:                     "Ã¡Å¾â€Ã¡Å¾â€°Ã¡Å¸â€™Ã¡Å¾â€¦Ã¡Å¾Â¼Ã¡Å¾â€ºÃ¡Å¾â€“Ã¡Å¸ÂÃ¡Å¾ÂÃ¡Å¸Å’Ã¡Å¾ËœÃ¡Å¾Â¶Ã¡Å¾â€œÃ¡Å¾â‚¬Ã¡Å¾ËœÃ¡Å¸â€™Ã¡Å¾ËœÃ¡Å¾Å“Ã¡Å¾Â·Ã¡Å¾â€™Ã¡Å¾Â¸ URL Ã¡Å¾Å¡Ã¡Å¾Â¼Ã¡Å¾â€Ã¡Å¾ÂÃ¡Å¸â€ Ã¡Å¾Å½Ã¡Å¾Â¶Ã¡Å¾â€ž Ã¡Å¾â€œÃ¡Å¾Â·Ã¡Å¾â€žÃ¡Å¾Å¸Ã¡Å¸â€™Ã¡Å¾ÂÃ¡Å¾Â¶Ã¡Å¾â€œÃ¡Å¾â€”Ã¡Å¾Â¶Ã¡Å¾â€“Ã¡Å¾â€Ã¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾Â¾Ã¡Å¾â€Ã¡Å¸â€™Ã¡Å¾Å¡Ã¡Å¾Â¶Ã¡Å¾Å¸Ã¡Å¸â€¹",
+74: 3746:                     style: GoogleFonts.kantumruyPro(
+75: 3747:                       fontSize: 12,
+76: 3748:                       color: const Color(0xff64748B),
+77: 3749:                     ),
+78: 3750:                   ),
+79: 3751:                 ],
+80: 3752:               ),
+81: 3753:             ),
+82: 3754: 
+83: 3755:             Padding(
+84: 3756:               padding: const EdgeInsets.all(16),
+85: 3757:               child: Column(
+86: 3758:                 crossAxisAlignment: CrossAxisAlignment.start,
+87: 3759:                 children: [
+88: 3760:                   Row(
+89: The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+90: 
+The above content shows the entire, complete file contents of the requested file.

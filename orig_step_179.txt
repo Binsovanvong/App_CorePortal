@@ -1,0 +1,19 @@
+﻿Created At: 2026-08-03T16:30:35Z
+Completed At: 2026-08-03T16:30:35Z
+File Path: `file:///d:/StudioProjects/Project/core_portal/lib/screens/super_admin/super_admin_view.dart`
+Total Lines: 4261
+Total Bytes: 164210
+Showing lines 3705 to 3715
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+3705:                                     ruleTypeCtrl.text = val;
+3706:                                   });
+3707:                                   _fetchRuleValuesForType(val);
+3708:                                 }
+3709:                               },
+3710:                               decoration: _buildInputDecoration(""),
+3711:                             ),           : "áž”áž„áŸ’áž€áž¾ážáž€áž˜áŸ’áž˜ážœáž·áž’áž¸áž”áŸ’ážšáž¾áž”áŸ’ážšáž¶ážŸáŸ‹ážáŸ’áž˜áž¸",
+3712:           style: GoogleFonts.kantumruyPro(
+3713:             fontWeight: FontWeight.bold,
+3714:             fontSize: 16,
+3715:             color: const Color(0xff0F172A),
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

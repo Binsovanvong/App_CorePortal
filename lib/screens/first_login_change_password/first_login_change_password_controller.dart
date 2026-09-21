@@ -1,6 +1,7 @@
 import 'package:core_portal/core/api/services/auth_service.dart';
 import 'package:core_portal/routes/page_route.dart';
 import 'package:core_portal/widgets/custom_snackbar.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
@@ -34,7 +35,7 @@ class FirstLoginChangePasswordController extends GetxController {
   bool _validatePassword(String password) {
     if (password.length < 8) {
       CustomSnackbar.showError(
-        message: 'ពាក្យសម្ងាត់ថ្មីត្រូវមានយ៉ាងហោចណាស់ ៨ តួអក្សរ',
+        message: 'pwd_rule_length'.tr,
       );
       return false;
     }
@@ -42,7 +43,7 @@ class FirstLoginChangePasswordController extends GetxController {
     // Uppercase check
     if (!RegExp(r'[A-Z]').hasMatch(password)) {
       CustomSnackbar.showError(
-        message: 'ពាក្យសម្ងាត់ត្រូវមានអក្សរធំ (A-Z) យ៉ាងហោចណាស់មួយតួ',
+        message: 'pwd_rule_upper'.tr,
       );
       return false;
     }
@@ -50,7 +51,7 @@ class FirstLoginChangePasswordController extends GetxController {
     // Lowercase check
     if (!RegExp(r'[a-z]').hasMatch(password)) {
       CustomSnackbar.showError(
-        message: 'ពាក្យសម្ងាត់ត្រូវមានអក្សរតូច (a-z) យ៉ាងហោចណាស់មួយតួ',
+        message: 'pwd_rule_lower'.tr,
       );
       return false;
     }
@@ -58,7 +59,7 @@ class FirstLoginChangePasswordController extends GetxController {
     // Number check
     if (!RegExp(r'[0-9]').hasMatch(password)) {
       CustomSnackbar.showError(
-        message: 'ពាក្យសម្ងាត់ត្រូវមានលេខ (0-9) យ៉ាងហោចណាស់មួយតួ',
+        message: 'pwd_rule_number'.tr,
       );
       return false;
     }
@@ -66,15 +67,24 @@ class FirstLoginChangePasswordController extends GetxController {
     // Special character check
     if (!RegExp(r'[!@#\$&*~%^()_\+=\-\[\]{}|;:<>?\/]').hasMatch(password)) {
       CustomSnackbar.showError(
-        message: 'ពាក្យសម្ងាត់ត្រូវមានសញ្ញាពិសេស (ឧទាហរណ៍: @, #, \$, *, !) យ៉ាងហោចណាស់មួយ',
+        message: 'pwd_rule_special'.tr,
       );
       return false;
     }
 
     // Prevent using username in password
-    if (username.isNotEmpty && password.toLowerCase().contains(username.toLowerCase())) {
+    if (username.isNotEmpty &&
+        password.toLowerCase().contains(username.toLowerCase())) {
       CustomSnackbar.showError(
-        message: 'ពាក្យសម្ងាត់មិនត្រូវមានឈ្មោះគណនីរបស់អ្នកឡើយ',
+        message: 'pwd_rule_no_username'.tr,
+      );
+      return false;
+    }
+
+    // Prevent reusing temporary password
+    if (tempPassword.isNotEmpty && password == tempPassword) {
+      CustomSnackbar.showError(
+        message: 'password_same_as_old_error'.tr,
       );
       return false;
     }
@@ -88,14 +98,14 @@ class FirstLoginChangePasswordController extends GetxController {
 
     if (newPassword.isEmpty || confirmPassword.isEmpty) {
       CustomSnackbar.showError(
-        message: 'សូមបញ្ចូលពាក្យសម្ងាត់ថ្មី និងបញ្ជាក់ពាក្យសម្ងាត់ថ្មី',
+        message: 'pwd_rule_empty'.tr,
       );
       return;
     }
 
     if (newPassword != confirmPassword) {
       CustomSnackbar.showError(
-        message: 'ពាក្យសម្ងាត់ថ្មី និងពាក្យសម្ងាត់បញ្ជាក់មិនផ្ទៀងផ្ទាត់គ្នាឡើយ',
+        message: 'pwd_rule_mismatch'.tr,
       );
       return;
     }
@@ -111,17 +121,49 @@ class FirstLoginChangePasswordController extends GetxController {
         username: username,
         oldPassword: tempPassword,
         newPassword: newPassword,
+        confirmPassword: confirmPassword,
       );
 
       CustomSnackbar.showSuccess(
-        message: 'ការផ្លាស់ប្តូរពាក្យសម្ងាត់ទទួលបានជោគជ័យ',
+        message: 'password_changed_success'.tr,
       );
 
-      Get.offAllNamed(AppRoutes.mainPage);
+      Get.offAllNamed(AppRoutes.login);
     } catch (e) {
       debugPrint("Failed to update password during first login: $e");
+      String errorMessage = 'password_change_failed'.tr;
+      if (e is DioException) {
+        debugPrint(
+          "FIRST LOGIN CHANGE PASSWORD STATUS: ${e.response?.statusCode} - DATA: ${e.response?.data}",
+        );
+        if (e.type == DioExceptionType.connectionTimeout ||
+            e.type == DioExceptionType.sendTimeout ||
+            e.type == DioExceptionType.receiveTimeout) {
+          errorMessage = 'timeout_error'.tr;
+        } else if (e.type == DioExceptionType.connectionError) {
+          errorMessage = 'no_internet_error'.tr;
+        } else if (e.response?.data is Map) {
+          final data = e.response!.data as Map;
+          final detail = data['detail'] ??
+              data['message'] ??
+              data['error_description'] ??
+              data['error'];
+          if (detail != null) {
+            if (detail is List && detail.isNotEmpty) {
+              final first = detail.first;
+              if (first is Map && first['msg'] != null) {
+                errorMessage = first['msg'].toString();
+              } else {
+                errorMessage = detail.map((i) => i.toString()).join(", ");
+              }
+            } else if (detail.toString().isNotEmpty) {
+              errorMessage = detail.toString();
+            }
+          }
+        }
+      }
       CustomSnackbar.showError(
-        message: 'មិនអាចផ្លាស់ប្តូរពាក្យសម្ងាត់បានឡើយ។ សូមព្យាយាមម្តងទៀត។',
+        message: errorMessage,
       );
     } finally {
       isLoading.value = false;

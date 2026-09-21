@@ -2,6 +2,7 @@ import 'package:core_portal/models/request_model.dart';
 import 'package:core_portal/routes/page_route.dart';
 import 'package:core_portal/screens/modules/list/list_view.dart';
 import 'package:core_portal/theme/app_colors.dart';
+import 'package:core_portal/widgets/custom_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:core_portal/pages/Main/main_view.dart';

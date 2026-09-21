@@ -1,934 +1,1588 @@
-import 'package:carousel_slider/carousel_slider.dart';
-import 'package:core_portal/routes/page_route.dart';
+import 'package:core_portal/screens/notification/notification_controller.dart';
 import 'package:core_portal/screens/home/home_controller.dart';
+import 'package:core_portal/controllers/nav_controller.dart';
+import 'package:core_portal/core/localization/app_translations.dart';
+import 'package:core_portal/routes/page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:core_portal/widgets/app_icon.dart';
+import 'package:core_portal/widgets/empty_apps_widget.dart';
 
-// ignore: must_be_immutable
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffF6F6F6),
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        toolbarHeight: 120,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            border: Border.fromBorderSide(BorderSide(color: Color(0xffD4AF37))),
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(40),
-              bottomRight: Radius.circular(40),
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.only(left: 15, right: 15, top: 40),
-            child: Row(
-              children: [
-                Image.asset("assets/img/about-moi-logo.png", height: 70),
-                const SizedBox(width: 15),
-                const Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "ក្រសួងមហាផ្ទៃ",
-                        style: TextStyle(
-                          color: Color(0xffD4AF37),
-                          fontSize: 22,
-                        ),
-                      ),
-                      Text(
-                        "Ministry of Interior",
-                        style: TextStyle(
-                          color: Color(0xffD4AF37),
-                          fontSize: 18,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              const SizedBox(height: 25),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: "Search for ID cards, passports...",
-                    prefixIcon: const Icon(Icons.search),
-                    filled: true,
-                    fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 16),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: Colors.grey.shade200),
-                    ),
-                  ),
-                  onChanged: (value) {
-                    // Search logic
-                  },
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              /// SERVICE TITLE
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "កម្មវិធី",
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              /// GRID MENU
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Obx(() {
-                  if (controller.isLoading.value) {
-                    return const Center(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 40),
-                        child: CircularProgressIndicator(
-                          color: Color(0xffD4AF37),
-                        ),
-                      ),
-                    );
-                  }
-
-                  if (controller.services.isEmpty) {
-                    return Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 48,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(
-                          color: const Color(0xffD4AF37).withOpacity(0.3),
-                          width: 1.5,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(.05),
-                            blurRadius: 20,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 84,
-                            height: 84,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: const Color(0xffFCFAF3),
-                              border: Border.all(
-                                color: const Color(0xffE9D8A6),
-                                width: 1.5,
-                              ),
-                            ),
-                            child: const Center(
-                              child: Icon(
-                                Icons.grid_off_rounded,
-                                size: 40,
-                                color: Color(0xffD4AF37),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          const Text(
-                            "អត់ទាន់មានកម្មវិធី",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xff1E293B),
-                              height: 1.4,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            "No applications available yet",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey.shade500,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-
-                  return GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: controller.services.length,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
-                          childAspectRatio: 0.67,
-                        ),
-                    itemBuilder: (context, index) {
-                      final item = controller.services[index];
-                      final String route = item["route"] ?? AppRoutes.mainView;
-                      return Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(24),
-                          onTap: () {
-                            controller.addRecentActivity(item);
-                            if (route.startsWith('http://') ||
-                                route.startsWith('https://')) {
-                              Get.toNamed(
-                                AppRoutes.webView,
-                                arguments: {
-                                  'url': route,
-                                  'title': item["titleEn"] ?? "Portal App",
-                                },
-                              );
-                            } else {
-                              Get.toNamed(route);
-                            }
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(24),
-                              border: Border.all(
-                                color: const Color(0xffD4AF37),
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(.05),
-                                  blurRadius: 15,
-                                  offset: const Offset(0, 6),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                /// Icon Circle
-                                Container(
-                                  width: 78,
-                                  height: 78,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: const Color(0xffFCFAF3),
-                                    border: Border.all(
-                                      color: const Color(0xffE9D8A6),
-                                      width: 1.2,
-                                    ),
-                                  ),
-                                  child: Center(
-                                    child:
-                                        item["iconUrl"] != null &&
-                                            item["iconUrl"]
-                                                .toString()
-                                                .isNotEmpty
-                                        ? Image.network(
-                                            item["iconUrl"]!,
-                                            width: 34,
-                                            height: 34,
-                                            errorBuilder:
-                                                (context, error, stackTrace) =>
-                                                    Image.asset(
-                                                      item["icon"]!,
-                                                      width: 34,
-                                                      height: 34,
-                                                      color: const Color(
-                                                        0xff8A6514,
-                                                      ),
-                                                    ),
-                                          )
-                                        : Image.asset(
-                                            item["icon"]!,
-                                            width: 34,
-                                            height: 34,
-                                            color: const Color(0xff8A6514),
-                                          ),
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  item["titleKh"]!,
-                                  textAlign: TextAlign.center,
-                                  maxLines: 1,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    height: 1.3,
-                                  ),
-                                ),
-
-                                const SizedBox(height: 4),
-
-                                Text(
-                                  item["titleEn"]!,
-                                  textAlign: TextAlign.center,
-                                  maxLines: 1,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 1.2,
-                                    color: Colors.grey.shade600,
-                                  ),
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    controller.addRecentActivity(item);
-                                    if (route.startsWith('http://') ||
-                                        route.startsWith('https://')) {
-                                      Get.toNamed(
-                                        AppRoutes.webView,
-                                        arguments: {
-                                          'url': route,
-                                          'title':
-                                              item["titleEn"] ?? "Portal App",
-                                        },
-                                      );
-                                    } else {
-                                      Get.toNamed(route);
-                                    }
-                                  },
-                                  child: Container(
-                                    margin: const EdgeInsets.only(top: 8),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 7,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xffD4AF37),
-                                      borderRadius: BorderRadius.circular(30),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Text(
-                                          "បើកកម្មវិធី",
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        const Icon(
-                                          Icons.login_rounded,
-                                          size: 25,
-                                          color: Colors.white,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                }),
-              ),
-              const SizedBox(height: 30),
-
-              Obx(() {
-                final list = controller.announcements;
-                final int itemCount = list.length;
-
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    /// NEWS TITLE
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "សេចក្តីប្រកាស",
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    if (list.isEmpty)
-                      _buildEmptyState()
-                    else
-                      Column(
-                        children: [
-                          CarouselSlider(
-                            items: list
-                                .map(
-                                  (announcement) =>
-                                      _announcementBanner(announcement),
-                                )
-                                .toList(),
-                            options: CarouselOptions(
-                              height: 190,
-                              viewportFraction: 1,
-                              autoPlay: true,
-                              autoPlayInterval: const Duration(seconds: 5),
-                              autoPlayAnimationDuration: const Duration(
-                                milliseconds: 800,
-                              ),
-                              enlargeCenterPage: false,
-                              onPageChanged: (index, reason) {
-                                controller.currentIndex.value = index;
-                              },
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(itemCount, (index) {
-                              bool isActive =
-                                  controller.currentIndex.value == index;
-                              return AnimatedContainer(
-                                duration: const Duration(milliseconds: 300),
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 4,
-                                ),
-                                width: isActive ? 22 : 7,
-                                height: 7,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  color: isActive
-                                      ? const Color(0xffD4AF37)
-                                      : Colors.grey.shade400,
-                                ),
-                              );
-                            }),
-                          ),
-                        ],
-                      ),
-                    const SizedBox(height: 30),
-                  ],
-                );
-              }),
-              Obx(() {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            "សកម្មភាពថ្មីៗ",
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          if (controller.recentActivities.isNotEmpty)
-                            TextButton(
-                              onPressed: () =>
-                                  controller.clearRecentActivities(),
-                              child: const Text(
-                                "សម្អាត",
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    if (controller.recentActivities.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 30,
-                          horizontal: 20,
-                        ),
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.history_rounded,
-                                size: 48,
-                                color: Colors.grey.shade300,
-                              ),
-                              const SizedBox(height: 12),
-                              const Text(
-                                "អត់មានសកម្មភាព",
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  color: Color(0xff94A3B8),
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                    else
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            for (
-                              int i = 0;
-                              i < controller.recentActivities.length;
-                              i++
-                            ) ...[
-                              if (i > 0) const SizedBox(width: 16),
-                              Expanded(
-                                child: _recentActivityItem(
-                                  controller.recentActivities[i],
-                                  i,
-                                ),
-                              ),
-                            ],
-                            if (controller.recentActivities.length < 3)
-                              for (
-                                int j = 0;
-                                j < 3 - controller.recentActivities.length;
-                                j++
-                              ) ...[
-                                const SizedBox(width: 16),
-                                const Expanded(child: SizedBox.shrink()),
-                              ],
-                          ],
-                        ),
-                      ),
-                    const SizedBox(height: 100),
-                  ],
-                );
-              }),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget serviceCard({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    VoidCallback? onTap,
-    Widget? customIcon,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xffA88400).withOpacity(0.03),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-          ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.01),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-        border: Border.all(color: const Color(0xffF1F5F9), width: 1.5),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                /// Icon Box
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(18),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.03),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                    border: Border.all(
-                      color: const Color(0xffF1F5F9),
-                      width: 1,
-                    ),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: Center(
-                    child:
-                        customIcon ??
-                        Icon(icon, size: 28, color: const Color(0xffA88400)),
-                  ),
-                ),
-
-                const SizedBox(width: 16),
-
-                /// Text
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xff1E293B),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        subtitle,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Color(0xff64748B),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                /// Action Target Chevron
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: const Color(0xffF8FAFC),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: const Color(0xffF1F5F9),
-                      width: 1,
-                    ),
-                  ),
-                  child: const Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    size: 12,
-                    color: Color(0xffA88400),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _recentActivityItem(Map<String, dynamic> app, int index) {
-    final titleKh = app['titleKh'] ?? app['titleEn'] ?? 'App';
-    final titleEn = app['titleEn'] ?? 'App';
-    final route = app['route'] ?? '';
-
-    final colors = _getAppColors(index);
-    final bgColor = colors['bg']!;
-    final fgColor = colors['fg']!;
-
-    return GestureDetector(
-      onTap: () {
-        controller.addRecentActivity(app);
-        if (route.startsWith('http://') || route.startsWith('https://')) {
-          Get.toNamed(
-            AppRoutes.webView,
-            arguments: {'url': route, 'title': titleEn},
-          );
-        } else {
-          Get.toNamed(route);
-        }
-      },
-      child: Column(
-        children: [
-          Container(
-            width: 72,
-            height: 72,
-            decoration: BoxDecoration(
-              color: bgColor,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Center(child: _buildAppIcon(app, fgColor)),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            titleKh,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-              color: Color(0xff1E293B),
-              height: 1.3,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '($titleEn)',
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: Colors.grey.shade600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Map<String, Color> _getAppColors(int index) {
-    final colors = [
-      {'bg': const Color(0xffEEF2FF), 'fg': const Color(0xff4F46E5)},
-      {'bg': const Color(0xffECFDF5), 'fg': const Color(0xff059669)},
-      {'bg': const Color(0xffFFF7ED), 'fg': const Color(0xffEA580C)},
-      {'bg': const Color(0xffF5F3FF), 'fg': const Color(0xff7C3AED)},
-      {'bg': const Color(0xffF0FDFA), 'fg': const Color(0xff0D9488)},
-      {'bg': const Color(0xffFEF2F2), 'fg': const Color(0xffEF4444)},
-      {'bg': const Color(0xffF0F9FF), 'fg': const Color(0xff0284C7)},
-    ];
-    return colors[index % colors.length];
-  }
-
-  Widget _buildAppIcon(Map<String, dynamic> app, Color fgColor) {
-    final String iconUrl = app['iconUrl'] ?? '';
-    final String iconPath = app['icon'] ?? '';
-
-    if (iconUrl.isNotEmpty) {
-      return Image.network(
-        iconUrl,
-        width: 36,
-        height: 36,
-        errorBuilder: (context, error, stackTrace) => Image.asset(
-          iconPath.isNotEmpty ? iconPath : 'assets/img/about-moi-logo.png',
-          width: 36,
-          height: 36,
-          color: fgColor,
-        ),
-      );
-    } else if (iconPath.isNotEmpty) {
-      return Image.asset(iconPath, width: 36, height: 36, color: fgColor);
-    }
-
-    return Icon(Icons.apps_rounded, size: 36, color: fgColor);
-  }
-
-  Widget _announcementBanner(Map<String, dynamic> announcement) {
-    final String title =
-        announcement['title']?.toString() ??
-        announcement['titleEn']?.toString() ??
-        'សេចក្តីប្រកាស';
-    final String content = announcement['content']?.toString() ?? '';
-    // Strip HTML tags for simple display
-    final String cleanContent = content
-        .replaceAll(RegExp(r'<[^>]*>|&nbsp;'), ' ')
-        .trim();
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
+      backgroundColor: Colors.transparent,
+      body: Container(
         width: double.infinity,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
             colors: [
-              Color(0xFF1E3A8A), // Dark blue
-              Color(0xFF3B51C5), // Theme blue
+              Color(0xFFF8FAFC),
+              Color(0xFFF1F5F9),
+              Color(0xFFEFF4FB),
+              Color(0xFFE8EEF8),
             ],
+            stops: [0.0, 0.35, 0.7, 1.0],
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 15,
-              offset: const Offset(0, 6),
-            ),
-          ],
         ),
         child: Stack(
           children: [
-            // Decorative background pattern/logo
+            // Background Traditional Khmer Floral / Kbach Watermarks
             Positioned(
-              right: -20,
-              bottom: -20,
-              child: Opacity(
-                opacity: 0.1,
-                child: Image.asset(
-                  "assets/img/about-moi-logo.png",
-                  width: 150,
-                  height: 150,
+              right: -30,
+              top: 320,
+              child: IgnorePointer(
+                child: Opacity(
+                  opacity: 0.13,
+                  child: CustomPaint(
+                    size: const Size(220, 220),
+                    painter: _KhmerLotusKbachPainter(),
+                  ),
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(24),
+            Positioned(
+              left: -40,
+              bottom: 60,
+              child: IgnorePointer(
+                child: Opacity(
+                  opacity: 0.12,
+                  child: CustomPaint(
+                    size: const Size(240, 240),
+                    painter: _KhmerLotusKbachPainter(),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              right: -20,
+              bottom: 110,
+              child: IgnorePointer(
+                child: Opacity(
+                  opacity: 0.14,
+                  child: CustomPaint(
+                    size: const Size(200, 200),
+                    painter: _KhmerLotusKbachPainter(),
+                  ),
+                ),
+              ),
+            ),
+
+            // Main Scrollable Content
+            SafeArea(
+              top: false,
+              bottom: false,
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildTopAppBarCard(),
+                    const SizedBox(height: 14),
+                    _buildUserGreetingCard(),
+                    const SizedBox(height: 18),
+                    _buildPopularServicesSection(context),
+                    _buildSectionHeader(
+                      icon: Icons.campaign_rounded,
+                      title: 'recent_announcements'.tr,
+                      onTapSeeAll: () {
+                        if (Get.isRegistered<NavController>()) {
+                          final bool isAdmin =
+                              Get.find<NavController>().isAdmin.value;
+                          Get.find<NavController>().changeTab(isAdmin ? 3 : 1);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    _buildNoticeSectionList(context),
+                    const SizedBox(height: 110),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTopAppBarCard() {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF0F3278), Color(0xFF163774), Color(0xFF194498)],
+        ),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(28),
+          bottomRight: Radius.circular(28),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF163774).withOpacity(0.28),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          // Bottom-right Khmer Lotus Kbach watermark in app bar
+          Positioned(
+            right: -20,
+            bottom: -30,
+            child: IgnorePointer(
+              child: Opacity(
+                opacity: 0.22,
+                child: CustomPaint(
+                  size: const Size(180, 180),
+                  painter: const _KhmerLotusKbachPainter(
+                    color: Colors.white,
+                    strokeWidth: 1.2,
+                    opacity: 0.24,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFD4AF37).withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: const Color(0xFFD4AF37),
-                        width: 0.5,
+                  Row(
+                    children: [
+                      // Ministry Emblem Logo
+                      Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                          border: Border.all(
+                            color: const Color(0xFFD4AF37),
+                            width: 2.2,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.22),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        padding: const EdgeInsets.all(2),
+                        child: ClipOval(
+                          child: Image.asset(
+                            "assets/img/about-moi-logo.png",
+                            fit: BoxFit.contain,
+                          ),
+                        ),
                       ),
-                    ),
-                    child: const Text(
-                      'សេចក្តីប្រកាស',
-                      style: TextStyle(
-                        color: Color(0xFFD4AF37),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 10,
+                      const SizedBox(width: 10),
+
+                      // Titles
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              "ក្រសួងមហាផ្ទៃ",
+                              style: GoogleFonts.kantumruyPro(
+                                color: Colors.white,
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,
+                                height: 1.2,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              "Ministry of Interior",
+                              style: GoogleFonts.poppins(
+                                color: Colors.white.withOpacity(0.92),
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 8),
+
+                      // Language Dropdown
+                      _buildLanguageDropdown(),
+                      const SizedBox(width: 8),
+
+                      // Notification Button
+                      _buildNotificationButton(),
+                    ],
                   ),
-                  const SizedBox(height: 12),
-                  Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    cleanContent,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
-                      fontSize: 13,
-                      height: 1.4,
+                  const SizedBox(height: 6),
+
+                  // Line 3: Full-width Motto text
+                  Padding(
+                    padding: const EdgeInsets.only(left: 62),
+                    child: Text(
+                      "moi_motto".tr,
+                      style: GoogleFonts.kantumruyPro(
+                        color: Colors.white.withOpacity(0.85),
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w400,
+                        letterSpacing: -0.15,
+                        height: 1.2,
+                      ),
+                      softWrap: true,
+                      maxLines: 2,
                     ),
                   ),
                 ],
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNotificationButton() {
+    final notifCtrl = Get.isRegistered<NotificationController>()
+        ? Get.find<NotificationController>()
+        : Get.put(NotificationController());
+
+    return Obx(() {
+      final unreadCount = notifCtrl.notifications
+          .where((n) => !n.isRead)
+          .length;
+
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => Get.toNamed(AppRoutes.notification),
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.12),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Icon(
+                  Icons.notifications_outlined,
+                  size: 20,
+                  color: Color(0xFF163774),
+                ),
+                if (unreadCount > 0)
+                  Positioned(
+                    top: -1,
+                    right: -1,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: const Color(0xffEF4444),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 1.5),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _buildLanguageDropdown() {
+    return Obx(() {
+      final currentLang = LocalizationService.currentLanguageCode.value;
+      final isKh = currentLang == 'km';
+
+      return Theme(
+        data: Theme.of(Get.context!).copyWith(
+          popupMenuTheme: PopupMenuThemeData(
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: const BorderSide(color: Color(0xffF1F5F9), width: 1),
+            ),
+            elevation: 8,
+            shadowColor: const Color(0xff0F172A).withOpacity(0.12),
+          ),
+        ),
+        child: PopupMenuButton<String>(
+          onSelected: (String langCode) {
+            LocalizationService.changeLanguage(langCode);
+          },
+          offset: const Offset(0, 38),
+          padding: EdgeInsets.zero,
+          tooltip: 'select_language'.tr,
+          itemBuilder: (BuildContext context) => [
+            PopupMenuItem<String>(
+              value: 'km',
+              height: 42,
+              child: Row(
+                children: [
+                  const Text('🇰🇭', style: TextStyle(fontSize: 15)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'ភាសាខ្មែរ (KH)',
+                      style: GoogleFonts.kantumruyPro(
+                        fontSize: 13,
+                        fontWeight: isKh ? FontWeight.bold : FontWeight.w500,
+                        color: isKh
+                            ? const Color(0xFF163774)
+                            : const Color(0xff334155),
+                      ),
+                    ),
+                  ),
+                  if (isKh)
+                    const Icon(
+                      Icons.check_rounded,
+                      size: 16,
+                      color: Color(0xffD4AF37),
+                    ),
+                ],
+              ),
+            ),
+            const PopupMenuDivider(height: 1),
+            PopupMenuItem<String>(
+              value: 'en',
+              height: 42,
+              child: Row(
+                children: [
+                  const Text('🇬🇧', style: TextStyle(fontSize: 15)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'English (EN)',
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        fontWeight: !isKh ? FontWeight.bold : FontWeight.w500,
+                        color: !isKh
+                            ? const Color(0xFF163774)
+                            : const Color(0xff334155),
+                      ),
+                    ),
+                  ),
+                  if (!isKh)
+                    const Icon(
+                      Icons.check_rounded,
+                      size: 16,
+                      color: Color(0xffD4AF37),
+                    ),
+                ],
+              ),
+            ),
+          ],
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5.5),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.12),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  isKh ? '🇰🇭' : '🇬🇧',
+                  style: const TextStyle(fontSize: 13),
+                ),
+                const SizedBox(width: 5),
+                Text(
+                  isKh ? 'KH' : 'EN',
+                  style: GoogleFonts.poppins(
+                    color: const Color(0xFF163774),
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(width: 2),
+                const Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  size: 16,
+                  color: Color(0xFF163774),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _buildUserGreetingCard() {
+    return GestureDetector(
+      onTap: () {
+        if (Get.isRegistered<NavController>()) {
+          final bool isAdmin = Get.find<NavController>().isAdmin.value;
+          Get.find<NavController>().changeTab(isAdmin ? 4 : 2);
+        }
+      },
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF163774).withOpacity(0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Left Blue Avatar Circle with solid person icon
+            Container(
+              width: 48,
+              height: 48,
+              decoration: const BoxDecoration(
+                color: Color(0xFFEFF6FF),
+                shape: BoxShape.circle,
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.person_rounded,
+                  color: Color(0xFF1D4ED8),
+                  size: 26,
+                ),
+              ),
+            ),
+            const SizedBox(width: 14),
+
+            // Greeting + Name Column
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'hello'.tr,
+                        style: GoogleFonts.kantumruyPro(
+                          color: const Color(0xFF0F172A),
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Text('👋', style: TextStyle(fontSize: 16)),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Obx(() {
+                    final name = controller.userDisplayName.value;
+                    return Text(
+                      name.isNotEmpty ? name : 'bin sovanvong',
+                      style: GoogleFonts.kantumruyPro(
+                        color: const Color(0xFF64748B),
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    );
+                  }),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+
+            // Far-Right Chevron ">"
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: Color(0xFF1D4ED8),
+              size: 24,
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildEmptyState() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 36),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: const Color(0xffD4AF37).withOpacity(0.3),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(.04),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+  Widget _buildSectionHeader({
+    IconData? icon,
+    bool isPillAccent = false,
+    required String title,
+    VoidCallback? onTapSeeAll,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Container(
-            width: 72,
-            height: 72,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: const Color(0xffFCFAF3),
-              border: Border.all(color: const Color(0xffE9D8A6), width: 1.5),
-            ),
-            child: const Center(
-              child: Icon(
-                Icons.notifications_off_outlined,
-                size: 32,
-                color: Color(0xffD4AF37),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (isPillAccent)
+                Container(
+                  width: 4,
+                  height: 18,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1D4ED8),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                )
+              else if (icon != null)
+                Icon(icon, color: const Color(0xFF1D4ED8), size: 22),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: GoogleFonts.kantumruyPro(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF0F172A),
+                ),
+              ),
+            ],
+          ),
+          if (onTapSeeAll != null)
+            GestureDetector(
+              onTap: onTapSeeAll,
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4.5,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEFF6FF),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'view_all'.tr,
+                      style: GoogleFonts.kantumruyPro(
+                        color: const Color(0xFF1D4ED8),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(
+                      Icons.arrow_forward_rounded,
+                      size: 14,
+                      color: Color(0xFF1D4ED8),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            "គ្មានសេចក្តីប្រកាស",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Color(0xff1E293B),
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            "មិនទាន់មានសេចក្តីប្រកាសនៅឡើយទេ។",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey.shade500,
-              height: 1.4,
-            ),
-          ),
         ],
       ),
     );
   }
+
+  Widget _buildPopularServicesSection(BuildContext context) {
+    return Obx(() {
+      final activeServices = controller.homeServices;
+
+      if (activeServices.isEmpty) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildSectionHeader(
+              isPillAccent: true,
+              title: 'all_applications'.tr,
+            ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: EmptyAppsWidget(
+                isCompact: true,
+                title: 'no_applications_yet'.tr,
+                subtitle: 'no_applications_yet_desc'.tr,
+                actionText: 'refresh'.tr,
+                onAction: controller.fetchPortalApps,
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+        );
+      }
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildSectionHeader(isPillAccent: true, title: 'all_applications'.tr),
+          const SizedBox(height: 12),
+          _buildPopularServicesRow(context, activeServices),
+          const SizedBox(height: 20),
+        ],
+      );
+    });
+  }
+
+  Widget _buildPopularServicesRow(
+    BuildContext context,
+    List<Map<String, dynamic>> services,
+  ) {
+    final storage = GetStorage();
+    final String sessionToken =
+        (storage.read('token') ?? storage.read('access_token') ?? '')
+            .toString();
+    final bool isEnglish =
+        LocalizationService.currentLanguageCode.value == 'en';
+
+    final themes = [
+      {
+        'bgColor': const Color(0xFFF0F7FF),
+        'borderColor': const Color(0xFFDBEAFE),
+        'iconBg': const Color(0xFFDBEAFE),
+        'tintColor': const Color(0xFF1D4ED8),
+        'fallbackIcon': Icons.description_rounded,
+      },
+      {
+        'bgColor': const Color(0xFFF0FDF4),
+        'borderColor': const Color(0xFFDCFCE7),
+        'iconBg': const Color(0xFFDCFCE7),
+        'tintColor': const Color(0xFF16A34A),
+        'fallbackIcon': Icons.badge_rounded,
+      },
+      {
+        'bgColor': const Color(0xFFFFF7ED),
+        'borderColor': const Color(0xFFFFEDD5),
+        'iconBg': const Color(0xFFFFEDD5),
+        'tintColor': const Color(0xFFEA580C),
+        'fallbackIcon': Icons.security_rounded,
+      },
+    ];
+
+    // Chunk all user services into rows of 3
+    final List<List<Map<String, dynamic>>> chunks = [];
+    for (var i = 0; i < services.length; i += 3) {
+      chunks.add(
+        services.sublist(i, i + 3 > services.length ? services.length : i + 3),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final double standardCardWidth = (constraints.maxWidth - 20) / 3;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(chunks.length, (rowIndex) {
+              final rowItems = chunks[rowIndex];
+
+              return Padding(
+                padding: EdgeInsets.only(
+                  bottom: rowIndex < chunks.length - 1 ? 10.0 : 0.0,
+                ),
+                child: Row(
+                  children: List.generate(rowItems.length, (colIndex) {
+                    final itemIndex = rowIndex * 3 + colIndex;
+                    final theme = themes[itemIndex % themes.length];
+                    final item = rowItems[colIndex];
+
+                    final String displayName = isEnglish
+                        ? (item["titleEn"] ??
+                                  item["nameEn"] ??
+                                  item["name"] ??
+                                  item["titleKh"] ??
+                                  item["nameKh"] ??
+                                  'application'.tr)
+                              .toString()
+                        : (item["titleKh"] ??
+                                  item["nameKh"] ??
+                                  item["name"] ??
+                                  item["titleEn"] ??
+                                  item["nameEn"] ??
+                                  'application'.tr)
+                              .toString();
+
+                    final String title = displayName.trim().isNotEmpty
+                        ? displayName.trim()
+                        : 'application'.tr;
+
+                    String? iconUrl;
+                    final String rawImg = AppIconWidget.extractRawIcon(item);
+                    if (rawImg.isNotEmpty &&
+                        rawImg != 'assets/img/about-moi-logo.png' &&
+                        rawImg != '/assets/img/about-moi-logo.png' &&
+                        rawImg.toLowerCase() != 'null' &&
+                        rawImg.toLowerCase() != 'undefined') {
+                      iconUrl = AppIconWidget.formatIconUrl(rawImg, sessionToken);
+                    }
+
+                    final String route =
+                        (item["appUrl"] ??
+                                item["launchUrl"] ??
+                                item["url"] ??
+                                item["route"] ??
+                                item["path"] ??
+                                '')
+                            .toString()
+                            .trim();
+
+                    final String rawIconStr = (item["icon"] ?? '').toString().trim();
+                    final String itemLocal = (rawIconStr.isNotEmpty &&
+                            !rawIconStr.startsWith('http://') &&
+                            !rawIconStr.startsWith('https://') &&
+                            rawIconStr != 'assets/img/about-moi-logo.png' &&
+                            rawIconStr != '/assets/img/about-moi-logo.png')
+                        ? rawIconStr
+                        : '';
+
+                    final Widget card = _buildServiceCard(
+                      bgColor: theme['bgColor'] as Color,
+                      borderColor: theme['borderColor'] as Color,
+                      iconBg: theme['iconBg'] as Color,
+                      tintColor: theme['tintColor'] as Color,
+                      fallbackIcon: theme['fallbackIcon'] as IconData,
+                      title: title,
+                      iconUrl: iconUrl,
+                      localAsset: itemLocal,
+                      sessionToken: sessionToken,
+                      onTap: () {
+                        if (route.isNotEmpty) {
+                          try {
+                            controller.addRecentActivity(item);
+                            final Map<String, dynamic> navigationArgs = {
+                              'url': route,
+                              'title': title,
+                            };
+                            if (route.startsWith('http://') ||
+                                route.startsWith('https://')) {
+                              Get.toNamed(
+                                AppRoutes.webView,
+                                arguments: navigationArgs,
+                              );
+                              return;
+                            }
+                            Get.toNamed(route, arguments: navigationArgs);
+                          } catch (e) {
+                            debugPrint("Navigation error: $e");
+                          }
+                        } else {
+                          if (Get.isRegistered<NavController>()) {
+                            final bool isAdmin =
+                                Get.find<NavController>().isAdmin.value;
+                            if (isAdmin) {
+                              Get.find<NavController>().changeTab(1);
+                            } else {
+                              Get.toNamed(AppRoutes.application);
+                            }
+                          }
+                        }
+                      },
+                    );
+
+                    if (rowItems.length == 3) {
+                      return Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                            right: colIndex < 2 ? 10.0 : 0.0,
+                          ),
+                          child: card,
+                        ),
+                      );
+                    }
+
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        right: colIndex < rowItems.length - 1 ? 10.0 : 0.0,
+                      ),
+                      child: SizedBox(width: standardCardWidth, child: card),
+                    );
+                  }),
+                ),
+              );
+            }),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildServiceCard({
+    required Color bgColor,
+    required Color borderColor,
+    required Color iconBg,
+    required Color tintColor,
+    required IconData fallbackIcon,
+    required String title,
+    String? iconUrl,
+    String? localAsset,
+    String? sessionToken,
+    required VoidCallback onTap,
+  }) {
+    final cleanLocal = (localAsset != null &&
+            localAsset.trim().isNotEmpty &&
+            localAsset != 'assets/img/about-moi-logo.png' &&
+            localAsset != '/assets/img/about-moi-logo.png')
+        ? localAsset.trim()
+        : '';
+    final bool hasImage =
+        (iconUrl != null && iconUrl.trim().isNotEmpty) ||
+        cleanLocal.isNotEmpty;
+
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 6),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: borderColor, width: 1.2),
+          boxShadow: [
+            BoxShadow(
+              color: tintColor.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Squircle Icon Container
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: hasImage ? Colors.white : iconBg,
+                borderRadius: BorderRadius.circular(13),
+                border: hasImage
+                    ? Border.all(
+                        color: borderColor.withOpacity(0.9),
+                        width: 1.0,
+                      )
+                    : null,
+                boxShadow: hasImage
+                    ? [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 5,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Center(
+                  child: hasImage
+                      ? Padding(
+                          padding: const EdgeInsets.all(4.5),
+                          child: AppIconWidget(
+                            iconUrl: iconUrl ?? '',
+                            localAsset: cleanLocal,
+                            fallbackIcon: fallbackIcon,
+                            fallbackColor: tintColor,
+                            token: sessionToken ?? '',
+                            size: 32,
+                            fit: BoxFit.contain,
+                          ),
+                        )
+                      : Icon(fallbackIcon, color: tintColor, size: 24),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            // 2-Line Title
+            ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 34),
+              child: Text(
+                title,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.kantumruyPro(
+                  fontSize: 11.0,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF0F172A),
+                  height: 1.2,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            // Circular Arrow Button
+            Container(
+              width: 26,
+              height: 26,
+              decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
+              child: Center(
+                child: Icon(
+                  Icons.arrow_forward_rounded,
+                  color: tintColor,
+                  size: 14,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNoticeSectionList(BuildContext context) {
+    return Obx(() {
+      final list = controller.announcements;
+      if (list.isEmpty) {
+        return Container(
+          width: double.infinity,
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF163774).withOpacity(0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Center(child: _MegaphoneIllustration()),
+              const SizedBox(height: 14),
+              Text(
+                'no_announcements'.tr,
+                style: GoogleFonts.kantumruyPro(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF0F2B66),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 5),
+              Text(
+                'no_announcements_yet_desc'.tr,
+                style: GoogleFonts.kantumruyPro(
+                  fontSize: 12.5,
+                  color: const Color(0xFF94A3B8),
+                  fontWeight: FontWeight.w400,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        );
+      }
+
+      return Column(
+        children: [
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: list.length > 3 ? 3 : list.length,
+            itemBuilder: (context, index) {
+              final a = list[index];
+              final String title = a['title']?.toString() ?? 'announcement'.tr;
+              final String content = a['content']?.toString() ?? '';
+              final String rawDate = a['date']?.toString() ?? '';
+              final String cleanContent = content
+                  .replaceAll(RegExp(r'<[^>]*>|&nbsp;'), ' ')
+                  .replaceAll(RegExp(r'\s+'), ' ')
+                  .trim();
+
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: const Color(0xFFE2E8F0),
+                    width: 1.1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF163774).withOpacity(0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => _showAnnouncementDialog(context, a),
+                    borderRadius: BorderRadius.circular(18),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: const Color(0xffFAF3E3),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: const Color(0xffD4AF37).withOpacity(0.3),
+                                width: 1,
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.description_outlined,
+                              color: Color(0xFF163774),
+                              size: 18,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        title,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: GoogleFonts.kantumruyPro(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: const Color(0xff1E293B),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      _formatKhmerDate(rawDate),
+                                      textAlign: TextAlign.right,
+                                      style: GoogleFonts.kantumruyPro(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: const Color(0xff64748B),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  cleanContent,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.kantumruyPro(
+                                    fontSize: 12,
+                                    color: const Color(0xff64748B),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          const Icon(
+                            Icons.chevron_right_rounded,
+                            size: 18,
+                            color: Colors.grey,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+          // Golden Khmer Prasat / Angkor Spire Decorative Divider
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 36),
+            child: CustomPaint(
+              size: const Size(double.infinity, 24),
+              painter: _KhmerPrasatDividerPainter(),
+            ),
+          ),
+        ],
+      );
+    });
+  }
+
+  void _showAnnouncementDialog(
+    BuildContext context,
+    Map<String, dynamic> announcement,
+  ) {
+    final String title = announcement['title']?.toString() ?? 'announcement'.tr;
+    final String content = announcement['content']?.toString() ?? '';
+    final String cleanContent = content
+        .replaceAll(RegExp(r'<[^>]*>|&nbsp;'), ' ')
+        .trim();
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        backgroundColor: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xffA88400).withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'announcement'.tr,
+                      style: GoogleFonts.kantumruyPro(
+                        color: const Color(0xffA88400),
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded, color: Colors.grey),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                title,
+                style: GoogleFonts.kantumruyPro(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xff1E293B),
+                ),
+              ),
+              const Divider(
+                height: 24,
+                color: Color(0xffF1F5F9),
+                thickness: 1.5,
+              ),
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Text(
+                    cleanContent,
+                    style: GoogleFonts.kantumruyPro(
+                      fontSize: 15,
+                      color: const Color(0xff475569),
+                      height: 1.6,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xffA88400),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  child: Text(
+                    'close'.tr,
+                    style: GoogleFonts.kantumruyPro(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatKhmerDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return '';
+    try {
+      final dateTime = DateTime.tryParse(dateStr);
+      if (dateTime == null) return dateStr;
+
+      const khmerMonths = [
+        'មករា',
+        'កុម្ភៈ',
+        'មីនា',
+        'មេសា',
+        'ឧសភា',
+        'មិថុនា',
+        'កក្កដា',
+        'សីហា',
+        'កញ្ញា',
+        'តុលា',
+        'វិច្ឆិកា',
+        'ធ្នូ',
+      ];
+
+      final day = dateTime.day.toString();
+      final month = khmerMonths[dateTime.month - 1];
+      final year = dateTime.year.toString();
+
+      String toKhmer(String input) {
+        const english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        const khmer = ['០', '១', '២', '៣', '៤', '៥', '៦', '៧', '៨', '៩'];
+        String res = input;
+        for (int i = 0; i < english.length; i++) {
+          res = res.replaceAll(english[i], khmer[i]);
+        }
+        return res;
+      }
+
+      return '${toKhmer(day)} $month ${toKhmer(year)}';
+    } catch (_) {
+      return dateStr;
+    }
+  }
+}
+
+/// Traditional Khmer Prasat / Angkor Spire Decorative Divider Painter
+class _KhmerPrasatDividerPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final linePaint = Paint()
+      ..color = const Color(0xffD4AF37).withOpacity(0.55)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.9;
+
+    final goldFill = Paint()
+      ..color = const Color(0xffC59E3F)
+      ..style = PaintingStyle.fill;
+
+    final goldStroke = Paint()
+      ..color = const Color(0xFF163774)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.8;
+
+    final double cx = size.width / 2;
+    final double cy = size.height / 2;
+    const double gap = 16.0;
+
+    // Draw left and right dividing lines
+    canvas.drawLine(Offset(0, cy), Offset(cx - gap, cy), linePaint);
+    canvas.drawLine(Offset(cx + gap, cy), Offset(size.width, cy), linePaint);
+
+    // Draw Khmer Prasat (Angkor Spire) silhouette in center
+    final path = Path();
+    path.moveTo(cx, cy - 10);
+    path.lineTo(cx + 1.5, cy - 7);
+    path.lineTo(cx + 3, cy - 6);
+    path.lineTo(cx + 2, cy - 4.5);
+    path.lineTo(cx + 4.5, cy - 3.5);
+    path.lineTo(cx + 3.5, cy - 1.5);
+    path.lineTo(cx + 6, cy - 0.5);
+    path.lineTo(cx + 5, cy + 2);
+    path.lineTo(cx + 7.5, cy + 4);
+    path.lineTo(cx + 7.5, cy + 6.5);
+    path.lineTo(cx - 7.5, cy + 6.5);
+    path.lineTo(cx - 7.5, cy + 4);
+    path.lineTo(cx - 5, cy + 2);
+    path.lineTo(cx - 6, cy - 0.5);
+    path.lineTo(cx - 3.5, cy - 1.5);
+    path.lineTo(cx - 4.5, cy - 3.5);
+    path.lineTo(cx - 2, cy - 4.5);
+    path.lineTo(cx - 3, cy - 6);
+    path.lineTo(cx - 1.5, cy - 7);
+    path.close();
+
+    canvas.drawPath(path, goldFill);
+    canvas.drawPath(path, goldStroke);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// Traditional Khmer Lotus / Kbach Watermark Line Art Painter
+class _KhmerLotusKbachPainter extends CustomPainter {
+  final Color color;
+  final double strokeWidth;
+  final double opacity;
+
+  const _KhmerLotusKbachPainter({
+    this.color = const Color(0xFF163774),
+    this.strokeWidth = 1.0,
+    this.opacity = 0.08,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color.withOpacity(opacity)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+
+    final fillPaint = Paint()
+      ..color = color.withOpacity(opacity * 0.25)
+      ..style = PaintingStyle.fill;
+
+    final cx = size.width / 2;
+    final cy = size.height / 2;
+
+    for (int i = 0; i < 4; i++) {
+      canvas.save();
+      canvas.translate(cx, cy);
+      canvas.rotate((i * 90) * 3.14159265 / 180);
+
+      // Central pointed petal
+      final p1 = Path();
+      p1.moveTo(0, 0);
+      p1.quadraticBezierTo(
+        size.width * 0.15,
+        -size.height * 0.25,
+        0,
+        -size.height * 0.48,
+      );
+      p1.quadraticBezierTo(-size.width * 0.15, -size.height * 0.25, 0, 0);
+      p1.close();
+      canvas.drawPath(p1, fillPaint);
+      canvas.drawPath(p1, paint);
+
+      // Inner flame detail
+      final p2 = Path();
+      p2.moveTo(0, -size.height * 0.08);
+      p2.quadraticBezierTo(
+        size.width * 0.08,
+        -size.height * 0.22,
+        0,
+        -size.height * 0.38,
+      );
+      p2.quadraticBezierTo(
+        -size.width * 0.08,
+        -size.height * 0.22,
+        0,
+        -size.height * 0.08,
+      );
+      canvas.drawPath(p2, paint);
+
+      // Side curved tendrils
+      final p3 = Path();
+      p3.moveTo(size.width * 0.05, -size.height * 0.1);
+      p3.quadraticBezierTo(
+        size.width * 0.25,
+        -size.height * 0.15,
+        size.width * 0.22,
+        -size.height * 0.32,
+      );
+      p3.quadraticBezierTo(
+        size.width * 0.12,
+        -size.height * 0.26,
+        size.width * 0.08,
+        -size.height * 0.22,
+      );
+      canvas.drawPath(p3, paint);
+
+      final p4 = Path();
+      p4.moveTo(-size.width * 0.05, -size.height * 0.1);
+      p4.quadraticBezierTo(
+        -size.width * 0.25,
+        -size.height * 0.15,
+        -size.width * 0.22,
+        -size.height * 0.32,
+      );
+      p4.quadraticBezierTo(
+        -size.width * 0.12,
+        -size.height * 0.26,
+        -size.width * 0.08,
+        -size.height * 0.22,
+      );
+      canvas.drawPath(p4, paint);
+
+      canvas.restore();
+    }
+
+    // Center circular ornament
+    canvas.drawCircle(Offset(cx, cy), size.width * 0.06, paint);
+    canvas.drawCircle(Offset(cx, cy), size.width * 0.03, fillPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// Megaphone vector illustration matching Screenshot 1 empty announcements state
+class _MegaphoneIllustration extends StatelessWidget {
+  const _MegaphoneIllustration();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 90,
+      height: 72,
+      child: CustomPaint(painter: _MegaphonePainter()),
+    );
+  }
+}
+
+class _MegaphonePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double w = size.width;
+    final double h = size.height;
+
+    // Megaphone horn
+    canvas.save();
+    canvas.translate(w * 0.42, h * 0.52);
+    canvas.rotate(-22 * 3.14159265 / 180);
+
+    // Body (trapezoid cone)
+    final hornPath = Path();
+    hornPath.moveTo(-w * 0.24, -h * 0.12);
+    hornPath.lineTo(w * 0.16, -h * 0.28);
+    hornPath.lineTo(w * 0.16, h * 0.28);
+    hornPath.lineTo(-w * 0.24, h * 0.12);
+    hornPath.close();
+
+    final bodyPaint = Paint()
+      ..shader = const LinearGradient(
+        colors: [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
+      ).createShader(Rect.fromLTWH(-w * 0.24, -h * 0.28, w * 0.4, h * 0.56));
+    canvas.drawPath(hornPath, bodyPaint);
+
+    // Base cup / handle connector
+    final basePaint = Paint()..color = const Color(0xFF1E40AF);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(-w * 0.30, -h * 0.13, w * 0.08, h * 0.26),
+        const Radius.circular(3),
+      ),
+      basePaint,
+    );
+
+    // Handle
+    final handlePath = Path();
+    handlePath.moveTo(-w * 0.13, h * 0.14);
+    handlePath.lineTo(-w * 0.09, h * 0.36);
+    handlePath.lineTo(-w * 0.03, h * 0.36);
+    handlePath.lineTo(-w * 0.07, h * 0.16);
+    handlePath.close();
+    canvas.drawPath(handlePath, basePaint);
+
+    // Horn rim (light cyan/blue opening)
+    final rimPaint = Paint()..color = const Color(0xFF93C5FD);
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(w * 0.16, 0),
+        width: w * 0.10,
+        height: h * 0.56,
+      ),
+      rimPaint,
+    );
+
+    // Inner rim
+    final innerRimPaint = Paint()..color = const Color(0xFF60A5FA);
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(w * 0.16, 0),
+        width: w * 0.05,
+        height: h * 0.40,
+      ),
+      innerRimPaint,
+    );
+
+    canvas.restore();
+
+    // Sound waves emitting from the horn
+    final wavePaint = Paint()
+      ..color = const Color(0xFF60A5FA)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.2
+      ..strokeCap = StrokeCap.round;
+
+    final cx = w * 0.65;
+    final cy = h * 0.32;
+
+    // Small wave
+    canvas.drawArc(
+      Rect.fromCircle(center: Offset(cx, cy), radius: 13),
+      -0.65,
+      1.3,
+      false,
+      wavePaint,
+    );
+
+    // Large wave
+    canvas.drawArc(
+      Rect.fromCircle(center: Offset(cx, cy), radius: 23),
+      -0.65,
+      1.3,
+      false,
+      wavePaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

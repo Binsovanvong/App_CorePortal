@@ -1,0 +1,209 @@
+﻿Created At: 2026-08-03T16:28:20Z
+Completed At: 2026-08-03T16:28:20Z
+File Path: `file:///d:/StudioProjects/Project/core_portal/lib/screens/admin/admin_view.dart`
+Total Lines: 3424
+Total Bytes: 128161
+Showing lines 3000 to 3200
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+3000: 
+3001: class _AdminAppCreateViewState extends State<AdminAppCreateView> {
+3002:   final _controller = Get.find<AdminController>();
+3003:   late final TextEditingController nameKhCtrl;
+3004:   late final TextEditingController nameEnCtrl;
+3005:   late final TextEditingController urlCtrl;
+3006:   late final TextEditingController ruleTypeCtrl;
+3007:   late final TextEditingController ruleValueCtrl;
+3008:   late bool isActive;
+3009: 
+3010:   @override
+3011:   void initState() {
+3012:     super.initState();
+3013:     String nameKh = '';
+3014:     String nameEn = '';
+3015:     String url = '';
+3016:     String ruleType = 'áž¢áž‚áŸ’áž‚áž“áž¶áž™áž€ážŠáŸ’áž‹áž¶áž“';
+3017:     String ruleValue = 'GDDTM';
+3018:     if (widget.isEdit && widget.appData != null) {
+3019:       nameKh = widget.appData!['titleKh'] ?? '';
+3020:       nameEn = widget.appData!['titleEn'] ?? '';
+3021:       url = widget.appData!['route'] ?? '';
+3022:       ruleType = widget.appData!['ruleType'] ?? 'áž¢áž‚áŸ’áž‚áž“áž¶áž™áž€ážŠáŸ’áž‹áž¶áž“';
+3023:       ruleValue = widget.appData!['ruleValue'] ?? 'GDDTM';
+3024:     }
+3025:     nameKhCtrl = TextEditingController(text: nameKh);
+3026:     nameEnCtrl = TextEditingController(text: nameEn);
+3027:     urlCtrl = TextEditingController(text: url);
+3028:     ruleTypeCtrl = TextEditingController(text: ruleType);
+3029:     ruleValueCtrl = TextEditingController(text: ruleValue);
+3030:     isActive = widget.isEdit ? (widget.appData?['isActive'] ?? true) : true;
+3031:   }
+3032: 
+3033:   @override
+3034:   void dispose() {
+3035:     nameKhCtrl.dispose();
+3036:     nameEnCtrl.dispose();
+3037:     urlCtrl.dispose();
+3038:     ruleTypeCtrl.dispose();
+3039:     ruleValueCtrl.dispose();
+3040:     super.dispose();
+3041:   }
+3042: 
+3043:   @override
+3044:   Widget build(BuildContext context) {
+3045:     return Scaffold(
+3046:       backgroundColor: const Color(0xffF8FAFC),
+3047:       appBar: AppBar(
+3048:         backgroundColor: Colors.white,
+3049:         elevation: 0,
+3050:         scrolledUnderElevation: 0,
+3051:         leading: IconButton(
+3052:           icon: const Icon(
+3053:             Icons.arrow_back_ios_new_rounded,
+3054:             color: Color(0xff8A6514),
+3055:           ),
+3056:           onPressed: () => Navigator.of(context).pop(),
+3057:         ),
+3058:         title: Text(
+3059:           widget.isEdit
+3060:               ? "áž€áŸ‚áž”áŸ’ážšáŸ‚áž€áž˜áŸ’áž˜ážœáž·áž’áž¸áž”áŸ’ážšáž¾áž”áŸ’ážšáž¶ážŸáŸ‹"
+3061:               : "áž”áž„áŸ’áž€áž¾ážáž€áž˜áŸ’áž˜ážœáž·áž’áž¸áž”áŸ’ážšáž¾áž”áŸ’ážšáž¶ážŸáŸ‹ážáŸ’áž˜áž¸",
+3062:           style: GoogleFonts.kantumruyPro(
+3063:             fontWeight: FontWeight.bold,
+3064:             fontSize: 16,
+3065:             color: const Color(0xff0F172A),
+3066:           ),
+3067:         ),
+3068:       ),
+3069:       body: SingleChildScrollView(
+3070:         child: Column(
+3071:           crossAxisAlignment: CrossAxisAlignment.start,
+3072:           children: [
+3073:             /// Sub Header
+3074:             Container(
+3075:               width: double.infinity,
+3076:               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+3077:               decoration: const BoxDecoration(
+3078:                 color: Colors.white,
+3079:                 border: Border(bottom: BorderSide(color: Color(0xffE2E8F0))),
+3080:               ),
+3081:               child: Column(
+3082:                 crossAxisAlignment: CrossAxisAlignment.start,
+3083:                 children: [
+3084:                   Text(
+3085:                     widget.isEdit
+3086:                         ? "áž€áŸ‚áž”áŸ’ážšáŸ‚áž€áž˜áŸ’áž˜ážœáž·áž’áž¸áž”áŸ’ážšáž¾áž”áŸ’ážšáž¶ážŸáŸ‹"
+3087:                         : "áž”áž„áŸ’áž€áž¾ážáž€áž˜áŸ’áž˜ážœáž·áž’áž¸áž”áŸ’ážšáž¾áž”áŸ’ážšáž¶ážŸáŸ‹ážáŸ’áž˜áž¸",
+3088:                     style: GoogleFonts.kantumruyPro(
+3089:                       fontSize: 22,
+3090:                       fontWeight: FontWeight.bold,
+3091:                       color: const Color(0xff0F172A),
+3092:                     ),
+3093:                   ),
+3094:                   const SizedBox(height: 4),
+3095:                   Text(
+3096:                     "áž”áž‰áŸ’áž…áž¼áž›áž–áŸážáŸŒáž˜áž¶áž“áž€áž˜áŸ’áž˜ážœáž·áž’áž¸ URL ážšáž¼áž”ážáŸ†ážŽáž¶áž„ áž“áž·áž„ážŸáŸ’ážáž¶áž“áž—áž¶áž–áž”áŸ’ážšáž¾áž”áŸ’ážšáž¶ážŸáŸ‹",
+3097:                     style: GoogleFonts.kantumruyPro(
+3098:                       fontSize: 12,
+3099:                       color: const Color(0xff64748B),
+3100:                     ),
+3101:                   ),
+3102:                 ],
+3103:               ),
+3104:             ),
+3105: 
+3106:             /// Input Fields form card
+3107:             Padding(
+3108:               padding: const EdgeInsets.all(16),
+3109:               child: Column(
+3110:                 crossAxisAlignment: CrossAxisAlignment.start,
+3111:                 children: [
+3112:                   Row(
+3113:                     crossAxisAlignment: CrossAxisAlignment.start,
+3114:                     children: [
+3115:                       Expanded(
+3116:                         child: Column(
+3117:                           crossAxisAlignment: CrossAxisAlignment.start,
+3118:                           children: [
+3119:                             _buildInputLabel("ážˆáŸ’áž˜áŸ„áŸ‡áž€áž˜áŸ’áž˜ážœáž·áž’áž¸ (ážáŸ’áž˜áŸ‚ážš) *"),
+3120:                             TextField(
+3121:                               controller: nameKhCtrl,
+3122:                               decoration: _buildInputDecoration(
+3123:                                 "áž”áž‰áŸ’áž…áž¼áž›ážˆáŸ’áž˜áŸ„áŸ‡áž€áž˜áŸ’áž˜ážœáž·áž’áž¸áž‡áž¶áž—áž¶ážŸáž¶ážáŸ’áž˜áŸ‚ážš",
+3124:                               ),
+3125:                             ),
+3126:                           ],
+3127:                         ),
+3128:                       ),
+3129:                       const SizedBox(width: 16),
+3130:                       Expanded(
+3131:                         child: Column(
+3132:                           crossAxisAlignment: CrossAxisAlignment.start,
+3133:                           children: [
+3134:                             _buildInputLabel("ážˆáŸ’áž˜áŸ„áŸ‡áž€áž˜áŸ’áž˜ážœáž·áž’áž¸ (áž¢áž„áŸ‹áž‚áŸ’áž›áŸážŸ) *"),
+3135:                             TextField(
+3136:                               controller: nameEnCtrl,
+3137:                               decoration: _buildInputDecoration(
+3138:                                 "áž”áž‰áŸ’áž…áž¼áž›ážˆáŸ’áž˜áŸ„áŸ‡áž€áž˜áŸ’áž˜ážœáž·áž’áž¸áž‡áž¶áž—áž¶ážŸáž¶áž¢áž„áŸ‹áž‚áŸ’áž›áŸážŸ",
+3139:                               ),
+3140:                             ),
+3141:                           ],
+3142:                         ),
+3143:                       ),
+3144:                     ],
+3145:                   ),
+3146:                   const SizedBox(height: 16),
+3147: 
+3148:                   _buildInputLabel("URL *"),
+3149:                   TextField(
+3150:                     controller: urlCtrl,
+3151:                     decoration: _buildInputDecoration(
+3152:                       "áž”áž‰áŸ’áž…áž¼áž› URL (áž§. https://example.moi.gov.kh)",
+3153:                     ),
+3154:                   ),
+3155:                   const SizedBox(height: 16),
+3156: 
+3157:                   /// Access Rules
+3158:                   _buildInputLabel("áž…áŸ’áž”áž¶áž”áŸ‹áž…áž¼áž›áž”áŸ’ážšáž¾ *"),
+3159:                   Row(
+3160:                     children: [
+3161:                       Expanded(
+3162:                         child: Column(
+3163:                           crossAxisAlignment: CrossAxisAlignment.start,
+3164:                           children: [
+3165:                             _buildSubInputLabel("áž”áŸ’ážšáž—áŸáž‘áž…áŸ’áž”áž¶áž”áŸ‹"),
+3166:                             TextField(
+3167:                               controller: ruleTypeCtrl,
+3168:                               decoration: _buildInputDecoration(
+3169:                                 "áž¢áž‚áŸ’áž‚áž“áž¶áž™áž€ážŠáŸ’áž‹áž¶áž“",
+3170:                               ),
+3171:                             ),
+3172:                           ],
+3173:                         ),
+3174:                       ),
+3175:                       const SizedBox(width: 16),
+3176:                       Expanded(
+3177:                         child: Column(
+3178:                           crossAxisAlignment: CrossAxisAlignment.start,
+3179:                           children: [
+3180:                             _buildSubInputLabel("ážáž˜áŸ’áž›áŸƒáž…áŸ’áž”áž¶áž”áŸ‹"),
+3181:                             TextField(
+3182:                               controller: ruleValueCtrl,
+3183:                               decoration: _buildInputDecoration("áž§. GDDTM"),
+3184:                             ),
+3185:                           ],
+3186:                         ),
+3187:                       ),
+3188:                     ],
+3189:                   ),
+3190:                   const SizedBox(height: 16),
+3191: 
+3192:                   /// Status Select Radio box style
+3193:                   _buildInputLabel("ážŸáŸ’ážáž¶áž“áž—áž¶áž– *"),
+3194:                   Row(
+3195:                     children: [
+3196:                       Expanded(
+3197:                         child: _buildStatusRadioCard("áž€áŸ†áž–áž»áž„ážŠáŸ†ážŽáž¾ážšáž€áž¶ážš", true),
+3198:                       ),
+3199:                       const SizedBox(width: 16),
+3200:                       Expanded(
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

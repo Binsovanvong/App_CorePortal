@@ -95,12 +95,8 @@ class RequestViewController extends GetxController {
 
   void saveRequest() {
     if (firstName.text.trim().isEmpty && lastName.text.trim().isEmpty) {
-      Get.snackbar(
-        'កំហុស',
-        'សូមបញ្ចូលឈ្មោះខ្មែរ ឬឈ្មោះឡាតាំង',
-        backgroundColor: Colors.red.shade100,
-        colorText: Colors.red.shade900,
-        snackPosition: SnackPosition.BOTTOM,
+      CustomSnackbar.showWarning(
+        message: 'សូមបញ្ចូលឈ្មោះខ្មែរ ឬឈ្មោះឡាតាំង',
       );
       return;
     }
@@ -146,12 +142,8 @@ class RequestViewController extends GetxController {
       listController.users.value++;
     }
 
-    Get.snackbar(
-      'ជោគជ័យ',
-      'ព័ត៌មានត្រូវបានរក្សាទុកដោយជោគជ័យ',
-      backgroundColor: const Color(0xFFDCFCE7),
-      colorText: const Color(0xFF16803D),
-      snackPosition: SnackPosition.BOTTOM,
+    CustomSnackbar.showSuccess(
+      message: 'ព័ត៌មានត្រូវបានរក្សាទុកដោយជោគជ័យ',
     );
 
     // Navigation logic
