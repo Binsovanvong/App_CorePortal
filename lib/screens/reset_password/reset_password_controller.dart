@@ -14,6 +14,9 @@ class ResetPasswordController extends GetxController {
   final isConfirmPasswordVisible = false.obs;
   final isLoading = false.obs;
 
+  final newPassword = ''.obs;
+  final confirmPassword = ''.obs;
+
   String username = '';
   String displayName = '';
 
@@ -25,6 +28,12 @@ class ResetPasswordController extends GetxController {
       username = (args['username'] ?? args['userName'] ?? args['accountName'] ?? '').toString().trim();
       displayName = (args['displayName'] ?? args['name'] ?? username).toString().trim();
     }
+    newPasswordController.addListener(() {
+      newPassword.value = newPasswordController.text;
+    });
+    confirmPasswordController.addListener(() {
+      confirmPassword.value = confirmPasswordController.text;
+    });
   }
 
   void toggleNewPasswordVisibility() {
@@ -35,13 +44,46 @@ class ResetPasswordController extends GetxController {
     isConfirmPasswordVisible.value = !isConfirmPasswordVisible.value;
   }
 
-  bool get hasMinLength => newPasswordController.text.length >= 8;
+  bool get hasMinLength => newPassword.value.length >= 8;
   bool get hasBothCases =>
-      newPasswordController.text.contains(RegExp(r'[a-z]')) &&
-      newPasswordController.text.contains(RegExp(r'[A-Z]'));
-  bool get hasNumber => newPasswordController.text.contains(RegExp(r'[0-9]'));
+      newPassword.value.contains(RegExp(r'[a-z]')) &&
+      newPassword.value.contains(RegExp(r'[A-Z]'));
+  bool get hasNumber => newPassword.value.contains(RegExp(r'[0-9]'));
   bool get hasSpecialChar =>
-      newPasswordController.text.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+      newPassword.value.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+
+  int get passwordStrengthScore {
+    if (newPassword.value.isEmpty) return 1;
+    int score = 0;
+    if (hasMinLength) score++;
+    if (hasBothCases) score++;
+    if (hasNumber) score++;
+    if (hasSpecialChar) score++;
+    return score.clamp(1, 4);
+  }
+
+  String get passwordStrengthLabel {
+    final score = passwordStrengthScore;
+    if (newPassword.value.isEmpty || score == 1) return 'strength_weak'.tr;
+    if (score == 2) return 'strength_medium'.tr;
+    if (score == 3) return 'strength_good'.tr;
+    return 'strength_strong'.tr;
+  }
+
+  Color get passwordStrengthColor {
+    final score = passwordStrengthScore;
+    if (newPassword.value.isEmpty || score == 1) return const Color(0xFF2563EB);
+    if (score == 2) return const Color(0xFFF59E0B);
+    if (score == 3) return const Color(0xFF3B82F6);
+    return const Color(0xFF10B981);
+  }
+
+  void clearForm() {
+    newPasswordController.clear();
+    confirmPasswordController.clear();
+    newPassword.value = '';
+    confirmPassword.value = '';
+  }
 
   Future<void> submitResetPassword() async {
     final newPass = newPasswordController.text.trim();
@@ -49,38 +91,46 @@ class ResetPasswordController extends GetxController {
 
     if (username.isEmpty) {
       CustomSnackbar.showError(
-        message: 'មិនមានឈ្មោះអ្នកប្រើប្រាស់សម្រាប់កំណត់ពាក្យសម្ងាត់ទេ (Username is missing)',
+        title: 'error_title'.tr,
+        message: 'username_missing_err'.tr,
       );
       return;
     }
 
     if (newPass.isEmpty) {
       CustomSnackbar.showWarning(
-        message: 'សូមបញ្ចូលពាក្យសម្ងាត់ថ្មី (Please enter new password)',
+        title: 'warning_title'.tr,
+        message: 'please_enter_new_pwd'.tr,
       );
       return;
     }
 
     if (newPass.length < 8) {
       CustomSnackbar.showWarning(
-        message: 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងហោចណាស់ ៨ តួអក្សរ (Password must be at least 8 characters)',
+        title: 'warning_title'.tr,
+        message: 'pwd_must_be_8_chars'.tr,
       );
       return;
     }
 
     if (confirmPass.isEmpty) {
       CustomSnackbar.showWarning(
-        message: 'សូមបញ្ចូលការបញ្ជាក់ពាក្យសម្ងាត់ (Please confirm password)',
+        title: 'warning_title'.tr,
+        message: 'please_confirm_pwd'.tr,
       );
       return;
     }
 
     if (newPass != confirmPass) {
       CustomSnackbar.showWarning(
-        message: 'ពាក្យសម្ងាត់ទាំងពីរមិនត្រូវគ្នាទេ (Passwords do not match)',
+        title: 'warning_title'.tr,
+        message: 'pwd_not_match'.tr,
       );
       return;
     }
+
+    // Dismiss keyboard before submitting
+    FocusManager.instance.primaryFocus?.unfocus();
 
     isLoading.value = true;
     try {
@@ -90,24 +140,38 @@ class ResetPasswordController extends GetxController {
         confirmPassword: confirmPass,
       );
 
-      CustomSnackbar.showSuccess(
-        message: 'កំណត់ពាក្យសម្ងាត់ថ្មីសម្រាប់ $username បានជោគជ័យ',
-      );
+      final String targetName =
+          displayName.isNotEmpty ? displayName : username;
 
-      // Navigate back
+      // 1. Clear all inputs and state on this screen
+      clearForm();
+
+      // 2. Clear/pop this reset screen back to the previous screen
       Get.back(result: true);
+
+      // 3. Show success snackbar on the caller screen
+      Future.delayed(const Duration(milliseconds: 150), () {
+        CustomSnackbar.showSuccess(
+          title: 'success_title'.tr,
+          message: 'reset_pwd_success'.trParams({'user': targetName}),
+        );
+      });
     } on DioException catch (e) {
-      String errMsg = 'បរាជ័យក្នុងការកំណត់ពាក្យសម្ងាត់ថ្មី';
+      String errMsg = 'reset_pwd_failed'.tr;
       if (e.response?.data is Map) {
         final d = e.response!.data as Map;
-        errMsg = (d['message'] ?? d['error'] ?? d['detail'] ?? errMsg).toString();
+        errMsg = (d['message'] ?? d['error'] ?? d['detail'] ?? d['title'] ?? errMsg).toString();
+      } else if (e.response?.data is String && (e.response!.data as String).isNotEmpty) {
+        errMsg = e.response!.data.toString();
       }
       CustomSnackbar.showError(
+        title: 'failed_title'.tr,
         message: errMsg,
       );
     } catch (e) {
       CustomSnackbar.showError(
-        message: 'មានបញ្ហាបច្ចេកទេស: $e',
+        title: 'failed_title'.tr,
+        message: '${'technical_issue'.tr}: $e',
       );
     } finally {
       isLoading.value = false;

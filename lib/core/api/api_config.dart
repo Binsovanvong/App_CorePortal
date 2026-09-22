@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:get/get.dart';
+import 'package:core_portal/core/api/api_client.dart';
 import 'package:core_portal/routes/page_route.dart';
 
 class ApiConfig {
@@ -106,10 +107,9 @@ class ApiConfig {
 
     dio.interceptors.add(
       InterceptorsWrapper(
-        onRequest: (options, handler) {
-          final box = GetStorage();
+        onRequest: (options, handler) async {
           final String? token =
-              (box.read('token') ?? box.read('access_token'))?.toString().trim();
+              (ApiClient.currentToken ?? await ApiClient.getAccessToken())?.trim();
           final path = options.path.toLowerCase();
           final isAuthEndpoint =
               path.contains('/auth/login') ||

@@ -1,10 +1,12 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:core_portal/core/localization/app_translations.dart';
 import 'package:core_portal/routes/apppage.dart';
 import 'package:core_portal/routes/page_route.dart';
 import 'package:core_portal/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import 'package:get_storage/get_storage.dart';
 
 Future<String> _determineInitialRoute(
@@ -33,18 +35,29 @@ Future<String> _determineInitialRoute(
   return AppRoutes.splash;
 }
 
-class MyHttpOverrides extends HttpOverrides {
+class DevHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)
-      ..badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
+    final client = super.createHttpClient(context);
+    // In debug mode only, permit self-signed certificates on known internal test hosts
+    if (kDebugMode) {
+      client.badCertificateCallback =
+          (X509Certificate cert, String host, int port) {
+        return host == '172.30.192.127' ||
+            host == '10.0.2.2' ||
+            host == '127.0.0.1' ||
+            host == 'localhost';
+      };
+    }
+    return client;
   }
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  HttpOverrides.global = MyHttpOverrides();
+  if (kDebugMode) {
+    HttpOverrides.global = DevHttpOverrides();
+  }
 
   await GetStorage.init();
 

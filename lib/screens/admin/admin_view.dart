@@ -16,6 +16,7 @@ import 'package:core_portal/screens/admin/admin_edit_user_groups_view.dart';
 import 'package:core_portal/core/localization/app_translations.dart';
 import 'package:core_portal/widgets/app_icon.dart';
 import 'package:core_portal/widgets/empty_apps_widget.dart';
+import 'package:core_portal/widgets/logout_dialog.dart';
 import 'package:get_storage/get_storage.dart';
 
 class AdminView extends GetView<AdminController> {
@@ -3065,50 +3066,9 @@ class AdminView extends GetView<AdminController> {
   }
 
   void _confirmLogout(BuildContext context) {
-    showDialog(
-      context: context,
-
-      builder: (context) => AlertDialog(
-        title: Text(
-          'ចាកចេញពីគណនី',
-
-          style: GoogleFonts.kantumruyPro(fontWeight: FontWeight.bold),
-        ),
-
-        content: Text(
-          'តើអ្នកពិតជាចង់ចាកចេញពីគណនី Admin នេះមែនទេ?',
-
-          style: GoogleFonts.kantumruyPro(),
-        ),
-
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-
-            child: Text(
-              'បោះបង់',
-
-              style: GoogleFonts.kantumruyPro(color: Colors.grey),
-            ),
-          ),
-
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF163774),
-
-              foregroundColor: Colors.white,
-            ),
-
-            onPressed: () {
-              Navigator.of(context).pop();
-
-              controller.logout();
-            },
-
-            child: Text('ចាកចេញ', style: GoogleFonts.kantumruyPro()),
-          ),
-        ],
-      ),
+    showLogoutConfirmDialog(
+      context,
+      onConfirm: controller.logout,
     );
   }
 }

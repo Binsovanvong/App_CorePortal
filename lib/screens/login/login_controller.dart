@@ -49,7 +49,7 @@ class LoginController extends GetxController {
     if (_sessionUnlockAttempted) return;
     _sessionUnlockAttempted = true;
     final box = GetStorage();
-    final token = box.read('token')?.toString() ?? '';
+    final token = await ApiClient.getAccessToken() ?? '';
     final username = box.read('username')?.toString() ?? '';
     if (token.isEmpty || username.isEmpty) return;
 
@@ -83,7 +83,7 @@ class LoginController extends GetxController {
 
   Future<void> retryBiometricUnlock() async {
     final box = GetStorage();
-    final token = box.read('token')?.toString() ?? '';
+    final token = await ApiClient.getAccessToken() ?? '';
     final username = box.read('username')?.toString() ?? '';
     if (token.isEmpty || username.isEmpty) return;
     final rawRoles = box.read('roles');
@@ -119,7 +119,7 @@ class LoginController extends GetxController {
     }
 
     final box = GetStorage();
-    final token = box.read('token')?.toString() ?? '';
+    final token = await ApiClient.getAccessToken() ?? '';
     final username = box.read('username')?.toString() ?? '';
 
     if (token.isNotEmpty && username.isNotEmpty) {

@@ -28,6 +28,7 @@ import 'package:core_portal/screens/splash/splash_binding.dart';
 import 'package:core_portal/screens/splash/splash_view.dart';
 import 'package:core_portal/screens/reset_password/reset_password_view.dart';
 import 'package:core_portal/screens/reset_password/reset_password_binding.dart';
+import 'package:core_portal/routes/auth_middleware.dart';
 import '../screens/setting/setting_view.dart';
 
 class AppPages {
@@ -46,6 +47,7 @@ class AppPages {
       name: AppRoutes.home,
       page: () => HomeView(),
       binding: HomeBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: AppRoutes.announcement,
@@ -56,36 +58,43 @@ class AppPages {
       name: AppRoutes.setting,
       page: () => SettingView(),
       binding: SettingViewBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: AppRoutes.notification,
       page: () => NotificationView(),
       binding: NotificationBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: AppRoutes.mainPage,
       page: () => MainpageView(),
       binding: MainpageBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: AppRoutes.mainView,
       page: () => MainView(),
       binding: MainViewBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: AppRoutes.homepage,
       page: () => HomePageView(),
       binding: HomePageBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: AppRoutes.request,
       page: () => const RequestView(),
       binding: RequestViewBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: AppRoutes.requestList,
       page: () => const RequestListView(),
       binding: ListViewBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(name: AppRoutes.webView, page: () => const WebViewScreen()),
     GetPage(
@@ -97,16 +106,19 @@ class AppPages {
       name: AppRoutes.superAdmin,
       page: () => const SuperAdminView(),
       binding: SuperAdminBinding(),
+      middlewares: [AdminMiddleware()],
     ),
     GetPage(
       name: AppRoutes.admin,
       page: () => const AdminView(),
       binding: AdminBinding(),
+      middlewares: [AdminMiddleware()],
     ),
     GetPage(
       name: AppRoutes.application,
       page: () => const ApplicationView(),
       binding: ApplicationViewBinding(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: AppRoutes.resetPassword,

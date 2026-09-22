@@ -29,6 +29,7 @@ dependencies:
   flutter_secure_storage: ^9.2.4
   crypto: ^3.0.3
   pointycastle: ^3.9.1
+  flutter_jailbreak_detection: ^1.10.0
 
 dev_dependencies:
   flutter_test:

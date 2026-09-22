@@ -113,9 +113,9 @@ class LoginView extends GetView<LoginController> {
                           ),
                           const SizedBox(height: 14),
 
-                          // Ministry Title (Royal Gold, bold)
+                          // Ministry Title (Royal Gold Khmer)
                           Text(
-                            'ministry_title'.tr,
+                            'ក្រសួងមហាផ្ទៃ',
                             textAlign: TextAlign.center,
                             style: GoogleFonts.kantumruyPro(
                               fontSize: 27,
@@ -124,7 +124,20 @@ class LoginView extends GetView<LoginController> {
                               letterSpacing: 0.2,
                             ),
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 4),
+
+                          // Ministry Subtitle (English - Royal Gold / Champagne)
+                          Text(
+                            'MINISTRY OF INTERIOR',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.poppins(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFFDFBC66),
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
                         ],
                       ),
                     ),
@@ -787,13 +800,27 @@ class LoginView extends GetView<LoginController> {
                         ),
                       ),
                       const SizedBox(height: 12),
+                      // Ministry Title (Royal Gold Khmer)
                       Text(
-                        'ministry_title'.tr,
+                        'ក្រសួងមហាផ្ទៃ',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.kantumruyPro(
                           fontSize: 24,
                           fontWeight: FontWeight.w800,
                           color: const Color(0xFFD4AF37),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+
+                      // Ministry Subtitle (English - Royal Gold / Champagne)
+                      Text(
+                        'MINISTRY OF INTERIOR',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFFDFBC66),
+                          letterSpacing: 1.1,
                         ),
                       ),
                     ],
@@ -1211,7 +1238,6 @@ class _FaceIdPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-
 
 // ─── Subtle Bottom Card Wave Painter ────────────────────────────────────────
 

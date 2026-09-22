@@ -47,10 +47,9 @@ class ApiClient {
   static String? currentToken;
   static String? currentCpSession;
 
-  /// Retrieves the current access token with multi-source fallback:
-  /// 1. In-memory currentToken
-  /// 2. GetStorage ('access_token', then 'token') - fast synchronous
-  /// 3. FlutterSecureStorage ('access_token', then 'token') - hardware Keystore fallback
+  /// Retrieves the current access token:
+  /// 1. In-memory currentToken (fast synchronous cache)
+  /// 2. FlutterSecureStorage ('access_token', then 'token') - hardware Keystore/Keychain
   static Future<String?> getAccessToken() async {
     String? token = currentToken;
     if (token != null && token.isNotEmpty && token != 'null') {
@@ -58,20 +57,25 @@ class ApiClient {
     }
 
     try {
-      final box = GetStorage();
-      token =
-          box.read('access_token')?.toString() ??
-          box.read('token')?.toString();
-    } catch (_) {}
-
-    if (token == null || token.isEmpty || token == 'null') {
-      try {
-        token = await storage.read(key: 'access_token');
-        token ??= await storage.read(key: 'token');
-      } catch (e) {
-        debugPrint("FlutterSecureStorage read warning: $e");
-      }
+      token = await storage.read(key: 'access_token');
+      token ??= await storage.read(key: 'token');
+    } catch (e) {
+      debugPrint("FlutterSecureStorage read warning: $e");
     }
+
+    // Clean up any legacy plaintext tokens from GetStorage to prevent data leakage
+    try {
+      final box = GetStorage();
+      if (box.hasData('access_token') ||
+          box.hasData('token') ||
+          box.hasData('refresh_token') ||
+          box.hasData('CP_SESSION')) {
+        box.remove('access_token');
+        box.remove('token');
+        box.remove('refresh_token');
+        box.remove('CP_SESSION');
+      }
+    } catch (_) {}
 
     if (token != null) {
       token = token.trim();
@@ -82,20 +86,13 @@ class ApiClient {
         token = null;
       } else {
         currentToken = token;
-        try {
-          final box = GetStorage();
-          if (box.read('access_token') != token) {
-            box.write('access_token', token);
-            box.write('token', token);
-          }
-        } catch (_) {}
       }
     }
     return token;
   }
 
-  /// Synchronously and asynchronously persists tokens in both stores
-  /// to ensure immediate readiness before any downstream page request starts.
+  /// Persists authentication secrets strictly inside FlutterSecureStorage (hardware-backed).
+  /// Only non-sensitive metadata (username, login state) is saved in GetStorage.
   static Future<void> saveToken(
     String token, {
     String? refreshToken,
@@ -108,24 +105,23 @@ class ApiClient {
     currentToken = cleanToken;
     currentCpSession = cpSession;
 
-    // 1. Write to GetStorage immediately
+    // 1. Write non-sensitive metadata only to GetStorage
     try {
       final box = GetStorage();
-      await box.write('access_token', cleanToken);
-      await box.write('token', cleanToken);
+      // Ensure plaintext tokens do not linger in unencrypted storage
+      box.remove('access_token');
+      box.remove('token');
+      box.remove('refresh_token');
+      box.remove('CP_SESSION');
+
       final extractedUser = extractUsernameFromToken(cleanToken);
       if (extractedUser != null && extractedUser.isNotEmpty) {
         await box.write('username', extractedUser);
       }
-      if (refreshToken != null && refreshToken.isNotEmpty) {
-        await box.write('refresh_token', refreshToken);
-      }
-      if (cpSession != null && cpSession.isNotEmpty) {
-        await box.write('CP_SESSION', cpSession);
-      }
+      await box.write('is_logged_in', true);
     } catch (_) {}
 
-    // 2. Await SecureStorage write
+    // 2. Persist tokens strictly in hardware-backed FlutterSecureStorage
     try {
       await storage.write(key: 'access_token', value: cleanToken);
       await storage.write(key: 'token', value: cleanToken);
@@ -140,7 +136,7 @@ class ApiClient {
     }
   }
 
-  /// For Flutter JWT flow: immediately logging out clears locally stored tokens
+  /// Clears stored tokens and sessions across secure storage and cache
   static Future<void> logout() async {
     currentToken = null;
     currentCpSession = null;
@@ -157,6 +153,7 @@ class ApiClient {
       await box.remove('token');
       await box.remove('refresh_token');
       await box.remove('CP_SESSION');
+      await box.remove('is_logged_in');
       await box.remove('isAdmin');
       await box.remove('userProfile');
       await box.remove('roles');
@@ -270,7 +267,7 @@ class ApiClient {
 
               // 6. On mobile/desktop, attach CP_SESSION cookie if available
               if (!kIsWeb) {
-                String? sessionCookie = currentCpSession ?? GetStorage().read('CP_SESSION')?.toString();
+                String? sessionCookie = currentCpSession;
                 if (sessionCookie == null || sessionCookie.isEmpty) {
                   try {
                     sessionCookie = await storage.read(key: 'CP_SESSION');
