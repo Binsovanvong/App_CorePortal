@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:core_portal/screens/announcement/announcement_controller.dart';
 import 'package:core_portal/widgets/custom_snackbar.dart';
+import 'package:core_portal/widgets/announcement_detail_dialog.dart';
 
 class AnnouncementView extends GetView<AnnouncementController> {
   const AnnouncementView({super.key});
@@ -128,7 +129,7 @@ class AnnouncementView extends GetView<AnnouncementController> {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  'តាមដានសេចក្តីជូនដំណឹង និងព័ត៌មានសំខាន់ៗ',
+                  'announcement_subtitle'.tr,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.kantumruyPro(
@@ -791,6 +792,7 @@ class AnnouncementView extends GetView<AnnouncementController> {
                     },
                   ),
                   _buildPaginationControls(),
+                  const SizedBox(height: 80),
                 ],
               );
             }),
@@ -1697,133 +1699,7 @@ class AnnouncementView extends GetView<AnnouncementController> {
     BuildContext context,
     Map<String, dynamic> announcement,
   ) {
-    final String time =
-        announcement['createdAt']?.toString() ??
-        announcement['time']?.toString() ??
-        '';
-    final String title =
-        announcement['title']?.toString() ??
-        announcement['titleEn']?.toString() ??
-        'គ្មានចំណងជើង';
-    final String content =
-        announcement['content']?.toString() ?? announcement['body'] ?? '';
-    final String cleanContent = content
-        .replaceAll(RegExp(r'<[^>]*>|&nbsp;'), ' ')
-        .trim();
-
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-        backgroundColor: Colors.white,
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xffA88400).withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      'announcement'.tr,
-                      style: GoogleFonts.kantumruyPro(
-                        color: const Color(0xffA88400),
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close_rounded, color: Colors.grey),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              if (time.isNotEmpty)
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.access_time_rounded,
-                      size: 14,
-                      color: Colors.grey,
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        _formatKhmerDate(time),
-                        style: GoogleFonts.kantumruyPro(
-                          color: Colors.grey,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              const SizedBox(height: 12),
-              Text(
-                title,
-                style: GoogleFonts.kantumruyPro(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xff1E293B),
-                ),
-              ),
-              const Divider(
-                height: 24,
-                color: Color(0xffF1F5F9),
-                thickness: 1.5,
-              ),
-              Flexible(
-                child: SingleChildScrollView(
-                  child: Text(
-                    cleanContent,
-                    style: GoogleFonts.kantumruyPro(
-                      fontSize: 15,
-                      color: const Color(0xff475569),
-                      height: 1.6,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xffA88400),
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: Text(
-                    'close'.tr,
-                    style: GoogleFonts.kantumruyPro(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+    showAnnouncementDetailDialog(context, announcement);
   }
 
   Widget _buildFeaturedCard(
@@ -2225,106 +2101,213 @@ class AnnouncementView extends GetView<AnnouncementController> {
       final total = controller.totalPages;
       final current = controller.currentPage.value;
 
-      String toKhmer(int number) {
-        const khmerDigits = ['០', '១', '២', '៣', '៤', '៥', '៦', '៧', '៨', '៩'];
-        return number
-            .toString()
-            .split('')
-            .map((char) {
-              final val = int.tryParse(char);
-              return val != null ? khmerDigits[val] : char;
-            })
-            .join('');
+      // Determine dot indicator parameters (up to 5 dots with sliding window)
+      final int dotCount = total < 5 ? total : 5;
+      int startPage = 1;
+      if (total > 5) {
+        if (current <= 3) {
+          startPage = 1;
+        } else if (current >= total - 2) {
+          startPage = total - 4;
+        } else {
+          startPage = current - 2;
+        }
       }
 
+      final bool canPrev = current > 1;
+      final bool canNext = current < total;
+
       return Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border(
-            top: BorderSide(
-              color: const Color(0xffD4AF37).withOpacity(0.15),
-              width: 1,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF1E293B).withOpacity(0.06),
+              blurRadius: 18,
+              offset: const Offset(0, 4),
             ),
-          ),
+            BoxShadow(
+              color: const Color(0xFF1E293B).withOpacity(0.02),
+              blurRadius: 4,
+              offset: const Offset(0, 1),
+            ),
+          ],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            ElevatedButton(
-              onPressed: current > 1
-                  ? () => controller.currentPage.value--
-                  : null,
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(0, 0),
-                backgroundColor: const Color(0xFF163774),
-                foregroundColor: Colors.white,
-                disabledBackgroundColor: Colors.grey.shade200,
-                disabledForegroundColor: Colors.grey.shade400,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.arrow_back_ios_new_rounded, size: 12),
-                  const SizedBox(width: 6),
-                  Text(
-                    'prev_page'.tr,
-                    style: GoogleFonts.kantumruyPro(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
+            // Previous Button ("មុន")
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: canPrev
+                    ? () {
+                        controller.currentPage.value--;
+                      }
+                    : null,
+                borderRadius: BorderRadius.circular(16),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
                   ),
-                ],
+                  decoration: BoxDecoration(
+                    color: canPrev
+                        ? const Color(0xFFEEF3FA)
+                        : const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.chevron_left_rounded,
+                        size: 20,
+                        color: canPrev
+                            ? const Color(0xFF475569)
+                            : const Color(0xFFCBD5E1),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'prev_page'.tr,
+                        style: GoogleFonts.kantumruyPro(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: canPrev
+                              ? const Color(0xFF334155)
+                              : const Color(0xFFCBD5E1),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-            Text(
-              "ទំព័រ ${toKhmer(current)} នៃ ${toKhmer(total)}",
-              style: GoogleFonts.kantumruyPro(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xff1E293B),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: current < total
-                  ? () => controller.currentPage.value++
-                  : null,
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(0, 0),
-                backgroundColor: const Color(0xFF163774),
-                foregroundColor: Colors.white,
-                disabledBackgroundColor: Colors.grey.shade200,
-                disabledForegroundColor: Colors.grey.shade400,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'next_page'.tr,
-                    style: GoogleFonts.kantumruyPro(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
+
+            // Center Page Info & Dots
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: '${'page_of'.tr} ',
+                        style: GoogleFonts.kantumruyPro(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF475569),
+                        ),
+                      ),
+                      TextSpan(
+                        text: '$current',
+                        style: GoogleFonts.kantumruyPro(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF0851D7),
+                        ),
+                      ),
+                      TextSpan(
+                        text: ' ${'of'.tr} $total',
+                        style: GoogleFonts.kantumruyPro(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF475569),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 6),
-                  const Icon(Icons.arrow_forward_ios_rounded, size: 12),
-                ],
+                ),
+                const SizedBox(height: 8),
+                // Dots Indicator
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(dotCount, (index) {
+                    final pageNum = startPage + index;
+                    final bool isActive = pageNum == current;
+                    return GestureDetector(
+                      onTap: () {
+                        controller.currentPage.value = pageNum;
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        margin: const EdgeInsets.symmetric(horizontal: 3.5),
+                        width: isActive ? 7.5 : 6,
+                        height: isActive ? 7.5 : 6,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isActive
+                              ? const Color(0xFF3885FE)
+                              : const Color(0xFFDCE6F5),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ],
+            ),
+
+            // Next Button ("បន្ទាប់")
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: canNext
+                    ? () {
+                        controller.currentPage.value++;
+                      }
+                    : null,
+                borderRadius: BorderRadius.circular(16),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: canNext
+                        ? const Color(0xFF3885FE)
+                        : const Color(0xFFE2E8F0),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: canNext
+                        ? [
+                            BoxShadow(
+                              color: const Color(0xFF3885FE).withOpacity(0.35),
+                              blurRadius: 10,
+                              offset: const Offset(0, 3),
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'next_page'.tr,
+                        style: GoogleFonts.kantumruyPro(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: canNext
+                              ? Colors.white
+                              : const Color(0xFF94A3B8),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        size: 20,
+                        color: canNext
+                            ? Colors.white
+                            : const Color(0xFF94A3B8),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ],

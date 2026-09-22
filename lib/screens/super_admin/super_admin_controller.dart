@@ -1160,11 +1160,7 @@ class SuperAdminController extends GetxController {
       debugPrint("Fallback fetchPortalApps failed in SuperAdmin: $e");
     }
 
-    try {
-      return await _authService.fetchApps();
-    } catch (_) {
-      return null;
-    }
+    return null;
   }
 
   Future<dynamic> _fetchUsersWithFallback() async {
@@ -1210,6 +1206,14 @@ class SuperAdminController extends GetxController {
               [];
         }
       }
+      final token = await ApiClient.getAccessToken();
+      if (token != null && token.isNotEmpty) {
+        try {
+          final box = GetStorage();
+          await box.write('access_token', token);
+          await box.write('token', token);
+        } catch (_) {}
+      }
       if (rawApps.isNotEmpty) {
         final parsedApps = rawApps.map<Map<String, dynamic>>((app) {
           final String appId = app['id']?.toString() ?? '';
@@ -1231,8 +1235,7 @@ class SuperAdminController extends GetxController {
               '/';
           final bool isActive =
               app['enabled'] ?? app['active'] ?? app['is_active'] ?? true;
-          final String icon =
-              app['iconUrl'] ?? app['icon'] ?? app['logo'] ?? '';
+          final String icon = AppIconWidget.extractRawIcon(app);
           final String code = app['code'] ?? '';
           final List accessRules =
               app['accessRules'] ?? app['access_rules'] ?? app['rules'] ?? [];
@@ -1283,7 +1286,7 @@ class SuperAdminController extends GetxController {
                 iconPath = 'assets/$iconPath';
               }
             } else {
-              iconUrl = AppIconWidget.formatIconUrl(icon);
+              iconUrl = AppIconWidget.formatIconUrl(icon, token);
             }
           }
 

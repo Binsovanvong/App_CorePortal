@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:core_portal/core/api/api_config.dart';
+import 'package:core_portal/core/api/api_client.dart';
 
 class AppIconWidget extends StatelessWidget {
   final String iconUrl;
@@ -28,46 +29,224 @@ class AppIconWidget extends StatelessWidget {
   /// Safely extracts the raw icon candidate from an app Map or dynamic object.
   static String extractRawIcon(dynamic data) {
     if (data == null) return '';
-    if (data is String) return data.trim();
+    if (data is String) {
+      final s = data.trim();
+      if (s.isNotEmpty &&
+          s.toLowerCase() != 'null' &&
+          s.toLowerCase() != 'undefined' &&
+          s != 'assets/img/about-moi-logo.png' &&
+          s != '/assets/img/about-moi-logo.png') {
+        return s;
+      }
+      return '';
+    }
     if (data is! Map) return '';
 
-    final candidate = data['iconUrl'] ??
-        data['icon_url'] ??
-        data['iconURL'] ??
-        data['icon'] ??
-        data['iconPath'] ??
-        data['icon_path'] ??
-        data['appIcon'] ??
-        data['app_icon'] ??
-        data['imageUrl'] ??
-        data['image_url'] ??
-        data['image'] ??
-        data['tileIcon'] ??
-        data['tile_icon'] ??
-        data['logo'] ??
-        data['logoUrl'] ??
-        data['logo_url'] ??
-        data['avatar'] ??
-        data['file'] ??
-        data['filePath'] ??
-        data['filepath'];
+    const candidateKeys = [
+      'iconUrl',
+      'icon_url',
+      'iconURL',
+      'icon',
+      'icons',
+      'iconPath',
+      'icon_path',
+      'appIcon',
+      'app_icon',
+      'portalAppIcon',
+      'portal_app_icon',
+      'portalAppIcons',
+      'portal_app_icons',
+      'imageUrl',
+      'image_url',
+      'image',
+      'images',
+      'tileIcon',
+      'tile_icon',
+      'logo',
+      'logos',
+      'logoUrl',
+      'logo_url',
+      'appLogo',
+      'app_logo',
+      'avatar',
+      'avatarUrl',
+      'avatar_url',
+      'thumbnail',
+      'thumbnailUrl',
+      'thumbnail_url',
+      'picture',
+      'pictureUrl',
+      'picture_url',
+      'badge',
+      'badgeUrl',
+      'badge_url',
+      'file',
+      'files',
+      'filePath',
+      'filepath',
+      'fileUrl',
+      'file_url',
+      'media',
+      'mediaUrl',
+      'media_url',
+      'downloadUrl',
+      'download_url',
+      'attachment',
+      'attachments',
+      'link',
+      'src',
+      'url',
+      'path',
+    ];
 
-    if (candidate == null) return '';
-    if (candidate is String) return candidate.trim();
-    if (candidate is Map) {
-      final inner = candidate['url'] ??
-          candidate['path'] ??
-          candidate['filePath'] ??
-          candidate['filepath'] ??
-          candidate['file'] ??
-          candidate['iconUrl'] ??
-          candidate['name'];
-      return inner?.toString().trim() ?? '';
+    for (final key in candidateKeys) {
+      final val = data[key];
+      if (val == null) continue;
+      if (val is String) {
+        final s = val.trim();
+        if (s.isNotEmpty &&
+            s.toLowerCase() != 'null' &&
+            s.toLowerCase() != 'undefined' &&
+            s != 'assets/img/about-moi-logo.png' &&
+            s != '/assets/img/about-moi-logo.png') {
+          return s;
+        }
+      } else if (val is Map) {
+        final innerRes = extractRawIcon(val);
+        if (innerRes.isNotEmpty) return innerRes;
+      } else if (val is List && val.isNotEmpty) {
+        for (final item in val) {
+          final res = extractRawIcon(item);
+          if (res.isNotEmpty) return res;
+        }
+      }
     }
-    return candidate.toString().trim();
+
+    // Check nested objects
+    for (final subKey in [
+      'app',
+      'portalApp',
+      'portal_app',
+      'tile',
+      'target',
+      'application',
+      'service',
+      'item',
+      'raw',
+      'data',
+      'attributes',
+      'properties',
+      'metadata',
+    ]) {
+      final sub = data[subKey];
+      if (sub is Map) {
+        final res = extractRawIcon(sub);
+        if (res.isNotEmpty) return res;
+      }
+    }
+
+    return '';
+  }
+
+  /// Extracts the canonical relative asset path (e.g. "portal-app-icons/xxx.png")
+  static String extractRelativePath(dynamic raw) {
+    if (raw == null) return '';
+    if (raw is Map) {
+      final inner = raw['url'] ??
+          raw['path'] ??
+          raw['filePath'] ??
+          raw['filepath'] ??
+          raw['iconUrl'] ??
+          raw['icon_url'] ??
+          raw['fileUrl'] ??
+          raw['downloadUrl'] ??
+          raw['file'] ??
+          raw['name'];
+      raw = inner?.toString().trim() ?? '';
+    }
+
+    String url = raw.toString().trim().replaceAll('\\', '/');
+    if (url.contains('?token=')) {
+      url = url.split('?token=').first;
+    }
+    if (url.isEmpty ||
+        url.toLowerCase() == 'null' ||
+        url.toLowerCase() == 'undefined' ||
+        url == 'assets/img/about-moi-logo.png' ||
+        url == '/assets/img/about-moi-logo.png') {
+      return '';
+    }
+
+    // Ignore local assets
+    final lower = url.toLowerCase();
+    if (lower.startsWith('assets/') ||
+        lower.startsWith('/assets/') ||
+        lower.startsWith('images/') ||
+        lower.startsWith('/images/')) {
+      return '';
+    }
+
+    // If it is a completely external domain that has nothing to do with our uploads, return empty
+    final bool isInternal = url.contains('core-gateway') ||
+        url.contains('127.0.0.1:8080') ||
+        url.contains('localhost:8080') ||
+        url.contains('172.30.192.253') ||
+        url.contains('172.30.192.127') ||
+        url.contains('172.30.1.128') ||
+        url.contains('/uploads/') ||
+        url.contains('uploads/') ||
+        url.contains('portal-app-icons') ||
+        url.contains('/api/mobile/portals/uploads/');
+
+    if (!isInternal && (url.startsWith('http://') || url.startsWith('https://'))) {
+      return '';
+    }
+
+    String relative = url;
+    if (relative.contains('portal-app-icons/')) {
+      relative = 'portal-app-icons/${relative.split('portal-app-icons/').last}';
+    } else if (relative.contains('/api/mobile/portals/uploads/')) {
+      relative = relative.split('/api/mobile/portals/uploads/').last;
+    } else if (relative.contains('/uploads/')) {
+      relative = relative.split('/uploads/').last;
+    } else if (relative.startsWith('uploads/')) {
+      relative = relative.substring('uploads/'.length);
+    } else if (isInternal) {
+      final uri = Uri.tryParse(relative);
+      if (uri != null && uri.path.isNotEmpty) {
+        relative = uri.path;
+      }
+    }
+
+    while (relative.startsWith('api/v1/uploads/')) {
+      relative = relative.substring('api/v1/uploads/'.length);
+    }
+    while (relative.startsWith('api/v1/')) {
+      relative = relative.substring('api/v1/'.length);
+    }
+    while (relative.startsWith('uploads/')) {
+      relative = relative.substring('uploads/'.length);
+    }
+    while (relative.startsWith('/')) {
+      relative = relative.substring(1);
+    }
+
+    if (!relative.contains('/') &&
+        (relative.endsWith('.png') ||
+            relative.endsWith('.jpg') ||
+            relative.endsWith('.jpeg') ||
+            relative.endsWith('.svg') ||
+            relative.endsWith('.webp'))) {
+      relative = 'portal-app-icons/$relative';
+    }
+
+    return relative;
   }
 
   /// Formats and resolves any icon URL (relative backend upload, external URL, or local asset).
+  ///
+  /// Automatically appends the user's active access token query parameter (`?token=...`)
+  /// so that image loaders and network widgets pass authentication through the BFF gateway.
   static String formatIconUrl(dynamic raw, [String? explicitToken]) {
     if (raw == null) return '';
     if (raw is Map) {
@@ -76,6 +255,9 @@ class AppIconWidget extends StatelessWidget {
           raw['filePath'] ??
           raw['filepath'] ??
           raw['iconUrl'] ??
+          raw['icon_url'] ??
+          raw['fileUrl'] ??
+          raw['downloadUrl'] ??
           raw['file'] ??
           raw['name'];
       raw = inner?.toString().trim() ?? '';
@@ -101,80 +283,46 @@ class AppIconWidget extends StatelessWidget {
       }
     }
 
-    if (url == 'assets/img/about-moi-logo.png' ||
-        url == '/assets/img/about-moi-logo.png') {
-      return '';
-    }
-
     // 1. Local asset strings
     final lower = url.toLowerCase();
     if (lower.startsWith('assets/') ||
-        lower.startsWith('asset/') ||
         lower.startsWith('/assets/') ||
-        lower.startsWith('/asset/') ||
         lower.startsWith('images/') ||
         lower.startsWith('/images/')) {
       return url;
     }
 
-    // 2. Check if this is an internal gateway or uploaded static icon from backend
-    final bool isInternalGateway = url.contains('core-gateway') ||
-        url.contains('127.0.0.1:8080') ||
-        url.contains('localhost:8080');
-
-    final bool isUpload = isInternalGateway ||
-        url.contains('/uploads/') ||
-        url.contains('uploads/') ||
-        url.contains('portal-app-icons') ||
-        url.contains('/api/mobile/portals/uploads/');
-
-    // If it is a purely external URL (not our upload server/gateway), return as-is
-    if (!isUpload && (url.startsWith('http://') || url.startsWith('https://'))) {
+    // 2. Extract relative upload path
+    final relativePath = extractRelativePath(url);
+    if (relativePath.isEmpty) {
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        return url;
+      }
       return url;
     }
 
-    // 3. Resolve backend upload path
-    // Examples:
-    // - "portal-app-icons/anpr-xxx.png"
-    // - "/uploads/portal-app-icons/anpr-xxx.png"
-    // - "http://core-gateway:8080/uploads/portal-app-icons/anpr-xxx.png"
-    String relativePath = url;
-
-    if (relativePath.contains('portal-app-icons/')) {
-      relativePath = 'portal-app-icons/${relativePath.split('portal-app-icons/').last}';
-    } else if (relativePath.contains('/api/mobile/portals/uploads/')) {
-      relativePath = relativePath.split('/api/mobile/portals/uploads/').last;
-    } else if (relativePath.contains('/uploads/')) {
-      relativePath = relativePath.split('/uploads/').last;
-    } else if (relativePath.startsWith('uploads/')) {
-      relativePath = relativePath.substring('uploads/'.length);
-    } else if (isInternalGateway) {
-      final uri = Uri.tryParse(relativePath);
-      if (uri != null && uri.path.isNotEmpty) {
-        relativePath = uri.path;
+    // Resolve authentication token
+    String? tokenToUse;
+    if (explicitToken != null && explicitToken.trim().isNotEmpty) {
+      tokenToUse = explicitToken.trim();
+    }
+    if (tokenToUse == null || tokenToUse.isEmpty) {
+      if (ApiClient.currentToken != null && ApiClient.currentToken!.isNotEmpty) {
+        tokenToUse = ApiClient.currentToken;
       }
     }
-
-    if (relativePath.startsWith('api/v1/uploads/')) {
-      relativePath = relativePath.substring('api/v1/uploads/'.length);
-    } else if (relativePath.startsWith('api/v1/')) {
-      relativePath = relativePath.substring('api/v1/'.length);
+    if (tokenToUse == null || tokenToUse.isEmpty) {
+      try {
+        final box = GetStorage();
+        final stored = (box.read('access_token') ?? box.read('token'))?.toString().trim();
+        if (stored != null && stored.isNotEmpty) {
+          tokenToUse = stored;
+        }
+      } catch (_) {}
     }
-
-    while (relativePath.startsWith('/')) {
-      relativePath = relativePath.substring(1);
-    }
-
-    // Resolve authentication token
-    String? tokenToUse = explicitToken?.trim();
     if (tokenToUse == null || tokenToUse.isEmpty) {
       if (existingToken.isNotEmpty) {
         tokenToUse = existingToken;
-      } else {
-        try {
-          final box = GetStorage();
-          tokenToUse = (box.read('access_token') ?? box.read('token'))?.toString().trim();
-        } catch (_) {}
       }
     }
     if (tokenToUse != null && tokenToUse.toLowerCase().startsWith('bearer ')) {
@@ -182,7 +330,8 @@ class AppIconWidget extends StatelessWidget {
     }
     if (tokenToUse == 'null' ||
         tokenToUse == 'undefined' ||
-        tokenToUse == 'mock_dev_token') {
+        tokenToUse == 'mock_dev_token' ||
+        tokenToUse == 'mock_admin_token') {
       tokenToUse = null;
     }
 
@@ -205,15 +354,24 @@ class AppIconWidget extends StatelessWidget {
       }
 
       final cleanLocal = localAsset.trim();
+      final cleanLower = cleanLocal.toLowerCase();
+      final bool isActualLocal = cleanLower.startsWith('assets/') ||
+          cleanLower.startsWith('/assets/') ||
+          cleanLower.startsWith('images/') ||
+          cleanLower.startsWith('/images/');
+
       // If a specific, valid local asset is specified (other than the default MOI seal and not a web URL)
-      if (cleanLocal.isNotEmpty &&
-          !cleanLocal.startsWith('http://') &&
-          !cleanLocal.startsWith('https://') &&
+      if (isActualLocal &&
           cleanLocal != 'assets/img/about-moi-logo.png' &&
           cleanLocal != '/assets/img/about-moi-logo.png') {
-        if (cleanLocal.toLowerCase().endsWith('.svg')) {
+        String resolvedLocal = cleanLocal.startsWith('/') ? cleanLocal.substring(1) : cleanLocal;
+        if (!resolvedLocal.startsWith('assets/')) {
+          resolvedLocal = 'assets/$resolvedLocal';
+        }
+
+        if (resolvedLocal.toLowerCase().endsWith('.svg')) {
           return SvgPicture.asset(
-            cleanLocal,
+            resolvedLocal,
             width: size,
             height: size,
             fit: fit,
@@ -221,7 +379,7 @@ class AppIconWidget extends StatelessWidget {
         }
 
         return Image.asset(
-          cleanLocal,
+          resolvedLocal,
           width: size,
           height: size,
           fit: fit,
@@ -250,7 +408,10 @@ class AppIconWidget extends StatelessWidget {
     // Fall back to stored session token if not explicitly passed
     final rawToken = (token != null && token!.trim().isNotEmpty)
         ? token!.trim()
-        : (GetStorage().read('token') ?? GetStorage().read('access_token'))?.toString();
+        : (ApiClient.currentToken ??
+            GetStorage().read('access_token') ??
+            GetStorage().read('token'))
+            ?.toString();
 
     String? cleanToken = rawToken?.trim();
     if (cleanToken != null && cleanToken.toLowerCase().startsWith('bearer ')) {
@@ -259,7 +420,8 @@ class AppIconWidget extends StatelessWidget {
     if (cleanToken == 'null' ||
         cleanToken == 'undefined' ||
         cleanToken?.isEmpty == true ||
-        cleanToken == 'mock_dev_token') {
+        cleanToken == 'mock_dev_token' ||
+        cleanToken == 'mock_admin_token') {
       cleanToken = null;
     }
 
@@ -267,14 +429,22 @@ class AppIconWidget extends StatelessWidget {
 
     final bool isOwnServer = cleanUrl.contains(ApiConfig.bffHost) ||
         cleanUrl.startsWith(ApiConfig.baseUrl) ||
-        cleanUrl.contains('interior.gov.kh');
+        cleanUrl.contains('interior.gov.kh') ||
+        cleanUrl.contains('172.30.192.253') ||
+        cleanUrl.contains('172.30.192.127') ||
+        cleanUrl.contains('172.30.1.128');
 
-    final Map<String, String>? authHeaders = (isOwnServer && (cleanToken != null || cpSession != null))
-        ? {
-            if (cleanToken != null) 'Authorization': 'Bearer $cleanToken',
-            'Cookie': 'CP_SESSION=${cpSession ?? cleanToken}',
-          }
-        : null;
+    // On Web, do not send custom auth headers because custom headers trigger an OPTIONS
+    // CORS preflight that the backend rejects with 405 Method Not Allowed.
+    // The ?token= query parameter is already attached to cleanUrl for authentication.
+    final Map<String, String>? authHeaders = (kIsWeb || !isOwnServer || cleanToken == null)
+        ? null
+        : {
+            'Authorization': 'Bearer $cleanToken',
+            if (cpSession != null && cpSession.isNotEmpty) 'Cookie': 'CP_SESSION=$cpSession',
+          };
+
+    final String relPath = extractRelativePath(iconUrl);
 
     // 1. Local Asset String
     final cleanLower = cleanUrl.toLowerCase();
@@ -327,12 +497,15 @@ class AppIconWidget extends StatelessWidget {
       if (kIsWeb) {
         return Image.network(
           cleanUrl,
-          headers: authHeaders,
+          headers: null,
           width: size,
           height: size,
           fit: fit,
           filterQuality: FilterQuality.high,
-          errorBuilder: (ctx, err, stack) => fallbackWidget(),
+          errorBuilder: (ctx, err, stack) {
+            debugPrint("AppIconWidget web failed to load raster image ($cleanUrl): $err");
+            return fallbackWidget();
+          },
           loadingBuilder: (ctx, child, progress) {
             if (progress == null) return child;
             return fallbackWidget();
@@ -340,18 +513,56 @@ class AppIconWidget extends StatelessWidget {
         );
       }
 
+      final bool shouldUseDirectGateway = !kIsWeb &&
+          ApiConfig.useUat &&
+          cleanToken != null &&
+          relPath.isNotEmpty &&
+          !cleanUrl.contains('172.30.192.253');
+
+      final String primaryImageUrl = shouldUseDirectGateway
+          ? 'http://172.30.192.253:8080/api/v1/uploads/$relPath'
+          : cleanUrl;
+
+      final Map<String, String>? primaryHeaders = shouldUseDirectGateway
+          ? {
+              'Authorization': 'Bearer $cleanToken',
+              if (cpSession != null && cpSession.isNotEmpty) 'Cookie': 'CP_SESSION=$cpSession',
+            }
+          : authHeaders;
+
       return CachedNetworkImage(
-        imageUrl: cleanUrl,
+        imageUrl: primaryImageUrl,
         width: size,
         height: size,
         fit: fit,
         filterQuality: FilterQuality.high,
-        httpHeaders: authHeaders,
-        fadeInDuration: const Duration(milliseconds: 200),
+        httpHeaders: primaryHeaders,
+        fadeInDuration: const Duration(milliseconds: 150),
         fadeOutDuration: const Duration(milliseconds: 100),
         placeholder: (context, url) => fallbackWidget(),
         errorWidget: (context, url, error) {
-          debugPrint("AppIconWidget failed to load raster image ($cleanUrl): $error");
+          debugPrint("AppIconWidget failed to load raster image ($primaryImageUrl): $error");
+          // Fallback to the alternative URL if primary failed
+          final fallbackImageUrl = shouldUseDirectGateway ? cleanUrl : (relPath.isNotEmpty ? 'http://172.30.192.253:8080/api/v1/uploads/$relPath' : '');
+          if (!kIsWeb && cleanToken != null && fallbackImageUrl.isNotEmpty && fallbackImageUrl != primaryImageUrl) {
+            return CachedNetworkImage(
+              imageUrl: fallbackImageUrl,
+              width: size,
+              height: size,
+              fit: fit,
+              filterQuality: FilterQuality.high,
+              httpHeaders: {
+                'Authorization': 'Bearer $cleanToken',
+                if (cpSession != null && cpSession.isNotEmpty) 'Cookie': 'CP_SESSION=$cpSession',
+              },
+              fadeInDuration: const Duration(milliseconds: 150),
+              placeholder: (ctx, u) => fallbackWidget(),
+              errorWidget: (ctx, errUrl, err) {
+                debugPrint("AppIconWidget secondary fallback also failed ($fallbackImageUrl): $err");
+                return fallbackWidget();
+              },
+            );
+          }
           return fallbackWidget();
         },
       );

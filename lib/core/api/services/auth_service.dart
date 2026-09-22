@@ -47,6 +47,11 @@ class AuthService {
         await ApiClient.logout();
         return false;
       }
+      try {
+        final box = GetStorage();
+        await box.write('access_token', token);
+        await box.write('token', token);
+      } catch (_) {}
       return true;
     } catch (e) {
       debugPrint("Session restoration error: $e");

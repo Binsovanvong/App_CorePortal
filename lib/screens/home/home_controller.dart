@@ -132,6 +132,12 @@ class HomeController extends GetxController {
     }
 
     try {
+      final box = GetStorage();
+      await box.write('access_token', accessToken);
+      await box.write('token', accessToken);
+    } catch (_) {}
+
+    try {
       if (services.isEmpty) {
         isLoading.value = true;
       }
@@ -158,46 +164,7 @@ class HomeController extends GetxController {
         }
       }
 
-      // 1. Fetch portal apps (/portals/apps) - returns user assigned applications including ANPR
-      try {
-        final portalAppsRes = await _authService.fetchPortalApps();
-        if (portalAppsRes != null) {
-          List list = [];
-          if (portalAppsRes is List) {
-            list = portalAppsRes;
-          } else if (portalAppsRes is Map) {
-            final data = portalAppsRes['data'] ??
-                portalAppsRes['value'] ??
-                portalAppsRes['items'] ??
-                portalAppsRes['content'] ??
-                portalAppsRes['apps'] ??
-                [];
-            if (data is List) list = data;
-          }
-          for (var item in list) {
-            addAppIfNew(item, isGeneral: false);
-          }
-        }
-      } on DioException catch (e) {
-        debugPrint("fetchPortalApps endpoint error: $e");
-        if (e.response?.statusCode == 401) {
-          is401 = true;
-        }
-      } catch (e) {
-        debugPrint("fetchPortalApps endpoint error: $e");
-      }
-
-      // If 401 occurred, do NOT retry other endpoints. Redirect to login instead.
-      if (is401) {
-        debugPrint("401 Unauthorized encountered. Redirecting to login.");
-        if (Get.currentRoute != AppRoutes.login) {
-          await ApiClient.logout();
-          Get.offAllNamed(AppRoutes.login);
-        }
-        return;
-      }
-
-      // 2. Fetch user tiles (/portals/tiles) to merge user's pinned tiles
+      // Fetch user portal tiles (/portals/tiles) - strictly portal tiles for Home
       try {
         final tilesRes = await _authService.fetchApps();
         if (tilesRes != null) {
@@ -227,8 +194,15 @@ class HomeController extends GetxController {
         debugPrint("fetchApps (tiles) error: $e");
       }
 
-      // User portal apps and tiles are the exclusive sources for Home services.
-      // Admin/general catalog apps are not merged here.
+      // If 401 occurred, redirect to login
+      if (is401) {
+        debugPrint("401 Unauthorized encountered. Redirecting to login.");
+        if (Get.currentRoute != AppRoutes.login) {
+          await ApiClient.logout();
+          Get.offAllNamed(AppRoutes.login);
+        }
+        return;
+      }
 
       if (rawApps.isNotEmpty) {
         final List<Map<String, dynamic>> tempServices = [];
@@ -236,10 +210,10 @@ class HomeController extends GetxController {
         for (var app in rawApps) {
           final String id = (app['id'] ?? app['_id'] ?? '').toString();
           final String titleKh =
-              (app['nameKh'] ?? app['title_kh'] ?? app['titleKh'] ?? app['name'] ?? 'កម្មវិធី')
+              (app['nameKh'] ?? app['title_kh'] ?? app['titleKh'] ?? app['title'] ?? app['name'] ?? 'កម្មវិធី')
                   .toString();
           final String titleEn =
-              (app['nameEn'] ?? app['title_en'] ?? app['titleEn'] ?? app['name'] ?? 'App')
+              (app['nameEn'] ?? app['title_en'] ?? app['titleEn'] ?? app['title'] ?? app['name'] ?? 'App')
                   .toString();
           final String rawIcon = AppIconWidget.extractRawIcon(app);
           String route =
@@ -328,8 +302,8 @@ class HomeController extends GetxController {
             'code': (app['code'] ?? '').toString(),
             'category': (app['category'] ?? app['subCategory'] ?? '').toString(),
             'subCategory': (app['subCategory'] ?? '').toString(),
-            'department': (app['department'] ?? app['unit'] ?? app['departmentName'] ?? app['generalDepartmentCode'] ?? '').toString(),
-            'departmentName': (app['departmentName'] ?? app['department'] ?? app['unit'] ?? app['generalDepartmentName'] ?? '').toString(),
+            'department': (app['department'] ?? app['unit'] ?? app['departmentName'] ?? app['generalDepartmentCode'] ?? app['ownerOrgCode'] ?? '').toString(),
+            'departmentName': (app['departmentName'] ?? app['department'] ?? app['unit'] ?? app['generalDepartmentName'] ?? app['ownerOrgCode'] ?? '').toString(),
             'unit': (app['unit'] ?? '').toString(),
             'description': (app['description'] ?? app['desc'] ?? app['descriptionKh'] ?? '').toString(),
             'accessRules': app['accessRules'] ?? app['access_rules'] ?? app['rules'] ?? [],

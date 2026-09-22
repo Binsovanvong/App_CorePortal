@@ -1,1 +1,1 @@
-{"access_token":"valid_test_token","token":"valid_test_token"}
+{}

@@ -83,15 +83,34 @@ class ApplicationView extends GetView<ApplicationViewController> {
                       ),
                     ],
                     Expanded(
-                      child: Text(
-                        'all_applications'.tr,
-                        style: GoogleFonts.kantumruyPro(
-                          fontSize: 27,
-                          fontWeight: FontWeight.w800,
-                          color: const Color(0xFF0F265C),
-                          height: 1.15,
-                          letterSpacing: -0.4,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'all_applications'.tr,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.kantumruyPro(
+                              fontSize: 27,
+                              fontWeight: FontWeight.w800,
+                              color: const Color(0xFF0F265C),
+                              height: 1.15,
+                              letterSpacing: -0.4,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'all_applications_subtitle'.tr,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.kantumruyPro(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: const Color(0xFF64748B),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -239,8 +258,7 @@ class ApplicationView extends GetView<ApplicationViewController> {
                   backgroundColor: Colors.white,
                   displacement: 28,
                   child: Obx(() {
-                    if (controller.isLoading.value ||
-                        controller.homeController.isLoading.value) {
+                    if (controller.isLoading.value) {
                       return const Center(
                         child: CircularProgressIndicator(
                           color: Color(0xFF1D4ED8),
@@ -279,12 +297,6 @@ class ApplicationView extends GetView<ApplicationViewController> {
                       );
                     }
 
-                    final bool showBottomSeeLess =
-                        controller.isExpanded.value &&
-                        controller.rxSearchQuery.value.trim().isEmpty &&
-                        controller.filteredServices.length >
-                            ApplicationViewController.initialItemLimit;
-
                     return ListView.builder(
                       physics: const AlwaysScrollableScrollPhysics(
                         parent: BouncingScrollPhysics(),
@@ -294,52 +306,8 @@ class ApplicationView extends GetView<ApplicationViewController> {
                         right: 20,
                         bottom: 120,
                       ),
-                      itemCount: displayList.length + (showBottomSeeLess ? 1 : 0),
+                      itemCount: displayList.length,
                       itemBuilder: (context, index) {
-                        if (showBottomSeeLess && index == displayList.length) {
-                          return Center(
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 4, bottom: 8),
-                              child: GestureDetector(
-                                onTap: controller.toggleExpanded,
-                                behavior: HitTestBehavior.opaque,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 7,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFEFF6FF),
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                      color: const Color(0xFFDBEAFE),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        'see_less'.tr,
-                                        style: GoogleFonts.kantumruyPro(
-                                          fontSize: 12.5,
-                                          fontWeight: FontWeight.w600,
-                                          color: const Color(0xFF1D4ED8),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      const Icon(
-                                        Icons.keyboard_arrow_up_rounded,
-                                        size: 16,
-                                        color: Color(0xFF1D4ED8),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        }
 
                         final item = displayList[index];
                         return _buildAppCard(
@@ -411,9 +379,12 @@ class ApplicationView extends GetView<ApplicationViewController> {
       imgUrl = AppIconWidget.formatIconUrl(cleanRaw, sessionToken);
     }
     final String rawLocal = (item["icon"] ?? '').toString().trim();
-    final String localImg = (rawLocal.isNotEmpty &&
-            !rawLocal.startsWith('http://') &&
-            !rawLocal.startsWith('https://') &&
+    final cleanLocalLower = rawLocal.toLowerCase();
+    final bool isLocalPath = cleanLocalLower.startsWith('assets/') ||
+        cleanLocalLower.startsWith('/assets/') ||
+        cleanLocalLower.startsWith('images/') ||
+        cleanLocalLower.startsWith('/images/');
+    final String localImg = (isLocalPath &&
             rawLocal != 'assets/img/about-moi-logo.png' &&
             rawLocal != '/assets/img/about-moi-logo.png')
         ? rawLocal
@@ -918,9 +889,12 @@ class ApplicationView extends GetView<ApplicationViewController> {
       imgUrl = AppIconWidget.formatIconUrl(cleanRaw, sessionToken);
     }
     final String rawLocal = (item["icon"] ?? '').toString().trim();
-    final String localImg = (rawLocal.isNotEmpty &&
-            !rawLocal.startsWith('http://') &&
-            !rawLocal.startsWith('https://') &&
+    final cleanLocalLower = rawLocal.toLowerCase();
+    final bool isLocalPath = cleanLocalLower.startsWith('assets/') ||
+        cleanLocalLower.startsWith('/assets/') ||
+        cleanLocalLower.startsWith('images/') ||
+        cleanLocalLower.startsWith('/images/');
+    final String localImg = (isLocalPath &&
             rawLocal != 'assets/img/about-moi-logo.png' &&
             rawLocal != '/assets/img/about-moi-logo.png')
         ? rawLocal

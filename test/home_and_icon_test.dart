@@ -7,6 +7,7 @@ import 'package:core_portal/screens/home/home_controller.dart';
 import 'package:core_portal/screens/application/application_view.dart';
 import 'package:core_portal/core/api/api_config.dart';
 import 'package:core_portal/screens/admin/admin_controller.dart';
+import 'package:core_portal/widgets/announcement_detail_dialog.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -64,6 +65,14 @@ void main() {
       expect(AppIconWidget.formatIconUrl('undefined'), isEmpty);
       expect(AppIconWidget.formatIconUrl(''), isEmpty);
       expect(AppIconWidget.formatIconUrl(null), isEmpty);
+    });
+
+    test('extractRelativePath normalizes various backend upload formats', () {
+      expect(AppIconWidget.extractRelativePath('portal-app-icons/app.png'), equals('portal-app-icons/app.png'));
+      expect(AppIconWidget.extractRelativePath('http://172.30.192.127/api/mobile/portals/uploads/api/v1/uploads/portal-app-icons/app.png'), equals('portal-app-icons/app.png'));
+      expect(AppIconWidget.extractRelativePath('/uploads/portal-app-icons/app.png'), equals('portal-app-icons/app.png'));
+      expect(AppIconWidget.extractRelativePath('app.png'), equals('portal-app-icons/app.png'));
+      expect(AppIconWidget.extractRelativePath('https://example.com/external.png'), equals(''));
     });
   });
 
@@ -258,6 +267,67 @@ void main() {
           equals('អគ្គនាយកដ្ឋានបច្ចេកវិទ្យាឌីជីថល និងផ្សព្វផ្សាយអប់រំ'));
       expect(AdminController.formatDepartmentToKhmer('—'),
           equals('អគ្គនាយកដ្ឋានបច្ចេកវិទ្យាឌីជីថល និងផ្សព្វផ្សាយអប់រំ'));
+    });
+  });
+
+  group('Home Tiles and Application Admin Apps Separation Tests', () {
+    test('ApplicationViewController._normalizeApp extracts ownerOrgCode and title correctly', () {
+      final appCtrl = ApplicationViewController();
+      final normalized = appCtrl.testNormalizeApp({
+        'id': 1,
+        'code': 'ANPR',
+        'nameKh': 'ប្រព័ន្ធស្នើរសុំចេញចូលទីស្តីការក្រសួងមហាផ្ទៃ',
+        'title': 'ANPR Access System',
+        'ownerOrgCode': 'GDDTM',
+        'appUrl': 'https://n4-anpr-uat.interior.gov.kh/admin',
+        'iconUrl': 'portal-app-icons/anpr.png',
+      });
+
+      expect(normalized['id'], equals('1'));
+      expect(normalized['code'], equals('ANPR'));
+      expect(normalized['department'], equals('GDDTM'));
+      expect(normalized['titleKh'], equals('ប្រព័ន្ធស្នើរសុំចេញចូលទីស្តីការក្រសួងមហាផ្ទៃ'));
+      expect(normalized['route'], equals('https://n4-anpr-uat.interior.gov.kh/admin'));
+    });
+
+    test('ApplicationViewController sourceApps strictly uses admin portal apps without tile injection', () {
+      final appCtrl = ApplicationViewController();
+      appCtrl.apiApps.assignAll([
+        {
+          'id': 'admin_app_1',
+          'code': 'ANPR',
+          'titleKh': 'ប្រព័ន្ធស្នើសុំចេញចូលទីស្តីការក្រសួងមហាផ្ទៃ',
+          'isActive': true,
+          'isGeneral': false,
+        },
+        {
+          'id': 'admin_app_2',
+          'code': 'COMPLAINT',
+          'titleKh': 'ប្រព័ន្ធទទួលពាក្យបណ្តឹងអនឡាញ',
+          'isActive': true,
+          'isGeneral': false,
+        },
+      ]);
+
+      final apps = appCtrl.sourceApps;
+      expect(apps.length, equals(2));
+      expect(apps.map((a) => a['id']).toList(), equals(['admin_app_1', 'admin_app_2']));
+    });
+  });
+
+  group('Announcement Detail Dialog Tests', () {
+    test('formatDetailKhmerDateTime formats ISO dates into official Khmer datetime string', () {
+      final formatted = formatDetailKhmerDateTime('2026-09-17T05:05:17.736741');
+      expect(formatted, contains('ថ្ងៃទី'));
+      expect(formatted, contains('កញ្ញា'));
+      expect(formatted, contains('ឆ្នាំ'));
+      expect(formatted, contains('ម៉ោង'));
+    });
+
+    test('formatDetailKhmerDateTime handles empty and invalid dates gracefully', () {
+      expect(formatDetailKhmerDateTime(''), isEmpty);
+      expect(formatDetailKhmerDateTime(null), isEmpty);
+      expect(formatDetailKhmerDateTime('invalid-date'), equals('invalid-date'));
     });
   });
 }

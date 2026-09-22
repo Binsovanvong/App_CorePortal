@@ -9,6 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:core_portal/widgets/app_icon.dart';
 import 'package:core_portal/widgets/empty_apps_widget.dart';
+import 'package:core_portal/widgets/announcement_detail_dialog.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
@@ -90,17 +91,7 @@ class HomeView extends GetView<HomeController> {
                     _buildUserGreetingCard(),
                     const SizedBox(height: 18),
                     _buildPopularServicesSection(context),
-                    _buildSectionHeader(
-                      icon: Icons.campaign_rounded,
-                      title: 'recent_announcements'.tr,
-                      onTapSeeAll: () {
-                        if (Get.isRegistered<NavController>()) {
-                          final bool isAdmin =
-                              Get.find<NavController>().isAdmin.value;
-                          Get.find<NavController>().changeTab(isAdmin ? 3 : 1);
-                        }
-                      },
-                    ),
+                    _buildAnnouncementsSectionHeader(),
                     const SizedBox(height: 12),
                     _buildNoticeSectionList(context),
                     const SizedBox(height: 110),
@@ -776,9 +767,11 @@ class HomeView extends GetView<HomeController> {
                             .trim();
 
                     final String rawIconStr = (item["icon"] ?? '').toString().trim();
-                    final String itemLocal = (rawIconStr.isNotEmpty &&
-                            !rawIconStr.startsWith('http://') &&
-                            !rawIconStr.startsWith('https://') &&
+                    final bool isLocalPath = rawIconStr.toLowerCase().startsWith('assets/') ||
+                        rawIconStr.toLowerCase().startsWith('/assets/') ||
+                        rawIconStr.toLowerCase().startsWith('images/') ||
+                        rawIconStr.toLowerCase().startsWith('/images/');
+                    final String itemLocal = (isLocalPath &&
                             rawIconStr != 'assets/img/about-moi-logo.png' &&
                             rawIconStr != '/assets/img/about-moi-logo.png')
                         ? rawIconStr
@@ -977,6 +970,86 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
+  Widget _buildAnnouncementsSectionHeader() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFEBF3FE),
+                  shape: BoxShape.circle,
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.campaign_rounded,
+                    color: Color(0xFF1D4ED8),
+                    size: 24,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'recent_announcements'.tr,
+                style: GoogleFonts.kantumruyPro(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF0F172A),
+                ),
+              ),
+            ],
+          ),
+          GestureDetector(
+            onTap: () {
+              if (Get.isRegistered<NavController>()) {
+                final bool isAdmin =
+                    Get.find<NavController>().isAdmin.value;
+                Get.find<NavController>().changeTab(isAdmin ? 3 : 1);
+              }
+            },
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 8,
+              ),
+              decoration: BoxDecoration(
+                color: const Color(0xFFEBF3FE),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'view_all'.tr,
+                    style: GoogleFonts.kantumruyPro(
+                      color: const Color(0xFF1D4ED8),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 15,
+                    color: Color(0xFF1D4ED8),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildNoticeSectionList(BuildContext context) {
     return Obx(() {
       final list = controller.announcements;
@@ -1026,138 +1099,139 @@ class HomeView extends GetView<HomeController> {
         );
       }
 
-      return Column(
-        children: [
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: list.length > 3 ? 3 : list.length,
-            itemBuilder: (context, index) {
-              final a = list[index];
-              final String title = a['title']?.toString() ?? 'announcement'.tr;
-              final String content = a['content']?.toString() ?? '';
-              final String rawDate = a['date']?.toString() ?? '';
-              final String cleanContent = content
-                  .replaceAll(RegExp(r'<[^>]*>|&nbsp;'), ' ')
-                  .replaceAll(RegExp(r'\s+'), ' ')
-                  .trim();
+      return ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: list.length > 3 ? 3 : list.length,
+        itemBuilder: (context, index) {
+          final a = list[index];
+          final String title = a['title']?.toString() ?? 'announcement'.tr;
+          final String content = a['content']?.toString() ?? '';
+          final String rawDate = a['date']?.toString() ?? '';
+          final String cleanContent = content
+              .replaceAll(RegExp(r'<[^>]*>|&nbsp;'), ' ')
+              .replaceAll(RegExp(r'\s+'), ' ')
+              .trim();
 
-              return Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(
-                    color: const Color(0xFFE2E8F0),
-                    width: 1.1,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF163774).withOpacity(0.04),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: const Color(0xFFF1F5F9),
+                width: 1.0,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF163774).withOpacity(0.04),
+                  blurRadius: 14,
+                  offset: const Offset(0, 4),
                 ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () => _showAnnouncementDialog(context, a),
-                    borderRadius: BorderRadius.circular(18),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: const Color(0xffFAF3E3),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: const Color(0xffD4AF37).withOpacity(0.3),
-                                width: 1,
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.01),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => _showAnnouncementDialog(context, a),
+                borderRadius: BorderRadius.circular(20),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFEBF3FE),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Center(
+                          child: Icon(
+                            Icons.description_rounded,
+                            color: Color(0xFF1D4ED8),
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Container(
+                        width: 1.0,
+                        height: 38,
+                        color: const Color(0xFFE2E8F0),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.kantumruyPro(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF0F172A),
                               ),
                             ),
-                            child: const Icon(
-                              Icons.description_outlined,
-                              color: Color(0xFF163774),
-                              size: 18,
+                            const SizedBox(height: 4),
+                            Text(
+                              cleanContent.isNotEmpty
+                                  ? cleanContent
+                                  : '...',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.kantumruyPro(
+                                fontSize: 13,
+                                color: const Color(0xFF94A3B8),
+                                fontWeight: FontWeight.w400,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        title,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: GoogleFonts.kantumruyPro(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          color: const Color(0xff1E293B),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      _formatKhmerDate(rawDate),
-                                      textAlign: TextAlign.right,
-                                      style: GoogleFonts.kantumruyPro(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        color: const Color(0xff64748B),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  cleanContent,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: GoogleFonts.kantumruyPro(
-                                    fontSize: 12,
-                                    color: const Color(0xff64748B),
-                                  ),
-                                ),
-                              ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          if (rawDate.isNotEmpty) ...[
+                            Text(
+                              _formatKhmerDate(rawDate),
+                              style: GoogleFonts.kantumruyPro(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: const Color(0xFF94A3B8),
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 4),
+                            const SizedBox(width: 4),
+                          ],
                           const Icon(
                             Icons.chevron_right_rounded,
-                            size: 18,
-                            color: Colors.grey,
+                            size: 20,
+                            color: Color(0xFF94A3B8),
                           ),
                         ],
                       ),
-                    ),
+                    ],
                   ),
                 ),
-              );
-            },
-          ),
-          const SizedBox(height: 16),
-          // Golden Khmer Prasat / Angkor Spire Decorative Divider
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 36),
-            child: CustomPaint(
-              size: const Size(double.infinity, 24),
-              painter: _KhmerPrasatDividerPainter(),
+              ),
             ),
-          ),
-        ],
+          );
+        },
       );
     });
   }
@@ -1166,104 +1240,7 @@ class HomeView extends GetView<HomeController> {
     BuildContext context,
     Map<String, dynamic> announcement,
   ) {
-    final String title = announcement['title']?.toString() ?? 'announcement'.tr;
-    final String content = announcement['content']?.toString() ?? '';
-    final String cleanContent = content
-        .replaceAll(RegExp(r'<[^>]*>|&nbsp;'), ' ')
-        .trim();
-
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-        backgroundColor: Colors.white,
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xffA88400).withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      'announcement'.tr,
-                      style: GoogleFonts.kantumruyPro(
-                        color: const Color(0xffA88400),
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close_rounded, color: Colors.grey),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                title,
-                style: GoogleFonts.kantumruyPro(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xff1E293B),
-                ),
-              ),
-              const Divider(
-                height: 24,
-                color: Color(0xffF1F5F9),
-                thickness: 1.5,
-              ),
-              Flexible(
-                child: SingleChildScrollView(
-                  child: Text(
-                    cleanContent,
-                    style: GoogleFonts.kantumruyPro(
-                      fontSize: 15,
-                      color: const Color(0xff475569),
-                      height: 1.6,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xffA88400),
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: Text(
-                    'close'.tr,
-                    style: GoogleFonts.kantumruyPro(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+    showAnnouncementDetailDialog(context, announcement);
   }
 
   String _formatKhmerDate(String? dateStr) {
@@ -1301,69 +1278,14 @@ class HomeView extends GetView<HomeController> {
         return res;
       }
 
-      return '${toKhmer(day)} $month ${toKhmer(year)}';
+      return '$day $month ${toKhmer(year)}';
     } catch (_) {
       return dateStr;
     }
   }
 }
 
-/// Traditional Khmer Prasat / Angkor Spire Decorative Divider Painter
-class _KhmerPrasatDividerPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final linePaint = Paint()
-      ..color = const Color(0xffD4AF37).withOpacity(0.55)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.9;
 
-    final goldFill = Paint()
-      ..color = const Color(0xffC59E3F)
-      ..style = PaintingStyle.fill;
-
-    final goldStroke = Paint()
-      ..color = const Color(0xFF163774)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.8;
-
-    final double cx = size.width / 2;
-    final double cy = size.height / 2;
-    const double gap = 16.0;
-
-    // Draw left and right dividing lines
-    canvas.drawLine(Offset(0, cy), Offset(cx - gap, cy), linePaint);
-    canvas.drawLine(Offset(cx + gap, cy), Offset(size.width, cy), linePaint);
-
-    // Draw Khmer Prasat (Angkor Spire) silhouette in center
-    final path = Path();
-    path.moveTo(cx, cy - 10);
-    path.lineTo(cx + 1.5, cy - 7);
-    path.lineTo(cx + 3, cy - 6);
-    path.lineTo(cx + 2, cy - 4.5);
-    path.lineTo(cx + 4.5, cy - 3.5);
-    path.lineTo(cx + 3.5, cy - 1.5);
-    path.lineTo(cx + 6, cy - 0.5);
-    path.lineTo(cx + 5, cy + 2);
-    path.lineTo(cx + 7.5, cy + 4);
-    path.lineTo(cx + 7.5, cy + 6.5);
-    path.lineTo(cx - 7.5, cy + 6.5);
-    path.lineTo(cx - 7.5, cy + 4);
-    path.lineTo(cx - 5, cy + 2);
-    path.lineTo(cx - 6, cy - 0.5);
-    path.lineTo(cx - 3.5, cy - 1.5);
-    path.lineTo(cx - 4.5, cy - 3.5);
-    path.lineTo(cx - 2, cy - 4.5);
-    path.lineTo(cx - 3, cy - 6);
-    path.lineTo(cx - 1.5, cy - 7);
-    path.close();
-
-    canvas.drawPath(path, goldFill);
-    canvas.drawPath(path, goldStroke);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
 
 /// Traditional Khmer Lotus / Kbach Watermark Line Art Painter
 class _KhmerLotusKbachPainter extends CustomPainter {

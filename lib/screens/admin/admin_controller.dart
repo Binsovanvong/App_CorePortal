@@ -967,24 +967,20 @@ class AdminController extends GetxController {
       debugPrint("Fallback fetchPortalApps failed: $e");
     }
 
-    try {
-      return await _authService.fetchApps();
-    } catch (_) {
-      return null;
-    }
+    return null;
   }
 
   Future<dynamic> _fetchUsersWithFallback() async {
     try {
       final res = await _authService.apiService.get(
-        endpoint: '/api/mobile/admin/user-profiles?page=0&size=1000',
+        endpoint: '/api/mobile/admin/user-profiles',
       );
       if (res != null) return res;
     } catch (_) {}
 
     try {
       final res = await _authService.apiService.get(
-        endpoint: '/api/mobile/admin/user-profiles',
+        endpoint: '/api/mobile/admin/user-profiles?page=0&size=1000',
       );
       if (res != null) return res;
     } catch (_) {}
@@ -1003,6 +999,15 @@ class AdminController extends GetxController {
 
   Future<void> _loadAdminAppsAndRules() async {
     try {
+      final token = await ApiClient.getAccessToken();
+      if (token != null && token.isNotEmpty) {
+        try {
+          final box = GetStorage();
+          await box.write('access_token', token);
+          await box.write('token', token);
+        } catch (_) {}
+      }
+
       final Map<String, List<Map<String, dynamic>>> appRulesMap = {};
 
       final results = await Future.wait([
@@ -1101,8 +1106,7 @@ class AdminController extends GetxController {
               }
             }
           }
-          final String icon =
-              app['iconUrl'] ?? app['icon'] ?? app['logo'] ?? '';
+          final String icon = AppIconWidget.extractRawIcon(app);
           final String code = app['code'] ?? '';
           final List rawRules =
               app['accessRules'] ?? app['access_rules'] ?? app['rules'] ?? [];
@@ -1146,9 +1150,7 @@ class AdminController extends GetxController {
               icon != '/assets/img/about-moi-logo.png') {
             final cleanLower = icon.toLowerCase();
             final bool isLocal = cleanLower.startsWith('assets/') ||
-                cleanLower.startsWith('asset/') ||
                 cleanLower.startsWith('/assets/') ||
-                cleanLower.startsWith('/asset/') ||
                 cleanLower.startsWith('images/') ||
                 cleanLower.startsWith('/images/');
 
@@ -1158,7 +1160,7 @@ class AdminController extends GetxController {
                 iconPath = 'assets/$iconPath';
               }
             } else {
-              iconUrl = AppIconWidget.formatIconUrl(icon);
+              iconUrl = AppIconWidget.formatIconUrl(icon, token);
             }
           }
 

@@ -38,7 +38,10 @@ class MainpageView extends StatelessWidget {
       body: Obx(() {
         final pages = controller.isAdmin.value ? adminPages : userPages;
         final index = controller.currentIndex.value.clamp(0, pages.length - 1);
-        return pages[index];
+        return IndexedStack(
+          index: index,
+          children: pages,
+        );
       }),
       bottomNavigationBar: Obx(
         () {

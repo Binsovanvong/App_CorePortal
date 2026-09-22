@@ -56,6 +56,9 @@ class ApplicationViewController extends GetxController {
     return filteredServices.take(initialItemLimit).toList();
   }
 
+  @visibleForTesting
+  Map<String, dynamic> testNormalizeApp(dynamic raw, [String? token]) => _normalizeApp(raw, token);
+
   /// Normalizes any raw map from backend endpoints into a clean, consistent schema
   Map<String, dynamic> _normalizeApp(dynamic raw, [String? token]) {
     if (raw is! Map) return {};
@@ -67,6 +70,7 @@ class ApplicationViewController extends GetxController {
     final String titleKh = (app['nameKh'] ??
             app['title_kh'] ??
             app['titleKh'] ??
+            app['title'] ??
             app['name'] ??
             app['titleEn'] ??
             'កម្មវិធី')
@@ -76,6 +80,7 @@ class ApplicationViewController extends GetxController {
     final String titleEn = (app['nameEn'] ??
             app['title_en'] ??
             app['titleEn'] ??
+            app['title'] ??
             app['name'] ??
             app['titleKh'] ??
             'App')
@@ -115,8 +120,13 @@ class ApplicationViewController extends GetxController {
     }
 
     final String rawLocal = (app['icon'] ?? '').toString().trim();
+    final cleanRawLocalLower = rawLocal.toLowerCase();
+    final bool isRealLocal = cleanRawLocalLower.startsWith('assets/') ||
+        cleanRawLocalLower.startsWith('/assets/') ||
+        cleanRawLocalLower.startsWith('images/') ||
+        cleanRawLocalLower.startsWith('/images/');
     if (iconPath.isEmpty &&
-        rawLocal.isNotEmpty &&
+        isRealLocal &&
         rawLocal != 'assets/img/about-moi-logo.png' &&
         rawLocal != '/assets/img/about-moi-logo.png') {
       iconPath = rawLocal;
@@ -179,6 +189,7 @@ class ApplicationViewController extends GetxController {
             app['departmentName'] ??
             app['generalDepartmentName'] ??
             app['generalDepartmentCode'] ??
+            app['ownerOrgCode'] ??
             '')
         .toString()
         .trim();
@@ -239,10 +250,13 @@ class ApplicationViewController extends GetxController {
   List<Map<String, dynamic>> get sourceApps {
     final List<Map<String, dynamic>> all = [];
     final Set<String> seen = {};
+    final String? token = ApiClient.currentToken ??
+        GetStorage().read('access_token')?.toString() ??
+        GetStorage().read('token')?.toString();
 
     void addApps(List<dynamic> list) {
       for (var raw in list) {
-        final app = _normalizeApp(raw);
+        final app = _normalizeApp(raw, token);
         if (app.isEmpty) continue;
         final id = (app['id'] ?? '').toString().trim();
         final code = (app['code'] ?? '').toString().trim();
@@ -259,20 +273,14 @@ class ApplicationViewController extends GetxController {
 
     if (apiApps.isNotEmpty) {
       addApps(apiApps);
-    }
-    addApps(homeController.services);
-
-    if (Get.isRegistered<AdminController>()) {
-      addApps(Get.find<AdminController>().appsList);
-    }
-
-    final cached = GetStorage().read('cached_portal_services') ??
-        GetStorage().read('cached_admin_apps_list');
-    if (cached is List && cached.isNotEmpty) {
-      addApps(cached);
+    } else {
+      final cached = GetStorage().read('cached_admin_apps_list');
+      if (cached is List && cached.isNotEmpty) {
+        addApps(cached);
+      }
     }
 
-    return all.isNotEmpty ? all : homeController.services;
+    return all;
   }
 
   List<String> get availableUnits {
@@ -333,12 +341,8 @@ class ApplicationViewController extends GetxController {
   void onInit() {
     super.onInit();
 
-    // Trigger admin fetch if available to ensure all department apps are loaded
     if (Get.isRegistered<AdminController>()) {
       final adminCtrl = Get.find<AdminController>();
-      if (adminCtrl.appsList.isEmpty && !adminCtrl.isLoading.value) {
-        adminCtrl.fetchDashboardData();
-      }
       ever(adminCtrl.appsList, (_) => _filterApps());
     }
 
@@ -350,7 +354,6 @@ class ApplicationViewController extends GetxController {
     // Listen to changes
     everAll([
       apiApps,
-      homeController.services,
       rxSearchQuery,
       selectedFilterTab,
       selectedSubCategory,
@@ -370,6 +373,12 @@ class ApplicationViewController extends GetxController {
     await AuthService.waitForAuth();
     final token = await ApiClient.getAccessToken();
     if (token == null || token.isEmpty) return;
+
+    try {
+      final box = GetStorage();
+      await box.write('access_token', token);
+      await box.write('token', token);
+    } catch (_) {}
 
     try {
       if (sourceApps.isEmpty) {
@@ -404,60 +413,20 @@ class ApplicationViewController extends GetxController {
         }
       }
 
-      // Fetch portal apps, user tiles, and admin apps concurrently
-      final responses = await Future.wait([
-        _authService.fetchPortalApps().catchError((e) {
-          debugPrint("ApplicationViewController fetchPortalApps error: $e");
-          return null;
-        }),
-        _authService.fetchApps().catchError((e) {
-          debugPrint("ApplicationViewController fetchApps tiles error: $e");
-          return null;
-        }),
-        _authService.fetchAdminApps().catchError((e) {
-          debugPrint("ApplicationViewController fetchAdminApps error: $e");
-          return null;
-        }),
-      ]);
-
-      final portalAppsRes = responses[0];
-      final tilesRes = responses[1];
-      final adminAppsRes = responses[2];
-
-      if (portalAppsRes != null) {
-        List list = [];
-        if (portalAppsRes is List) {
-          list = portalAppsRes;
-        } else if (portalAppsRes is Map) {
-          final data = portalAppsRes['data'] ??
-              portalAppsRes['value'] ??
-              portalAppsRes['items'] ??
-              portalAppsRes['content'] ??
-              portalAppsRes['apps'] ??
-              [];
-          if (data is List) list = data;
-        }
-        for (var item in list) {
-          addAppIfNew(item, isGeneral: false);
-        }
+      // Fetch admin portal apps (/admin/portal-apps) with fallback to portal apps (/portals/apps)
+      dynamic adminAppsRes;
+      try {
+        adminAppsRes = await _authService.fetchAdminApps();
+      } catch (e) {
+        debugPrint("ApplicationViewController fetchAdminApps error: $e");
       }
 
-      if (tilesRes != null) {
-        List list = [];
-        if (tilesRes is List) {
-          list = tilesRes;
-        } else if (tilesRes is Map) {
-          final data = tilesRes['data'] ??
-              tilesRes['value'] ??
-              tilesRes['items'] ??
-              tilesRes['content'] ??
-              tilesRes['tiles'] ??
-              tilesRes['apps'] ??
-              [];
-          if (data is List) list = data;
-        }
-        for (var item in list) {
-          addAppIfNew(item, isGeneral: false);
+      // If admin portal apps was null or empty, fallback to /portals/apps
+      if (adminAppsRes == null || (adminAppsRes is List && adminAppsRes.isEmpty)) {
+        try {
+          adminAppsRes = await _authService.fetchPortalApps();
+        } catch (e) {
+          debugPrint("ApplicationViewController fallback fetchPortalApps error: $e");
         }
       }
 
@@ -475,7 +444,7 @@ class ApplicationViewController extends GetxController {
           if (data is List) list = data;
         }
         for (var item in list) {
-          addAppIfNew(item, isGeneral: true);
+          addAppIfNew(item);
         }
       }
 
@@ -488,12 +457,7 @@ class ApplicationViewController extends GetxController {
           }
         }
         apiApps.assignAll(parsed);
-        if (homeController.services.isEmpty) {
-          final nonGeneral = parsed.where((a) => a['isGeneral'] != true).toList();
-          if (nonGeneral.isNotEmpty) {
-            homeController.services.assignAll(nonGeneral);
-          }
-        }
+        GetStorage().write('cached_admin_apps_list', parsed);
       }
     } catch (e) {
       debugPrint("ApplicationViewController fetchAppsFromApi error: $e");
@@ -633,10 +597,6 @@ class ApplicationViewController extends GetxController {
 
   Future<void> refreshApps() async {
     try {
-      if (Get.isRegistered<AdminController>()) {
-        await Get.find<AdminController>().fetchDashboardData();
-      }
-      await homeController.fetchPortalApps();
       await fetchAppsFromApi();
     } catch (_) {}
     _filterApps();

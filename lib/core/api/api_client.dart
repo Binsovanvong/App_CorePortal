@@ -43,25 +43,34 @@ class ApiClient {
     }
   }
 
+  /// In-memory token cache for instantaneous, synchronous access by widgets and formatters
+  static String? currentToken;
+  static String? currentCpSession;
+
   /// Retrieves the current access token with multi-source fallback:
-  /// 1. FlutterSecureStorage ('access_token', then 'token')
-  /// 2. GetStorage ('access_token', then 'token')
+  /// 1. In-memory currentToken
+  /// 2. GetStorage ('access_token', then 'token') - fast synchronous
+  /// 3. FlutterSecureStorage ('access_token', then 'token') - hardware Keystore fallback
   static Future<String?> getAccessToken() async {
-    String? token;
-    try {
-      token = await storage.read(key: 'access_token');
-      token ??= await storage.read(key: 'token');
-    } catch (e) {
-      debugPrint("FlutterSecureStorage read warning: $e");
+    String? token = currentToken;
+    if (token != null && token.isNotEmpty && token != 'null') {
+      return token;
     }
+
+    try {
+      final box = GetStorage();
+      token =
+          box.read('access_token')?.toString() ??
+          box.read('token')?.toString();
+    } catch (_) {}
 
     if (token == null || token.isEmpty || token == 'null') {
       try {
-        final box = GetStorage();
-        token =
-            box.read('access_token')?.toString() ??
-            box.read('token')?.toString();
-      } catch (_) {}
+        token = await storage.read(key: 'access_token');
+        token ??= await storage.read(key: 'token');
+      } catch (e) {
+        debugPrint("FlutterSecureStorage read warning: $e");
+      }
     }
 
     if (token != null) {
@@ -71,6 +80,15 @@ class ApiClient {
       }
       if (token.isEmpty || token == 'null' || token == 'undefined') {
         token = null;
+      } else {
+        currentToken = token;
+        try {
+          final box = GetStorage();
+          if (box.read('access_token') != token) {
+            box.write('access_token', token);
+            box.write('token', token);
+          }
+        } catch (_) {}
       }
     }
     return token;
@@ -87,6 +105,8 @@ class ApiClient {
     if (cleanToken.toLowerCase().startsWith('bearer ')) {
       cleanToken = cleanToken.substring(7).trim();
     }
+    currentToken = cleanToken;
+    currentCpSession = cpSession;
 
     // 1. Write to GetStorage immediately
     try {
@@ -122,6 +142,8 @@ class ApiClient {
 
   /// For Flutter JWT flow: immediately logging out clears locally stored tokens
   static Future<void> logout() async {
+    currentToken = null;
+    currentCpSession = null;
     try {
       await storage.delete(key: 'access_token');
       await storage.delete(key: 'refresh_token');
@@ -248,11 +270,15 @@ class ApiClient {
 
               // 6. On mobile/desktop, attach CP_SESSION cookie if available
               if (!kIsWeb) {
-                String? sessionCookie;
-                try {
-                  sessionCookie = await storage.read(key: 'CP_SESSION');
-                } catch (_) {}
-                sessionCookie ??= GetStorage().read('CP_SESSION')?.toString();
+                String? sessionCookie = currentCpSession ?? GetStorage().read('CP_SESSION')?.toString();
+                if (sessionCookie == null || sessionCookie.isEmpty) {
+                  try {
+                    sessionCookie = await storage.read(key: 'CP_SESSION');
+                  } catch (_) {}
+                  if (sessionCookie != null && sessionCookie.isNotEmpty) {
+                    currentCpSession = sessionCookie;
+                  }
+                }
                 if (sessionCookie != null && sessionCookie.isNotEmpty) {
                   final existingCookie = options.headers['Cookie']?.toString();
                   if (existingCookie == null ||
@@ -295,21 +321,15 @@ class ApiClient {
             },
           ),
           LogInterceptor(
-            requestHeader: true,
-            requestBody: true,
-            responseBody: true,
+            requestHeader: false,
+            requestBody: false,
+            responseBody: false,
+            responseHeader: false,
+            error: true,
             logPrint: (object) {
               if (kDebugMode) {
-                final logText = object.toString();
-                final masked = logText.replaceAllMapped(
-                  RegExp(
-                    r'(Bearer\s+)([A-Za-z0-9-_]+)\.([A-Za-z0-9-_]+)\.([A-Za-z0-9-_]+)',
-                  ),
-                  (match) =>
-                      '${match.group(1)}${match.group(2)?.substring(0, 10)}...[MASKED]',
-                );
                 // ignore: avoid_print
-                print(masked);
+                print(object);
               }
             },
           ),

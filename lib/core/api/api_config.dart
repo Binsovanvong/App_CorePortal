@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/widgets.dart' show debugPrint;
@@ -10,11 +9,11 @@ import 'package:core_portal/routes/page_route.dart';
 
 class ApiConfig {
   // API Base URLs
-  static const String uatBaseUrl = 'http://uat-app-core.interior.gov.kh';
+  static const String uatBaseUrl = 'http://172.30.192.127';
   static const String productionBaseUrl = 'https://core-app.interior.gov.kh';
 
   // Set to true to use the active UAT backend (UAT gateway currently verified & working)
-  static const bool useUat = false;
+  static const bool useUat = true;
 
   // Set to true to use a custom server IP or domain (e.g., http://127.0.0.1:8000)
   static const bool useCustomServer = false;
@@ -47,7 +46,7 @@ class ApiConfig {
       return '127.0.0.1'; // Default (iOS Simulator / Desktop)
     }
     final uri = Uri.tryParse(baseUrl);
-    return uri?.host ?? 'uat-app-core.interior.gov.kh';
+    return uri?.host ?? '172.30.192.127';
   }
 
   static String get baseUrl {
@@ -98,9 +97,10 @@ class ApiConfig {
           )
           ..interceptors.add(
             PrettyDioLogger(
-              requestBody: true,
-              requestHeader: true,
-              responseBody: true,
+              requestBody: false,
+              requestHeader: false,
+              responseBody: false,
+              error: true,
             ),
           );
 
@@ -108,7 +108,8 @@ class ApiConfig {
       InterceptorsWrapper(
         onRequest: (options, handler) {
           final box = GetStorage();
-          final String? token = box.read('token');
+          final String? token =
+              (box.read('token') ?? box.read('access_token'))?.toString().trim();
           final path = options.path.toLowerCase();
           final isAuthEndpoint =
               path.contains('/auth/login') ||
@@ -119,20 +120,6 @@ class ApiConfig {
             (key) => key.toLowerCase() == 'authorization',
           );
           if (!requestHasAuthorization && token != null && token.isNotEmpty) {
-            if (isTokenExpired(token)) {
-              box.remove('token');
-              box.remove('isAdmin');
-              try {
-                Get.offAllNamed(AppRoutes.login);
-              } catch (_) {}
-              return handler.reject(
-                DioException(
-                  requestOptions: options,
-                  error: "Token has expired",
-                  type: DioExceptionType.cancel,
-                ),
-              );
-            }
             final String accessToken = token;
             options.headers.remove('authorization');
             options.headers['Authorization'] = 'Bearer $accessToken';
@@ -160,15 +147,29 @@ class ApiConfig {
           return handler.next(options);
         },
         onError: (DioException e, handler) async {
-          final bool isBiometricAuthRequest = e.requestOptions.path.startsWith(
-            '/api/mobile/auth/device/',
-          );
-          if (e.response?.statusCode == 401 && !isBiometricAuthRequest) {
+          final path = e.requestOptions.path.toLowerCase();
+          final bool isAuthOrBiometric =
+              path.contains('/auth/login') ||
+              path.contains('/auth/device/') ||
+              path.contains('/auth/refresh');
+          final bool isAdminOrOptional =
+              path.contains('/admin/') ||
+              path.contains('/gateway/') ||
+              path.contains('/uploads/');
+
+          // Do NOT wipe the session when a background admin or optional check fails with 401
+          if (e.response?.statusCode == 401 &&
+              !isAuthOrBiometric &&
+              !isAdminOrOptional) {
+            debugPrint("ApiConfig 401 on core route: $path. Session expired upstream.");
             final box = GetStorage();
-            await box.remove('token'); // Clear the expired token
-            await box.remove('isAdmin'); // Clear the admin flag
+            await box.remove('token');
+            await box.remove('access_token');
+            await box.remove('isAdmin');
             try {
-              Get.offAllNamed(AppRoutes.login); // Redirect to Login
+              if (Get.currentRoute != AppRoutes.login) {
+                Get.offAllNamed(AppRoutes.login);
+              }
             } catch (_) {}
           }
           return handler.next(e);
@@ -177,26 +178,11 @@ class ApiConfig {
     );
   }
 
+  /// Device clocks may be skewed or out of sync with the upstream auth server.
+  /// Preemptively stripping tokens on the client guarantees 401 unauthorized failures.
+  /// Upstream Keycloak/Gateway remains the sole authority for token expiration.
   static bool isTokenExpired(String token) {
-    try {
-      final parts = token.split('.');
-      if (parts.length != 3) return false;
-
-      final String payload = parts[1];
-      final String normalized = base64Url.normalize(payload);
-      final String decoded = utf8.decode(base64Url.decode(normalized));
-      final Map<String, dynamic> map = json.decode(decoded);
-
-      if (map.containsKey('exp')) {
-        final int exp = map['exp'];
-        final DateTime expDate = DateTime.fromMillisecondsSinceEpoch(
-          exp * 1000,
-        );
-        return DateTime.now().isAfter(expDate);
-      }
-    } catch (_) {
-      return false;
-    }
     return false;
   }
 }
+

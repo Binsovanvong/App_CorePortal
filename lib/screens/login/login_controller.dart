@@ -18,8 +18,8 @@ import 'package:dio/dio.dart' show DioException, DioExceptionType;
 
 class LoginController extends GetxController {
   // Controllers for the input fields
-  final usernameController = TextEditingController();
-  final passwordController = TextEditingController();
+  final usernameController = TextEditingController(text: 'bin.sovanvong');
+  final passwordController = TextEditingController(text: 'Abc1234567*');
 
   // Observable toggle for password visibility
   final obscurePassword = true.obs;
@@ -141,9 +141,7 @@ class LoginController extends GetxController {
     } else {
       final result = await BiometricService.authenticate();
       if (result == BiometricResult.success) {
-        CustomSnackbar.showInfo(
-          message: 'first_login_biometric_bind_msg'.tr,
-        );
+        CustomSnackbar.showInfo(message: 'first_login_biometric_bind_msg'.tr);
       }
     }
   }
@@ -156,14 +154,15 @@ class LoginController extends GetxController {
       if (rawRole == null) return;
       String r = '';
       if (rawRole is Map) {
-        r = (rawRole['code'] ??
-                rawRole['name'] ??
-                rawRole['role'] ??
-                rawRole['groupCode'] ??
-                '')
-            .toString()
-            .toLowerCase()
-            .trim();
+        r =
+            (rawRole['code'] ??
+                    rawRole['name'] ??
+                    rawRole['role'] ??
+                    rawRole['groupCode'] ??
+                    '')
+                .toString()
+                .toLowerCase()
+                .trim();
       } else {
         r = rawRole.toString().toLowerCase().trim();
       }
@@ -287,7 +286,9 @@ class LoginController extends GetxController {
     bool isUnlockMode = false,
   }) async {
     // Skip biometric prompt when requireBiometricOnLogin is false or on non-mobile platforms
-    if (!requireBiometricOnLogin || kIsWeb || (!Platform.isAndroid && !Platform.isIOS)) {
+    if (!requireBiometricOnLogin ||
+        kIsWeb ||
+        (!Platform.isAndroid && !Platform.isIOS)) {
       await _finaliseLogin(
         username: username,
         roles: roles,
@@ -539,9 +540,11 @@ class LoginController extends GetxController {
     required Map<String, dynamic> credentialResponse,
     required String token,
   }) async {
-    final dynamic refreshToken = credentialResponse['refresh_token'] ??
+    final dynamic refreshToken =
+        credentialResponse['refresh_token'] ??
         credentialResponse['data']?['refresh_token'];
-    final dynamic cpSession = credentialResponse['cp_session'] ??
+    final dynamic cpSession =
+        credentialResponse['cp_session'] ??
         credentialResponse['CP_SESSION'] ??
         credentialResponse['session'];
 
@@ -575,7 +578,8 @@ class LoginController extends GetxController {
       Get.find<NavController>().checkAdminRole();
     }
 
-    final perms = credentialResponse['permissions'] ??
+    final perms =
+        credentialResponse['permissions'] ??
         credentialResponse['user']?['permissions'];
     if (perms is List) {
       await box.write('permissions', perms);
@@ -592,9 +596,7 @@ class LoginController extends GetxController {
     final password = passwordController.text;
 
     if (username.isEmpty || password.isEmpty) {
-      CustomSnackbar.showError(
-        message: 'enter_user_pass'.tr,
-      );
+      CustomSnackbar.showError(message: 'enter_user_pass'.tr);
       return;
     }
 
@@ -611,10 +613,7 @@ class LoginController extends GetxController {
             password: password,
           );
         } catch (e) {
-          response = {
-            'access_token': 'mock_admin_token',
-            'first_login': false,
-          };
+          response = {'access_token': 'mock_admin_token', 'first_login': false};
         }
 
         final token = response['access_token'] ?? response['token'];
@@ -630,9 +629,7 @@ class LoginController extends GetxController {
         }
       } catch (e) {
         final roles = _parseRoles(username, {});
-        final mockResponse = {
-          'access_token': 'mock_admin_token',
-        };
+        final mockResponse = {'access_token': 'mock_admin_token'};
         await _runBiometricAuth(
           username: username,
           roles: roles,
