@@ -2210,28 +2210,22 @@ class AdminView extends GetView<AdminController> {
       builder: (context) {
         return Dialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(28),
+            borderRadius: BorderRadius.circular(24),
           ),
           clipBehavior: Clip.antiAlias,
           backgroundColor: Colors.white,
           surfaceTintColor: Colors.transparent,
           insetPadding:
-              const EdgeInsets.symmetric(horizontal: 22, vertical: 24),
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 400),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Top Header Row with soft background
-                Container(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF6F9FE),
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(28),
-                    ),
-                  ),
+                // Top Header Row
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 16, 16),
                   child: Row(
                     children: [
                       Container(
@@ -2255,12 +2249,12 @@ class AdminView extends GetView<AdminController> {
                             Text(
                               'user_info_title'.tr,
                               style: GoogleFonts.kantumruyPro(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 17.5,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
                                 color: const Color(0xFF0F172A),
                               ),
                             ),
-                            const SizedBox(height: 3),
+                            const SizedBox(height: 2),
                             Text(
                               'user_detail_subtitle'.tr,
                               style: GoogleFonts.kantumruyPro(
@@ -2273,10 +2267,10 @@ class AdminView extends GetView<AdminController> {
                         ),
                       ),
                       Container(
-                        width: 38,
-                        height: 38,
+                        width: 36,
+                        height: 36,
                         decoration: const BoxDecoration(
-                          color: Color(0xFFEFF4FB),
+                          color: Color(0xFFF1F5F9),
                           shape: BoxShape.circle,
                         ),
                         child: IconButton(
@@ -2293,12 +2287,12 @@ class AdminView extends GetView<AdminController> {
                   ),
                 ),
                 const Divider(
-                  color: Color(0xFFE2E8F0),
+                  color: Color(0xFFF1F5F9),
                   height: 1,
                   thickness: 1,
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+                  padding: const EdgeInsets.fromLTRB(20, 14, 20, 20),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -2322,16 +2316,16 @@ class AdminView extends GetView<AdminController> {
 
                       // Tile 2: Role
                       _buildModernUserDetailTile(
-                        icon: Icons.groups_rounded,
+                        icon: Icons.people_alt_rounded,
                         iconBgColor: const Color(0xFFFAF5FF),
-                        iconColor: const Color(0xFF7C3AED),
+                        iconColor: const Color(0xFF9333EA),
                         label: 'role'.tr,
                         value: role,
                       ),
 
                       // Tile 3: Unit (Ministry)
                       _buildModernUserDetailTile(
-                        icon: Icons.domain_rounded,
+                        icon: Icons.apartment_rounded,
                         iconBgColor: const Color(0xFFFEF3C7),
                         iconColor: const Color(0xFFD97706),
                         label: 'unit_ministry'.tr,
@@ -2340,6 +2334,54 @@ class AdminView extends GetView<AdminController> {
 
                       // Tile 4: Status
                       _buildModernUserStatusTile(isActive: isActive),
+
+                      const SizedBox(height: 18),
+
+                      // Bottom Reset Password Action Button
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.of(context).pop();
+                            Get.toNamed(
+                              AppRoutes.resetPassword,
+                              arguments: {
+                                'username': username,
+                                'displayName': displayName,
+                                'user': user,
+                              },
+                            );
+                          },
+                          borderRadius: BorderRadius.circular(16),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(vertical: 13.5),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE0EDFF),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.sync_rounded,
+                                  color: Color(0xFF2563EB),
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'កំណត់ពាក្យសម្ងាត់ឡើងវិញ (Reset Password)',
+                                  style: GoogleFonts.kantumruyPro(
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF2563EB),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -2396,8 +2438,8 @@ class AdminView extends GetView<AdminController> {
                     Text(
                       value,
                       style: GoogleFonts.kantumruyPro(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.bold,
                         color: const Color(0xFF0F172A),
                       ),
                       maxLines: 2,
@@ -2412,7 +2454,7 @@ class AdminView extends GetView<AdminController> {
         const Divider(
           height: 12,
           thickness: 1,
-          color: Color(0xFFF1F5F9),
+          color: Color(0xFFF8FAFC),
         ),
       ],
     );
@@ -2485,8 +2527,8 @@ class AdminView extends GetView<AdminController> {
                       const SizedBox(width: 7),
                       Text(
                         isActive
-                            ? 'status_active_full'.tr
-                            : 'status_inactive_full'.tr,
+                            ? 'កំពុងដំណើរការ (ACTIVE)'
+                            : 'ផ្អាកដំណើរការ (INACTIVE)',
                         style: GoogleFonts.kantumruyPro(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,

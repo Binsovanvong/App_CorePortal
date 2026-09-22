@@ -223,6 +223,41 @@ class AuthService {
     }
   }
 
+  Future<dynamic> resetUserPasswordService({
+    required String username,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    final String cleanUsername = username.trim();
+    final Map<String, dynamic> body = {
+      'newPassword': newPassword,
+      'confirmPassword': confirmPassword,
+    };
+
+    debugPrint("RESET PASSWORD API for user: $cleanUsername");
+
+    try {
+      final response = await ApiClient.dio.put(
+        '/api/mobile/accounts/$cleanUsername/reset-password',
+        data: body,
+      );
+      return response.data;
+    } on DioException catch (e) {
+      debugPrint("RESET PASSWORD API ERROR: ${e.response?.statusCode} - ${e.response?.data}");
+      if (e.response?.statusCode == 404) {
+        // Fallback to /accounts/$cleanUsername/reset-password
+        try {
+          final fallbackRes = await ApiClient.dio.put(
+            '/accounts/$cleanUsername/reset-password',
+            data: body,
+          );
+          return fallbackRes.data;
+        } catch (_) {}
+      }
+      rethrow;
+    }
+  }
+
   Future<dynamic> changePasswordService({
     String? username,
     required String oldPassword,

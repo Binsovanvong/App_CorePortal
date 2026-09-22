@@ -26,6 +26,8 @@ import 'package:core_portal/screens/admin/admin_binding.dart';
 import 'package:core_portal/screens/admin/admin_view.dart';
 import 'package:core_portal/screens/splash/splash_binding.dart';
 import 'package:core_portal/screens/splash/splash_view.dart';
+import 'package:core_portal/screens/reset_password/reset_password_view.dart';
+import 'package:core_portal/screens/reset_password/reset_password_binding.dart';
 import '../screens/setting/setting_view.dart';
 
 class AppPages {
@@ -105,6 +107,11 @@ class AppPages {
       name: AppRoutes.application,
       page: () => const ApplicationView(),
       binding: ApplicationViewBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.resetPassword,
+      page: () => const ResetPasswordView(),
+      binding: ResetPasswordBinding(),
     ),
   ];
 }

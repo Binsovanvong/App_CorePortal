@@ -16,4 +16,5 @@ class AppRoutes {
   static const String superAdmin = '/super-admin';
   static const String admin = '/admin';
   static const String application = '/application';
+  static const String resetPassword = '/reset-password';
 }
