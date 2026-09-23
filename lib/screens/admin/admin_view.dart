@@ -1947,7 +1947,7 @@ class AdminView extends GetView<AdminController> {
               ),
               const SizedBox(width: 6),
 
-              // 3 Circular Action Buttons (Eye, Edit, Three-dots)
+              // Action Buttons (Eye, Edit)
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -1969,12 +1969,6 @@ class AdminView extends GetView<AdminController> {
                                   'មិនអាចកែសម្រួលគណនីផ្ទាល់ខ្លួនរបស់អ្នកបានឡើយ (You cannot edit your own account)',
                             );
                           },
-                  ),
-                  const SizedBox(width: 6),
-                  _buildUserCircleBtn(
-                    icon: Icons.more_vert_rounded,
-                    iconColor: const Color(0xFF64748B),
-                    onTap: () => _showUserActionsMenu(context, user, index),
                   ),
                 ],
               ),
@@ -2549,6 +2543,7 @@ class AdminView extends GetView<AdminController> {
     );
   }
 
+  // ignore: unused_element
   void _showUserActionsMenu(
     BuildContext context,
     Map<String, dynamic> user,
