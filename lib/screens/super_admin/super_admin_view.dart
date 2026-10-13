@@ -2950,54 +2950,6 @@ class SuperAdminView extends GetView<SuperAdminController> {
 
                       // Tile 4: Status
                       _buildModernUserStatusTile(isActive: isActive),
-
-                      const SizedBox(height: 18),
-
-                      // Bottom Reset Password Action Button
-                      Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () {
-                            Navigator.of(context).pop();
-                            Get.toNamed(
-                              AppRoutes.resetPassword,
-                              arguments: {
-                                'username': username,
-                                'displayName': displayName,
-                                'user': user,
-                              },
-                            );
-                          },
-                          borderRadius: BorderRadius.circular(16),
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 13.5),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFE0EDFF),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  Icons.sync_rounded,
-                                  color: Color(0xFF2563EB),
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'កំណត់ពាក្យសម្ងាត់ឡើងវិញ (Reset Password)',
-                                  style: GoogleFonts.kantumruyPro(
-                                    fontSize: 13.5,
-                                    fontWeight: FontWeight.bold,
-                                    color: const Color(0xFF2563EB),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -3218,6 +3170,32 @@ class SuperAdminView extends GetView<SuperAdminController> {
                           'មិនអាចកែសម្រួលគណនីផ្ទាល់ខ្លួនរបស់អ្នកបានឡើយ (You cannot edit your own account)',
                     );
                   }
+                },
+              ),
+              ListTile(
+                leading: const Icon(
+                  Icons.lock_reset_rounded,
+                  color: Color(0xFFD97706),
+                ),
+                title: Text(
+                  "កំណត់ពាក្យសម្ងាត់ឡើងវិញ",
+                  style: GoogleFonts.kantumruyPro(
+                    fontSize: 14,
+                    color: const Color(0xFF0F172A),
+                  ),
+                ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  final uname = (user['username'] ?? user['accountName'] ?? '').toString();
+                  final dname = (user['displayName'] ?? uname).toString();
+                  Get.toNamed(
+                    AppRoutes.resetPassword,
+                    arguments: {
+                      'username': uname,
+                      'displayName': dname,
+                      'user': user,
+                    },
+                  );
                 },
               ),
               ListTile(

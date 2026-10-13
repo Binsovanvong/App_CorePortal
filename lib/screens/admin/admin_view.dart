@@ -1616,6 +1616,29 @@ class AdminView extends GetView<AdminController> {
                 ],
               ),
             ),
+            const SizedBox(height: 18),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1D4ED8),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              onPressed: () => controller.fetchDashboardData(),
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: Text(
+                'refresh'.tr,
+                style: GoogleFonts.kantumruyPro(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
+              ),
+            ),
             const SizedBox(height: 80),
           ],
         ),
@@ -1734,6 +1757,15 @@ class AdminView extends GetView<AdminController> {
                 ),
               ],
             ),
+          ),
+          IconButton(
+            icon: const Icon(
+              Icons.refresh_rounded,
+              color: Color(0xFF1D4ED8),
+              size: 24,
+            ),
+            tooltip: 'refresh'.tr,
+            onPressed: () => controller.fetchDashboardData(),
           ),
         ],
       ),
@@ -1947,7 +1979,7 @@ class AdminView extends GetView<AdminController> {
               ),
               const SizedBox(width: 6),
 
-              // Action Buttons (Eye, Edit)
+              // Action Buttons (Eye, Edit, Reset Password)
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -1969,6 +2001,20 @@ class AdminView extends GetView<AdminController> {
                                   'មិនអាចកែសម្រួលគណនីផ្ទាល់ខ្លួនរបស់អ្នកបានឡើយ (You cannot edit your own account)',
                             );
                           },
+                  ),
+                  const SizedBox(width: 6),
+                  _buildUserCircleBtn(
+                    icon: Icons.lock_reset_rounded,
+                    iconColor: const Color(0xFFD97706),
+                    bgColor: const Color(0xFFFEF3C7),
+                    onTap: () => Get.toNamed(
+                      AppRoutes.resetPassword,
+                      arguments: {
+                        'username': username,
+                        'displayName': displayName,
+                        'user': user,
+                      },
+                    ),
                   ),
                 ],
               ),
@@ -2100,6 +2146,7 @@ class AdminView extends GetView<AdminController> {
     required IconData icon,
     required VoidCallback onTap,
     Color? iconColor,
+    Color? bgColor,
   }) {
     return Material(
       color: Colors.transparent,
@@ -2107,16 +2154,16 @@ class AdminView extends GetView<AdminController> {
         onTap: onTap,
         borderRadius: BorderRadius.circular(18),
         child: Container(
-          width: 33,
-          height: 33,
-          decoration: const BoxDecoration(
-            color: Color(0xFFEFF6FF),
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: bgColor ?? const Color(0xFFEFF6FF),
             shape: BoxShape.circle,
           ),
           child: Center(
             child: Icon(
               icon,
-              size: 16.5,
+              size: 16,
               color: iconColor ?? const Color(0xFF1D4ED8),
             ),
           ),
@@ -2329,54 +2376,6 @@ class AdminView extends GetView<AdminController> {
 
                       // Tile 4: Status
                       _buildModernUserStatusTile(isActive: isActive),
-
-                      const SizedBox(height: 18),
-
-                      // Bottom Reset Password Action Button
-                      Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () {
-                            Navigator.of(context).pop();
-                            Get.toNamed(
-                              AppRoutes.resetPassword,
-                              arguments: {
-                                'username': username,
-                                'displayName': displayName,
-                                'user': user,
-                              },
-                            );
-                          },
-                          borderRadius: BorderRadius.circular(16),
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 13.5),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFE0EDFF),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  Icons.sync_rounded,
-                                  color: Color(0xFF2563EB),
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'កំណត់ពាក្យសម្ងាត់ឡើងវិញ (Reset Password)',
-                                  style: GoogleFonts.kantumruyPro(
-                                    fontSize: 13.5,
-                                    fontWeight: FontWeight.bold,
-                                    color: const Color(0xFF2563EB),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),

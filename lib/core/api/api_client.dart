@@ -241,6 +241,9 @@ class ApiClient {
               final path = options.path.toLowerCase();
               final isAuthEndpoint =
                   path.contains('/auth/login') ||
+                  path.contains('/auth/browser-login') ||
+                  path.contains('/auth/exchange-code') ||
+                  path.contains('/auth/update-password') ||
                   path.contains('/auth/device/') ||
                   path.contains('/auth/refresh');
 
@@ -297,6 +300,9 @@ class ApiClient {
               final path = e.requestOptions.path.toLowerCase();
               final isAuthEndpoint =
                   path.contains('/auth/login') ||
+                  path.contains('/auth/browser-login') ||
+                  path.contains('/auth/exchange-code') ||
+                  path.contains('/auth/update-password') ||
                   path.contains('/auth/device/') ||
                   path.contains('/auth/refresh');
 

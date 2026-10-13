@@ -6,7 +6,6 @@ import 'package:core_portal/routes/page_route.dart';
 import 'package:core_portal/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import 'package:get_storage/get_storage.dart';
 
 Future<String> _determineInitialRoute(
@@ -43,11 +42,12 @@ class DevHttpOverrides extends HttpOverrides {
     if (kDebugMode) {
       client.badCertificateCallback =
           (X509Certificate cert, String host, int port) {
-        return host == '172.30.192.127' ||
-            host == '10.0.2.2' ||
-            host == '127.0.0.1' ||
-            host == 'localhost';
-      };
+            return host == 'uat-app-core.interior.gov.kh' ||
+                host == '172.30.192.127' ||
+                host == '10.0.2.2' ||
+                host == '127.0.0.1' ||
+                host == 'localhost';
+          };
     }
     return client;
   }
@@ -68,7 +68,7 @@ void main() async {
   final String initialRoute = await _determineInitialRoute(
     box,
     skipAuth: false,
-    devRole: 'super_admin',
+    devRole: 'admin',
   );
 
   runApp(MainApp(initialRoute: initialRoute));

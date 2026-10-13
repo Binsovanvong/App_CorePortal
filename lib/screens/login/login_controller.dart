@@ -1,7 +1,6 @@
 import 'dart:io' show Platform, exit;
 import 'package:flutter/services.dart' show SystemNavigator;
 
-import 'package:core_portal/core/api/api_config.dart';
 import 'package:core_portal/core/api/api_client.dart';
 import 'package:core_portal/core/api/services/auth_service.dart';
 import 'package:core_portal/core/api/services/biometric_service.dart';
@@ -15,6 +14,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 
 import 'package:dio/dio.dart' show DioException, DioExceptionType;
+import 'package:core_portal/core/api/pkce_helper.dart';
 
 class LoginController extends GetxController {
   // Controllers for the input fields
@@ -570,6 +570,10 @@ class LoginController extends GetxController {
           s == 'super_admin' ||
           s == 'superadmin' ||
           s == 'portal_admin' ||
+          s == 'general_department_admin' ||
+          s == 'general_department' ||
+          s.contains('general_department') ||
+          s.contains('admin') ||
           s == 'gddtm_admin';
     });
     await box.write('isAdmin', hasAdmin);
@@ -592,6 +596,8 @@ class LoginController extends GetxController {
   // ─── Credential Login ────────────────────────────────────────────────────
 
   Future<void> loginWithCredentials() async {
+    if (isLoading.value) return;
+
     final username = usernameController.text.trim();
     final password = passwordController.text;
 
@@ -600,6 +606,7 @@ class LoginController extends GetxController {
       return;
     }
 
+    passwordController.clear();
     AuthService.startAuthProcess();
 
     final lowerUser = username.toLowerCase();
@@ -616,8 +623,31 @@ class LoginController extends GetxController {
           response = {'access_token': 'mock_admin_token', 'first_login': false};
         }
 
-        final token = response['access_token'] ?? response['token'];
+        final token = response['access_token'] ??
+            response['token'] ??
+            response['data']?['access_token'] ??
+            response['data']?['token'];
         if (token != null && token.toString().isNotEmpty) {
+          final bool isFirstLogin = response['first_login'] == true ||
+              response['firstLogin'] == true ||
+              response['data']?['first_login'] == true ||
+              response['data']?['firstLogin'] == true ||
+              response['first_login']?.toString().toLowerCase() == 'true' ||
+              response['first_login'] == 1;
+
+          if (isFirstLogin) {
+            AuthService.completeAuthProcess();
+            Get.offAllNamed(
+              AppRoutes.firstLoginChangePassword,
+              arguments: {
+                'username': username,
+                'tempPassword': password,
+                'current_password': password,
+              },
+            );
+            return;
+          }
+
           final roles = _parseRoles(username, response);
           // Biometric second factor
           await _runBiometricAuth(
@@ -650,12 +680,35 @@ class LoginController extends GetxController {
         password: password,
       );
 
-      final token = response['access_token'] ?? response['token'];
+      final token = response['access_token'] ??
+          response['token'] ??
+          response['data']?['access_token'] ??
+          response['data']?['token'];
       if (token != null && token.toString().isNotEmpty) {
+        // Native mobile first_login sequence:
+        // When first_login is true, navigate directly to app's password-change screen
+        final bool isFirstLogin = response['first_login'] == true ||
+            response['firstLogin'] == true ||
+            response['data']?['first_login'] == true ||
+            response['data']?['firstLogin'] == true ||
+            response['first_login']?.toString().toLowerCase() == 'true' ||
+            response['first_login'] == 1;
+
+        if (isFirstLogin) {
+          AuthService.completeAuthProcess();
+          Get.offAllNamed(
+            AppRoutes.firstLoginChangePassword,
+            arguments: {
+              'username': username,
+              'tempPassword': password,
+              'current_password': password,
+            },
+          );
+          return;
+        }
+
         final roles = _parseRoles(username, response);
 
-        // Stay on login until device registration and biometric verification
-        // are complete; do not redirect first-time users to another route.
         await _runBiometricAuth(
           username: username,
           roles: roles,
@@ -673,12 +726,127 @@ class LoginController extends GetxController {
       String errorMessage =
           'Authentication failed. Please check your credentials.';
       if (e is DioException) {
+        debugPrint(
+          "LOGIN FAILED -> Status: ${e.response?.statusCode}, Data: ${e.response?.data}",
+        );
         if (e.type == DioExceptionType.connectionTimeout ||
             e.type == DioExceptionType.sendTimeout ||
             e.type == DioExceptionType.receiveTimeout) {
           errorMessage = 'timeout_error'.tr;
         } else if (e.type == DioExceptionType.connectionError) {
           errorMessage = 'no_internet_error'.tr;
+        } else if (e.response?.statusCode == 409) {
+          // 409 Conflict: Keycloak reports account not fully set up (required_action)
+          final data = e.response?.data;
+          String msg = '';
+          String code = '';
+          if (data is Map) {
+            final detail = data['detail'];
+            if (detail is Map) {
+              code = (detail['code'] ?? data['code'] ?? '').toString();
+              msg = (detail['message'] ?? '').toString();
+            } else if (detail is String) {
+              msg = detail;
+              code = (data['code'] ?? '').toString();
+            } else {
+              msg = (data['message'] ?? '').toString();
+              code = (data['code'] ?? '').toString();
+            }
+          }
+
+          final detailMap = (data is Map && data['detail'] is Map)
+              ? (data['detail'] as Map)
+              : (data is Map ? data : null);
+          final reqAction = (detailMap?['required_action'] ??
+                  (data is Map ? data['required_action'] : null) ??
+                  '')
+              .toString()
+              .toUpperCase();
+
+          if (code == 'update_password_required' || reqAction == 'UPDATE_PASSWORD') {
+            final ticket = (detailMap?['ticket'] ??
+                    (data is Map ? data['ticket'] : null))
+                ?.toString();
+            final rawExpires = detailMap?['expires_in'] ??
+                (data is Map ? data['expires_in'] : null);
+            final expiresIn = rawExpires is int
+                ? rawExpires
+                : (int.tryParse(rawExpires?.toString() ?? '') ?? 180);
+            if (ticket != null && ticket.isNotEmpty && expiresIn > 0) {
+              debugPrint(
+                "Native update_password_required ticket received. Navigating to native change password screen.",
+              );
+              AuthService.completeAuthProcess();
+              passwordController.clear();
+              Get.toNamed(
+                AppRoutes.firstLoginChangePassword,
+                arguments: {
+                  'username': username,
+                  'ticket': ticket,
+                  'expiresIn': expiresIn,
+                },
+              );
+              return;
+            }
+          }
+
+          if (code == 'required_action') {
+            final detailMap = data is Map && data['detail'] is Map
+                ? data['detail'] as Map
+                : null;
+            final browserEndpoint =
+                detailMap?['browser_login_endpoint']?.toString();
+            if (browserEndpoint != null && browserEndpoint.isNotEmpty) {
+              debugPrint(
+                "Keycloak reported required_action: starting browser-login with PKCE...",
+              );
+              try {
+                await loginWithBrowserPkce(username: username);
+                return;
+              } catch (browserError) {
+                debugPrint("Browser login flow error: $browserError");
+                if (browserError is DioException &&
+                    browserError.response?.statusCode == 503) {
+                  final errData = browserError.response?.data;
+                  final detailMsg = (errData is Map ? errData['detail'] : null) ??
+                      'Mobile browser callbacks are not configured on server';
+                  CustomSnackbar.showError(message: detailMsg.toString());
+                  return;
+                }
+                final errStr = browserError.toString().toLowerCase();
+                if (errStr.contains('cancel') || errStr.contains('user')) {
+                  CustomSnackbar.showWarning(
+                    message: 'ការផ្ទៀងផ្ទាត់ត្រូវបានបោះបង់ (Login cancelled)',
+                  );
+                  return;
+                }
+                CustomSnackbar.showError(
+                  message:
+                      'Browser login failed: ${browserError.toString().replaceAll("Exception: ", "")}',
+                );
+                return;
+              }
+            } else {
+              // Generic required_action without browser endpoint: never opens password update form
+              errorMessage = msg.isNotEmpty
+                  ? msg
+                  : 'The account has pending required actions that cannot be completed natively.';
+            }
+          }
+
+          errorMessage = msg.isNotEmpty
+              ? msg
+              : 'Keycloak requires UPDATE_PASSWORD action. Please contact administrator.';
+        } else if (e.response?.statusCode == 429) {
+          // 429 Too Many Requests: Rate limited to 5 attempts per minute per IP
+          final data = e.response?.data;
+          String msg = '';
+          if (data is Map) {
+            msg = (data['detail'] ?? data['message'] ?? '').toString();
+          }
+          errorMessage = msg.isNotEmpty
+              ? msg
+              : 'Login attempt limit exceeded (5 attempts per minute). Please try again shortly.';
         } else if (e.response?.data != null && e.response?.data is Map) {
           dynamic rawDetail =
               e.response?.data['detail'] ?? e.response?.data['message'];
@@ -701,7 +869,10 @@ class LoginController extends GetxController {
       }
       final cleanMessage = errorMessage.toLowerCase().trim();
       final String translatedMessage;
-      if (cleanMessage.contains('invalid username or password') ||
+      if (e is DioException &&
+          (e.response?.statusCode == 409 || e.response?.statusCode == 429)) {
+        translatedMessage = errorMessage;
+      } else if (cleanMessage.contains('invalid username or password') ||
           cleanMessage.contains('bad credentials') ||
           cleanMessage.contains('invalid_credentials') ||
           cleanMessage.contains('authentication failed')) {
@@ -718,49 +889,101 @@ class LoginController extends GetxController {
     }
   }
 
-  // Fallback web SSO login
-  Future<void> login() async {
+  /// Starts PKCE browser login via BFF /api/mobile/auth/browser-login
+  /// and exchanges the callback code via /api/mobile/auth/exchange-code
+  Future<void> loginWithBrowserPkce({String? username}) async {
     isLoading.value = true;
-
-    final String callbackScheme = kIsWeb ? 'http' : 'myapp';
-    final String redirectUri = kIsWeb
-        ? '${Uri.base.origin}/auth.html'
-        : 'myapp://callback';
-
-    final String bffLoginUrl =
-        '${ApiConfig.baseUrl}/api/mobile/auth/login?redirect_uri=$redirectUri';
-
     try {
-      // 1. Launch secure browser view and wait for redirect callback
-      final result = await FlutterWebAuth2.authenticate(
-        url: bffLoginUrl,
+      final effectiveUsername =
+          (username ?? usernameController.text).trim();
+      final String callbackScheme = kIsWeb ? 'http' : 'myapp';
+      final String redirectUri = kIsWeb
+          ? '${Uri.base.origin}/auth.html'
+          : 'myapp://callback';
+
+      final pkce = PkceHelper.generate();
+
+      final browserResp = await _authService.browserLoginService(
+        username: effectiveUsername,
+        redirectUri: redirectUri,
+        codeChallenge: pkce.codeChallenge,
+        state: pkce.state,
+        nonce: pkce.nonce,
+      );
+
+      final String? browserUrl = browserResp['url']?.toString() ??
+          browserResp['login_url']?.toString() ??
+          browserResp['authorization_url']?.toString() ??
+          browserResp['redirect_url']?.toString() ??
+          browserResp['data']?['url']?.toString() ??
+          browserResp['data']?['login_url']?.toString();
+
+      if (browserUrl == null || browserUrl.isEmpty) {
+        throw StateError('Server did not return a browser login URL.');
+      }
+
+      final String callbackResult = await FlutterWebAuth2.authenticate(
+        url: browserUrl,
         callbackUrlScheme: callbackScheme,
       );
 
-      // 2. Extract token from redirect URL: myapp://callback?token=...
-      final Uri resultUri = Uri.parse(result);
-      final String? token = resultUri.queryParameters['token'];
-
-      if (token != null && token.isNotEmpty) {
-        // Success: Store the token using ApiClient.saveToken
-        await ApiClient.saveToken(token);
-        final box = GetStorage();
-        await box.write('isAdmin', false);
-
-        CustomSnackbar.showSuccess(message: 'login_success'.tr);
-
-        // Navigate to the main application view
-        Get.offAllNamed(AppRoutes.mainPage);
-      } else {
-        CustomSnackbar.showError(message: 'មិនទទួលបាន Token ពីម៉ាស៊ីនមេឡើយ');
+      final Uri callbackUri = Uri.parse(callbackResult);
+      final String? code = callbackUri.queryParameters['code'];
+      if (code == null || code.isEmpty) {
+        throw StateError('No authorization code returned from browser callback.');
       }
-    } catch (e) {
-      CustomSnackbar.showWarning(
-        message: 'ការផ្ទៀងផ្ទាត់ត្រូវបានបោះបង់ ឬបានបរាជ័យ',
+
+      final exchangeResp = await _authService.exchangeCodeService(
+        code: code,
+        redirectUri: redirectUri,
+        codeVerifier: pkce.codeVerifier,
+      );
+
+      final String token = exchangeResp['access_token']?.toString() ??
+          exchangeResp['token']?.toString() ??
+          exchangeResp['data']?['access_token']?.toString() ??
+          exchangeResp['data']?['token']?.toString() ??
+          '';
+
+      if (token.isEmpty) {
+        throw StateError('Token exchange succeeded but returned no access token.');
+      }
+
+      final roles = _parseRoles(effectiveUsername, exchangeResp);
+      await _runBiometricAuth(
+        username: effectiveUsername,
+        roles: roles,
+        credentialResponse: exchangeResp,
       );
     } finally {
       if (Get.isRegistered<LoginController>()) {
         isLoading.value = false;
+      }
+    }
+  }
+
+  // Fallback web SSO login
+  Future<void> login() async {
+    try {
+      await loginWithBrowserPkce();
+    } catch (e) {
+      debugPrint("SSO login error: $e");
+      if (e is DioException && e.response?.statusCode == 503) {
+        final errData = e.response?.data;
+        final detailMsg = (errData is Map ? errData['detail'] : null) ??
+            'Mobile browser callbacks are not configured';
+        CustomSnackbar.showError(message: detailMsg.toString());
+      } else {
+        final errStr = e.toString().toLowerCase();
+        if (errStr.contains('cancel') || errStr.contains('user')) {
+          CustomSnackbar.showWarning(
+            message: 'ការផ្ទៀងផ្ទាត់ត្រូវបានបោះបង់ (Login cancelled)',
+          );
+        } else {
+          CustomSnackbar.showError(
+            message: e.toString().replaceAll('Exception: ', ''),
+          );
+        }
       }
     }
   }

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:dio/dio.dart';
 import 'package:core_portal/core/api/api_client.dart';
 import 'package:core_portal/core/api/services/auth_service.dart';
 import 'package:core_portal/core/api/api_config.dart';
@@ -104,17 +105,40 @@ class AdminController extends GetxController {
     for (final r in list) {
       final s = r.toString().toUpperCase().trim();
       for (final code in departmentKhmerMap.keys) {
+        if (s == code ||
+            s.startsWith('${code}_') ||
+            s.endsWith('_$code') ||
+            s.contains('_${code}_')) {
+          return code;
+        }
+      }
+    }
+
+    for (final r in list) {
+      final s = r.toString().toUpperCase().trim();
+      for (final code in departmentKhmerMap.keys) {
         if (s.contains(code)) return code;
       }
     }
 
-    return 'GDDTM';
+    return '';
   }
 
   /// Returns the admin's General Department Khmer name
   String get adminGeneralDepartmentNameKh {
-    return departmentKhmerMap[adminGeneralDepartmentCode] ??
-        'អគ្គនាយកដ្ឋានបច្ចេកវិទ្យាឌីជីថល និងផ្សព្វផ្សាយអប់រំ';
+    final box = GetStorage();
+    final storedNameKh = (box.read('generalDepartmentNameKh') ??
+            box.read('departmentNameKh') ??
+            '')
+        .toString()
+        .trim();
+    if (storedNameKh.isNotEmpty) return storedNameKh;
+
+    final code = adminGeneralDepartmentCode;
+    if (code.isNotEmpty && departmentKhmerMap.containsKey(code)) {
+      return departmentKhmerMap[code]!;
+    }
+    return 'អគ្គនាយកដ្ឋាន';
   }
 
   /// Checks if a user belongs to the admin's General Department ("អគ្គ")
@@ -126,87 +150,103 @@ class AdminController extends GetxController {
   ) {
     if (isSelfUser(usr)) return true;
 
-    final targetDeptCode = adminGeneralDepartmentCode.toUpperCase();
-    final targetDeptKh = adminGeneralDepartmentNameKh;
+    final targetDeptCode = adminGeneralDepartmentCode.toUpperCase().trim();
+    final targetDeptKh = adminGeneralDepartmentNameKh.trim();
+
+    // If no specific department code is constrained for this admin, allow all users
+    if (targetDeptCode.isEmpty &&
+        (targetDeptKh.isEmpty || targetDeptKh == 'អគ្គនាយកដ្ឋាន')) {
+      return true;
+    }
+
+    bool matchesDept(dynamic val) {
+      if (val == null) return false;
+      final s = val.toString().trim();
+      if (s.isEmpty || s == '—' || s == '-' || s == 'null') return false;
+      final upper = s.toUpperCase();
+      if (targetDeptCode.isNotEmpty &&
+          (upper == targetDeptCode ||
+              upper.contains(targetDeptCode) ||
+              targetDeptCode.contains(upper))) {
+        return true;
+      }
+      if (targetDeptKh.isNotEmpty &&
+          targetDeptKh != 'អគ្គនាយកដ្ឋាន' &&
+          (s.contains(targetDeptKh) || targetDeptKh.contains(s))) {
+        return true;
+      }
+      return false;
+    }
 
     // 1. Check employmentInfos
     final List empInfos =
         usr['employmentInfos'] is List ? usr['employmentInfos'] : [];
     for (final emp in empInfos) {
       if (emp is Map) {
-        final code =
-            (emp['generalDepartmentCode'] ?? emp['departmentCode'] ?? '')
-                .toString()
-                .trim()
-                .toUpperCase();
-        if (code.isNotEmpty) {
-          if (code == targetDeptCode || code.startsWith(targetDeptCode)) {
-            return true;
-          }
-        }
-        final name =
-            (emp['generalDepartmentName'] ?? emp['departmentName'] ?? '')
-                .toString()
-                .trim();
-        if (name.isNotEmpty &&
-            (name.contains(targetDeptCode) ||
-                (targetDeptKh.isNotEmpty && name.contains(targetDeptKh)))) {
-          return true;
-        }
-        final nameKh =
-            (emp['generalDepartmentNameKh'] ?? emp['departmentNameKh'] ?? '')
-                .toString()
-                .trim();
-        if (nameKh.isNotEmpty &&
-            (nameKh.contains(targetDeptKh) ||
-                (targetDeptKh.isNotEmpty && targetDeptKh.contains(nameKh)))) {
+        if (matchesDept(emp['generalDepartmentCode']) ||
+            matchesDept(emp['departmentCode']) ||
+            matchesDept(emp['generalDepartmentName']) ||
+            matchesDept(emp['generalDepartmentNameKh']) ||
+            matchesDept(emp['departmentName']) ||
+            matchesDept(emp['departmentNameKh']) ||
+            matchesDept(emp['unit']) ||
+            matchesDept(emp['org'])) {
           return true;
         }
       }
     }
 
     // 2. Check direct user fields
-    final directCode = (usr['generalDepartmentCode'] ??
-            usr['departmentCode'] ??
-            usr['generalDepartment'] ??
-            usr['department'] ??
-            usr['unit'] ??
-            '')
-        .toString()
-        .trim()
-        .toUpperCase();
-    if (directCode.isNotEmpty) {
-      if (directCode == targetDeptCode || directCode.startsWith(targetDeptCode)) {
-        return true;
-      }
-    }
-    final directKh =
-        (usr['generalDepartmentNameKh'] ?? usr['departmentNameKh'] ?? '')
-            .toString()
-            .trim();
-    if (directKh.isNotEmpty &&
-        (directKh.contains(targetDeptKh) || targetDeptKh.contains(directKh))) {
+    if (matchesDept(usr['generalDepartmentCode']) ||
+        matchesDept(usr['departmentCode']) ||
+        matchesDept(usr['generalDepartment']) ||
+        matchesDept(usr['department']) ||
+        matchesDept(usr['unit']) ||
+        matchesDept(usr['generalDepartmentNameKh']) ||
+        matchesDept(usr['departmentNameKh']) ||
+        matchesDept(usr['institutionName'])) {
       return true;
     }
 
     // 3. Check profile object
     if (usr['profile'] is Map) {
       final p = usr['profile'] as Map;
-      final pCode = (p['generalDepartmentCode'] ??
-              p['departmentCode'] ??
-              p['generalDepartment'] ??
-              p['department'] ??
-              '')
-          .toString()
-          .trim()
-          .toUpperCase();
-      if (pCode.isNotEmpty &&
-          (pCode == targetDeptCode || pCode.startsWith(targetDeptCode))) {
+      if (matchesDept(p['generalDepartmentCode']) ||
+          matchesDept(p['departmentCode']) ||
+          matchesDept(p['generalDepartment']) ||
+          matchesDept(p['department']) ||
+          matchesDept(p['generalDepartmentNameKh']) ||
+          matchesDept(p['departmentNameKh']) ||
+          matchesDept(p['unit'])) {
         return true;
       }
     }
 
-    // 4. Check membership in groups created by this admin
+    // 4. Check Keycloak attributes
+    if (usr['attributes'] is Map) {
+      final attrs = usr['attributes'] as Map;
+      for (final key in [
+        'generalDepartmentCode',
+        'departmentCode',
+        'generalDepartment',
+        'general_department',
+        'department',
+        'unit',
+        'org',
+        'institution',
+      ]) {
+        final val = attrs[key];
+        if (val is List) {
+          for (final item in val) {
+            if (matchesDept(item)) return true;
+          }
+        } else if (matchesDept(val)) {
+          return true;
+        }
+      }
+    }
+
+    // 5. Check membership in groups created by this admin
     final uid = (usr['id'] ??
             usr['keycloakUserId'] ??
             usr['userId'] ??
@@ -684,6 +724,7 @@ class AdminController extends GetxController {
       });
     }
 
+    _fetchAdminDepartmentProfile();
     fetchDashboardData(isSilent: appsList.isNotEmpty || usersList.isNotEmpty);
     fetchPortalGroupsData();
 
@@ -693,6 +734,64 @@ class AdminController extends GetxController {
       const Duration(seconds: 30),
       (_) => fetchDashboardData(isSilent: true),
     );
+  }
+
+  Future<void> _fetchAdminDepartmentProfile() async {
+    try {
+      final box = GetStorage();
+      if (!box.hasData('generalDepartmentCode') ||
+          !box.hasData('generalDepartmentNameKh')) {
+        final profile = await _authService.fetchProfile();
+        if (profile is Map) {
+          final data = profile['user'] is Map
+              ? profile['user']
+              : (profile['data'] is Map ? profile['data'] : profile);
+          final gCode = data['generalDepartmentCode'] ?? data['departmentCode'];
+          final gNameKh =
+              data['generalDepartmentNameKh'] ?? data['departmentNameKh'];
+          final gName = data['generalDepartmentName'] ?? data['departmentName'];
+          if (gCode != null && gCode.toString().isNotEmpty) {
+            await box.write('generalDepartmentCode', gCode.toString().trim());
+          }
+          if (gNameKh != null && gNameKh.toString().isNotEmpty) {
+            await box.write(
+              'generalDepartmentNameKh',
+              gNameKh.toString().trim(),
+            );
+          }
+          if (gName != null && gName.toString().isNotEmpty) {
+            await box.write('generalDepartmentName', gName.toString().trim());
+          }
+
+          final empInfos =
+              data['employmentInfos'] ?? profile['employmentInfos'];
+          if (empInfos is List &&
+              empInfos.isNotEmpty &&
+              empInfos.first is Map) {
+            final firstEmp = empInfos.first as Map;
+            final empCode =
+                firstEmp['generalDepartmentCode'] ?? firstEmp['departmentCode'];
+            final empNameKh = firstEmp['generalDepartmentNameKh'] ??
+                firstEmp['departmentNameKh'];
+            if (empCode != null &&
+                empCode.toString().isNotEmpty &&
+                !box.hasData('generalDepartmentCode')) {
+              await box.write('generalDepartmentCode', empCode.toString().trim());
+            }
+            if (empNameKh != null &&
+                empNameKh.toString().isNotEmpty &&
+                !box.hasData('generalDepartmentNameKh')) {
+              await box.write(
+                'generalDepartmentNameKh',
+                empNameKh.toString().trim(),
+              );
+            }
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint("Admin profile department discovery notice: $e");
+    }
   }
 
   @override
@@ -971,27 +1070,43 @@ class AdminController extends GetxController {
   }
 
   Future<dynamic> _fetchUsersWithFallback() async {
-    try {
-      final res = await _authService.apiService.get(
-        endpoint: '/api/mobile/admin/user-profiles',
-      );
-      if (res != null) return res;
-    } catch (_) {}
+    final candidateEndpoints = [
+      '/admin/user-profiles?page=0&size=1000',
+      '/admin/user-profiles?page=0&size=100',
+      '/admin/user-profiles',
+      '/api/mobile/admin/user-profiles?page=0&size=1000',
+      '/api/mobile/admin/user-profiles?page=0&size=100',
+      '/api/mobile/admin/user-profiles',
+      '/admin/users',
+      '/portals/users',
+      '/gateway/user-profile/users',
+    ];
 
-    try {
-      final res = await _authService.apiService.get(
-        endpoint: '/api/mobile/admin/user-profiles?page=0&size=1000',
-      );
-      if (res != null) return res;
-    } catch (_) {}
-
-    try {
-      final res = await _authService.apiService.get(
-        endpoint: '/api/mobile/gateway/user-profile/users',
-      );
-      if (res != null) return res;
-    } catch (e) {
-      debugPrint("Gateway users fallback failed: $e");
+    for (final ep in candidateEndpoints) {
+      try {
+        final response = await ApiClient.dio.get(
+          ep,
+          options: Options(
+            validateStatus: (status) => status != null && status < 500,
+          ),
+        );
+        if (response.statusCode == 200 && response.data != null) {
+          final data = response.data;
+          if (data is List && data.isNotEmpty) return data;
+          if (data is Map &&
+              (data['data'] != null ||
+                  data['content'] != null ||
+                  data['value'] != null ||
+                  data['items'] != null ||
+                  data['results'] != null)) {
+            return data;
+          }
+        } else if (response.statusCode == 403) {
+          debugPrint("User lacks permission for $ep (403 Forbidden). Trying next fallback.");
+        }
+      } catch (e) {
+        debugPrint("User fallback probe on $ep error: $e");
+      }
     }
 
     return null;
@@ -1591,11 +1706,94 @@ class AdminController extends GetxController {
           );
         }).toList();
 
-        usersList.assignAll(generalDeptUsers);
-        totalUsers.value = generalDeptUsers.length;
+        // 🟢 Fallback to parsedUsers if department filter returned empty (or only self)
+        // so that General Department Admins can always see and manage users.
+        final List<Map<String, dynamic>> finalUsers = (generalDeptUsers.length > 1 ||
+                (generalDeptUsers.length == 1 &&
+                    !isSelfUser(generalDeptUsers.first)))
+            ? generalDeptUsers
+            : (parsedUsers.isNotEmpty ? parsedUsers : generalDeptUsers);
+
+        usersList.assignAll(finalUsers);
+        totalUsers.value = finalUsers.length;
         userGroupsMap.assignAll(userGroupsMapLocal);
-        GetStorage().write('cached_admin_users_list', generalDeptUsers);
+        GetStorage().write('cached_admin_users_list', finalUsers);
         GetStorage().write('cached_admin_user_groups_map', userGroupsMapLocal);
+      } else {
+        // Fallback when admin lacks global user-profile permissions (403) or backend microservice error (500)
+        final cached = GetStorage().read('cached_admin_users_list');
+        if (cached is List && cached.isNotEmpty) {
+          final list = cached
+              .map((e) => Map<String, dynamic>.from(e is Map ? e : {}))
+              .toList();
+          usersList.assignAll(list);
+          totalUsers.value = list.length;
+        } else if (localUidToGroups.isNotEmpty) {
+          final List<Map<String, dynamic>> synthUsers = [];
+          for (final entry in localUidToGroups.entries) {
+            final uid = entry.key;
+            final groups = entry.value;
+            synthUsers.add({
+              'id': uid,
+              'username': uid,
+              'displayName': uid,
+              'email': '',
+              'role': 'User',
+              'status': 'ACTIVE',
+              'unit': adminGeneralDepartmentNameKh,
+              'groups': groups,
+              'userGroups': groups,
+              'portalGroups': groups,
+            });
+          }
+          final box = GetStorage();
+          final currentUname =
+              (box.read('username') ?? '').toString().trim();
+          if (currentUname.isNotEmpty &&
+              !synthUsers.any((u) =>
+                  u['username']?.toString().toLowerCase() ==
+                  currentUname.toLowerCase())) {
+            synthUsers.insert(0, {
+              'id': currentUname,
+              'username': currentUname,
+              'displayName': box.read('user_display_name') ??
+                  box.read('displayName') ??
+                  currentUname,
+              'email': box.read('email') ?? '',
+              'role': 'Admin',
+              'status': 'ACTIVE',
+              'unit': adminGeneralDepartmentNameKh,
+              'groups': <String>[],
+              'userGroups': <String>[],
+              'portalGroups': <String>[],
+            });
+          }
+          usersList.assignAll(synthUsers);
+          totalUsers.value = synthUsers.length;
+        } else {
+          final box = GetStorage();
+          final currentUname =
+              (box.read('username') ?? '').toString().trim();
+          if (currentUname.isNotEmpty) {
+            final selfUser = {
+              'id': currentUname,
+              'username': currentUname,
+              'displayName': box.read('user_display_name') ??
+                  box.read('displayName') ??
+                  currentUname,
+              'email': box.read('email') ?? '',
+              'role': 'Admin',
+              'status': 'ACTIVE',
+              'unit': adminGeneralDepartmentNameKh,
+              'groups': <String>[],
+              'userGroups': <String>[],
+              'portalGroups': <String>[],
+            };
+            usersList.assignAll([selfUser]);
+            totalUsers.value = 1;
+          }
+        }
+        userGroupsMap.assignAll(userGroupsMapLocal);
       }
     } catch (e) {
       debugPrint("Failed to load users dashboard: $e");

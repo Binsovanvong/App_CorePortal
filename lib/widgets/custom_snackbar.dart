@@ -115,6 +115,9 @@ class CustomSnackbar {
     if (prefix.startsWith('http') ||
         prefix.startsWith('the connection') ||
         prefix.startsWith('the request') ||
+        prefix.startsWith('{') ||
+        prefix.contains('{') ||
+        prefix.contains('code') ||
         prefix.contains('dio') ||
         prefix.contains('exception') ||
         prefix.contains('status code') ||

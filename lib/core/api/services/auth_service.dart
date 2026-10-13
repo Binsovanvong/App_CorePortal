@@ -47,10 +47,13 @@ class AuthService {
         await ApiClient.logout();
         return false;
       }
+      // Tokens are stored strictly in hardware secure storage (Keychain/Keystore).
+      // Keep plaintext tokens out of ordinary storage.
       try {
         final box = GetStorage();
-        await box.write('access_token', token);
-        await box.write('token', token);
+        box.remove('access_token');
+        box.remove('token');
+        box.remove('refresh_token');
       } catch (_) {}
       return true;
     } catch (e) {
@@ -66,7 +69,7 @@ class AuthService {
   /// 1. Shared login using ApiClient.dio and saving tokens to flutter_secure_storage
   Future<void> login(String username, String password) async {
     final response = await ApiClient.dio.post(
-      '/auth/login',
+      '/api/mobile/auth/login',
       data: {'username': username, 'password': password},
     );
 
@@ -132,6 +135,156 @@ class AuthService {
     return response.data as List<dynamic>;
   }
 
+  /// Exchanges authorization code obtained via PKCE system browser flow for tokens
+  Future<Map<String, dynamic>> exchangeCodeForToken({
+    required String code,
+    required String codeVerifier,
+    required String redirectUri,
+  }) async {
+    try {
+      final response = await ApiClient.dio.post(
+        ApiConfig.keycloakTokenEndpoint,
+        data: {
+          'grant_type': 'authorization_code',
+          'client_id': ApiConfig.keycloakClientId,
+          'code': code,
+          'redirect_uri': redirectUri,
+          'code_verifier': codeVerifier,
+        },
+        options: Options(
+          contentType: Headers.formUrlEncodedContentType,
+        ),
+      );
+      return Map<String, dynamic>.from(response.data as Map);
+    } catch (_) {
+      // Fallback to BFF token endpoint if direct Keycloak call fails
+      final response = await ApiClient.dio.post(
+        '/auth/token',
+        data: {
+          'grant_type': 'authorization_code',
+          'client_id': ApiConfig.keycloakClientId,
+          'code': code,
+          'redirect_uri': redirectUri,
+          'code_verifier': codeVerifier,
+        },
+      );
+      return Map<String, dynamic>.from(response.data as Map);
+    }
+  }
+
+  /// Initiates PKCE browser login via BFF POST /api/mobile/auth/browser-login
+  Future<Map<String, dynamic>> browserLoginService({
+    required String username,
+    required String redirectUri,
+    required String codeChallenge,
+    required String state,
+    required String nonce,
+  }) async {
+    final response = await ApiClient.dio.post(
+      '/api/mobile/auth/browser-login',
+      data: {
+        'username': username,
+        'redirect_uri': redirectUri,
+        'code_challenge': codeChallenge,
+        'state': state,
+        'nonce': nonce,
+      },
+    );
+    if (response.data is Map) {
+      return Map<String, dynamic>.from(response.data as Map);
+    }
+    return {'url': response.data.toString()};
+  }
+
+  /// Exchanges callback authorization code for Keycloak tokens via BFF POST /api/mobile/auth/exchange-code
+  Future<Map<String, dynamic>> exchangeCodeService({
+    required String code,
+    required String redirectUri,
+    required String codeVerifier,
+  }) async {
+    final response = await ApiClient.dio.post(
+      '/api/mobile/auth/exchange-code',
+      data: {
+        'code': code,
+        'redirect_uri': redirectUri,
+        'code_verifier': codeVerifier,
+      },
+    );
+
+    final data = Map<String, dynamic>.from(response.data as Map);
+    final accessToken = data['access_token']?.toString() ??
+        data['token']?.toString() ??
+        data['data']?['access_token']?.toString() ??
+        data['data']?['token']?.toString();
+    final refreshToken = data['refresh_token']?.toString() ??
+        data['data']?['refresh_token']?.toString();
+
+    String? cpSession;
+    final setCookie = response.headers['set-cookie'];
+    if (setCookie != null) {
+      for (final c in setCookie) {
+        if (c.contains('CP_SESSION=')) {
+          cpSession = c.split('CP_SESSION=')[1].split(';')[0];
+        }
+      }
+    }
+
+    if (accessToken != null && accessToken.isNotEmpty) {
+      await ApiClient.saveToken(
+        accessToken,
+        refreshToken: refreshToken,
+        cpSession: cpSession,
+      );
+    }
+
+    return data;
+  }
+
+  /// Submits new password using temporary ticket from 409 update_password_required
+  /// via BFF POST /api/mobile/auth/update-password. Returns tokens on 200.
+  Future<Map<String, dynamic>> updatePasswordWithTicketService({
+    required String ticket,
+    required String newPassword,
+    String? confirmPassword,
+  }) async {
+    final response = await ApiClient.dio.post(
+      '/api/mobile/auth/update-password',
+      data: {
+        'ticket': ticket,
+        'new_password': newPassword,
+        'confirm_password': confirmPassword ?? newPassword,
+      },
+    );
+
+    final data = Map<String, dynamic>.from(response.data as Map);
+    final accessToken = data['access_token']?.toString() ??
+        data['token']?.toString() ??
+        data['data']?['access_token']?.toString() ??
+        data['data']?['token']?.toString();
+    final refreshToken = data['refresh_token']?.toString() ??
+        data['data']?['refresh_token']?.toString();
+
+    String? cpSession;
+    final setCookie = response.headers['set-cookie'];
+    if (setCookie != null) {
+      for (final c in setCookie) {
+        if (c.contains('CP_SESSION=')) {
+          cpSession = c.split('CP_SESSION=')[1].split(';')[0];
+        }
+      }
+    }
+
+    if (accessToken != null && accessToken.isNotEmpty) {
+      await ApiClient.saveToken(
+        accessToken,
+        refreshToken: refreshToken,
+        cpSession: cpSession,
+      );
+    }
+
+    return data;
+  }
+
   /// Compatibility login service returning full payload Map
   Future<Map<String, dynamic>> loginService({
     required String username,
@@ -139,7 +292,7 @@ class AuthService {
     String redirectUri = 'myapp://callback',
   }) async {
     final response = await ApiClient.dio.post(
-      '/auth/login',
+      '/api/mobile/auth/login',
       data: {'username': username, 'password': password},
     );
 
@@ -264,40 +417,18 @@ class AuthService {
     required String newPassword,
     String? confirmPassword,
   }) async {
-    String resolvedUsername = username?.trim() ?? '';
-    if (resolvedUsername.isEmpty) {
-      try {
-        final box = GetStorage();
-        resolvedUsername = (box.read('username') ?? '').toString().trim();
-      } catch (_) {}
-    }
-    if (resolvedUsername.isEmpty) {
-      try {
-        final token = await ApiClient.getAccessToken();
-        resolvedUsername =
-            ApiClient.extractUsernameFromToken(token)?.trim() ?? '';
-      } catch (_) {}
-    }
-
     try {
       final Map<String, dynamic> data = {
         'current_password': oldPassword,
         'new_password': newPassword,
-        if (confirmPassword != null && confirmPassword.isNotEmpty)
-          'confirm_password': confirmPassword,
-        if (resolvedUsername.isNotEmpty) 'username': resolvedUsername,
-        'currentPassword': oldPassword,
-        'newPassword': newPassword,
-        if (confirmPassword != null && confirmPassword.isNotEmpty)
-          'confirmPassword': confirmPassword,
       };
 
       debugPrint(
-        "CHANGE PASSWORD PAYLOAD: username=$resolvedUsername, current_password length=${oldPassword.length}, new_password length=${newPassword.length}",
+        "CHANGE PASSWORD: PUT /api/mobile/accounts/change-password with current_password and new_password",
       );
 
       final response = await ApiClient.dio.put(
-        '/accounts/change-password',
+        '/api/mobile/accounts/change-password',
         data: data,
       );
       return response.data;

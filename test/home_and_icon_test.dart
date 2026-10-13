@@ -51,6 +51,9 @@ void main() {
 
       final res5 = AppIconWidget.formatIconUrl('http://uat-app-core.interior.gov.kh/api/mobile/portals/uploads/api/v1/uploads/portal-app-icons/84ec8874-109c-48e8-9eb8-fc1c20f7a9ae.png', 'token123');
       expect(res5, equals('${ApiConfig.baseUrl}/api/mobile/portals/uploads/portal-app-icons/84ec8874-109c-48e8-9eb8-fc1c20f7a9ae.png?token=token123'));
+
+      final res6 = AppIconWidget.formatIconUrl('/api/v1/uploads/portal-app-icons/6acc45da-5795-4b65-aa87-8897e64f942b.png', 'token123');
+      expect(res6, equals('${ApiConfig.baseUrl}/api/mobile/portals/uploads/portal-app-icons/6acc45da-5795-4b65-aa87-8897e64f942b.png?token=token123'));
     });
 
     test('formatIconUrl preserves external non-backend URLs', () {

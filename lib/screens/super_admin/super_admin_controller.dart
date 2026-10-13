@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:dio/dio.dart';
 import 'package:core_portal/core/api/api_client.dart';
 import 'package:core_portal/core/api/services/auth_service.dart';
 import 'package:core_portal/core/api/api_config.dart';
@@ -1164,27 +1165,39 @@ class SuperAdminController extends GetxController {
   }
 
   Future<dynamic> _fetchUsersWithFallback() async {
-    try {
-      final res = await _authService.apiService.get(
-        endpoint: '/api/mobile/admin/user-profiles?page=0&size=1000',
-      );
-      if (res != null) return res;
-    } catch (_) {}
+    final candidateEndpoints = [
+      '/admin/user-profiles?page=0&size=1000',
+      '/admin/user-profiles',
+      '/admin/users',
+      '/portals/users',
+      '/gateway/user-profile/users',
+    ];
 
-    try {
-      final res = await _authService.apiService.get(
-        endpoint: '/api/mobile/admin/user-profiles',
-      );
-      if (res != null) return res;
-    } catch (_) {}
-
-    try {
-      final res = await _authService.apiService.get(
-        endpoint: '/api/mobile/gateway/user-profile/users',
-      );
-      if (res != null) return res;
-    } catch (e) {
-      debugPrint("Gateway users fallback failed in SuperAdmin: $e");
+    for (final ep in candidateEndpoints) {
+      try {
+        final response = await ApiClient.dio.get(
+          ep,
+          options: Options(
+            validateStatus: (status) => status != null && status < 500,
+          ),
+        );
+        if (response.statusCode == 200 && response.data != null) {
+          final data = response.data;
+          if (data is List && data.isNotEmpty) return data;
+          if (data is Map &&
+              (data['data'] != null ||
+                  data['content'] != null ||
+                  data['value'] != null ||
+                  data['items'] != null ||
+                  data['results'] != null)) {
+            return data;
+          }
+        } else if (response.statusCode == 403) {
+          debugPrint("SuperAdmin lacks permission for $ep (403 Forbidden). Trying next fallback.");
+        }
+      } catch (e) {
+        debugPrint("SuperAdmin user fallback probe on $ep error: $e");
+      }
     }
 
     return null;
@@ -1636,6 +1649,38 @@ class SuperAdminController extends GetxController {
         userGroupsMap.assignAll(userGroupsMapLocal);
         GetStorage().write('cached_user_groups_map', userGroupsMapLocal);
         GetStorage().write('cached_users_list', parsedUsers);
+      } else {
+        final cached = GetStorage().read('cached_users_list') ??
+            GetStorage().read('cached_admin_users_list');
+        if (cached is List && cached.isNotEmpty) {
+          final list = cached
+              .map((e) => Map<String, dynamic>.from(e is Map ? e : {}))
+              .toList();
+          usersList.assignAll(list);
+          totalUsers.value = list.length;
+        } else {
+          final box = GetStorage();
+          final currentUname =
+              (box.read('username') ?? '').toString().trim();
+          if (currentUname.isNotEmpty) {
+            final selfUser = {
+              'id': currentUname,
+              'username': currentUname,
+              'displayName': box.read('user_display_name') ??
+                  box.read('displayName') ??
+                  currentUname,
+              'email': box.read('email') ?? '',
+              'role': 'SuperAdmin',
+              'status': 'ACTIVE',
+              'unit': 'ក្រសួងមហាផ្ទៃ',
+              'groups': <String>[],
+              'userGroups': <String>[],
+              'portalGroups': <String>[],
+            };
+            usersList.assignAll([selfUser]);
+            totalUsers.value = 1;
+          }
+        }
       }
     } catch (e) {
       debugPrint("Failed to load users dashboard: $e");

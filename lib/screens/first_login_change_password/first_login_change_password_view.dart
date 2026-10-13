@@ -59,7 +59,7 @@ class FirstLoginChangePasswordView
                                       ),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.black.withOpacity(0.20),
+                                          color: Colors.black.withValues(alpha: 0.20),
                                           blurRadius: 18,
                                           offset: const Offset(0, 6),
                                         ),
@@ -193,6 +193,92 @@ class FirstLoginChangePasswordView
                                 ),
 
                                 const SizedBox(height: 22),
+
+                                // Current Password Label & Field (when not passed in route arguments and not in ticket flow)
+                                if (controller.ticket == null && controller.tempPassword.isEmpty) ...[
+                                  Text(
+                                    'current_password'.tr,
+                                    style: GoogleFonts.kantumruyPro(
+                                      fontSize: 14.5,
+                                      fontWeight: FontWeight.w600,
+                                      color: const Color(0xFF1E293B),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Obx(
+                                    () => TextField(
+                                      controller:
+                                          controller.currentPasswordController,
+                                      obscureText: controller
+                                          .obscureCurrentPassword.value,
+                                      textInputAction: TextInputAction.next,
+                                      style: GoogleFonts.kantumruyPro(
+                                        fontSize: 14.5,
+                                        color: const Color(0xFF1E293B),
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      decoration: InputDecoration(
+                                        hintText:
+                                            'enter_current_password_hint'.tr,
+                                        hintStyle: GoogleFonts.kantumruyPro(
+                                          color: const Color(0xFF94A3B8),
+                                          fontSize: 14,
+                                        ),
+                                        prefixIcon: const Icon(
+                                          Icons.lock_outline_rounded,
+                                          color: Color(0xFF94A3B8),
+                                          size: 21,
+                                        ),
+                                        suffixIcon: IconButton(
+                                          icon: Icon(
+                                            controller.obscureCurrentPassword
+                                                    .value
+                                                ? Icons.visibility_off_outlined
+                                                : Icons.visibility_outlined,
+                                            color: const Color(0xFF94A3B8),
+                                            size: 20,
+                                          ),
+                                          onPressed: () {
+                                            controller.obscureCurrentPassword
+                                                .toggle();
+                                          },
+                                        ),
+                                        filled: true,
+                                        fillColor: const Color(0xFFF8FAFC),
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 16,
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(14),
+                                          borderSide: const BorderSide(
+                                            color: Color(0xFFE2E8F0),
+                                            width: 1.5,
+                                          ),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(14),
+                                          borderSide: const BorderSide(
+                                            color: Color(0xFF163774),
+                                            width: 2.0,
+                                          ),
+                                        ),
+                                        border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(14),
+                                          borderSide: const BorderSide(
+                                            color: Color(0xFFE2E8F0),
+                                            width: 1.5,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 18),
+                                ],
 
                                 // New Password Label & Field
                                 Text(
@@ -365,7 +451,7 @@ class FirstLoginChangePasswordView
                                         backgroundColor: const Color(0xFF163774),
                                         disabledBackgroundColor: const Color(
                                           0xFF163774,
-                                        ).withOpacity(0.65),
+                                        ).withValues(alpha: 0.65),
                                         foregroundColor: Colors.white,
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(12),
@@ -373,7 +459,7 @@ class FirstLoginChangePasswordView
                                         elevation: 2,
                                         shadowColor: const Color(
                                           0xFF163774,
-                                        ).withOpacity(0.4),
+                                        ).withValues(alpha: 0.4),
                                       ),
                                       child: controller.isLoading.value
                                           ? const SizedBox(
@@ -408,7 +494,26 @@ class FirstLoginChangePasswordView
                                   ),
                                 ),
 
-                                const SizedBox(height: 24),
+                                const SizedBox(height: 12),
+
+                                // Cancel / Return to Login Button
+                                Center(
+                                  child: TextButton(
+                                    onPressed: controller.isLoading.value
+                                        ? null
+                                        : controller.cancelAndReturnToLogin,
+                                    child: Text(
+                                      'cancel'.tr,
+                                      style: GoogleFonts.kantumruyPro(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: const Color(0xFF64748B),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                const SizedBox(height: 16),
 
                                 // Footer Copyright Text
                                 Center(
@@ -442,17 +547,17 @@ class _WaveBackgroundPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint1 = Paint()
-      ..color = const Color(0xFF3B82F6).withOpacity(0.12)
+      ..color = const Color(0xFF3B82F6).withValues(alpha: 0.12)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 
     final paint2 = Paint()
-      ..color = const Color(0xFF60A5FA).withOpacity(0.09)
+      ..color = const Color(0xFF60A5FA).withValues(alpha: 0.09)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
 
     final paint3 = Paint()
-      ..color = const Color(0xFF2563EB).withOpacity(0.14)
+      ..color = const Color(0xFF2563EB).withValues(alpha: 0.14)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.5;
 

@@ -10,6 +10,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:core_portal/widgets/app_icon.dart';
 import 'package:core_portal/widgets/empty_apps_widget.dart';
 import 'package:core_portal/widgets/announcement_detail_dialog.dart';
+import 'package:core_portal/core/api/api_client.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
@@ -666,9 +667,11 @@ class HomeView extends GetView<HomeController> {
     List<Map<String, dynamic>> services,
   ) {
     final storage = GetStorage();
-    final String sessionToken =
-        (storage.read('token') ?? storage.read('access_token') ?? '')
-            .toString();
+    final String sessionToken = (ApiClient.currentToken ??
+            storage.read('token') ??
+            storage.read('access_token') ??
+            '')
+        .toString();
     final bool isEnglish =
         LocalizationService.currentLanguageCode.value == 'en';
 

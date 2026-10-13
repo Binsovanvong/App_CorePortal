@@ -10,7 +10,7 @@ import 'package:core_portal/routes/page_route.dart';
 
 class ApiConfig {
   // API Base URLs
-  static const String uatBaseUrl = 'http://172.30.192.127';
+  static const String uatBaseUrl = 'http://uat-app-core.interior.gov.kh';
   static const String productionBaseUrl = 'https://core-app.interior.gov.kh';
 
   // Set to true to use the active UAT backend (UAT gateway currently verified & working)
@@ -27,6 +27,9 @@ class ApiConfig {
 
   // Set to true only if testing against local backend on port 8000
   static const bool useLocalApi = false;
+
+  static const String keycloakClientId = 'flutter-client';
+  static String get keycloakTokenEndpoint => '$baseUrl/auth/token';
 
   static String get bffHost {
     if (useCustomServer) {
@@ -47,7 +50,7 @@ class ApiConfig {
       return '127.0.0.1'; // Default (iOS Simulator / Desktop)
     }
     final uri = Uri.tryParse(baseUrl);
-    return uri?.host ?? '172.30.192.127';
+    return uri?.host ?? 'uat-app-core.interior.gov.kh';
   }
 
   static String get baseUrl {
@@ -109,10 +112,15 @@ class ApiConfig {
       InterceptorsWrapper(
         onRequest: (options, handler) async {
           final String? token =
-              (ApiClient.currentToken ?? await ApiClient.getAccessToken())?.trim();
+              (ApiClient.currentToken ?? await ApiClient.getAccessToken())
+                  ?.trim();
           final path = options.path.toLowerCase();
           final isAuthEndpoint =
               path.contains('/auth/login') ||
+              path.contains('/auth/browser-login') ||
+              path.contains('/auth/exchange-code') ||
+              path.contains('/auth/update-password') ||
+              path.contains('/auth/token') ||
               path.contains('/auth/device/') ||
               path.contains('/auth/refresh');
 
@@ -150,6 +158,10 @@ class ApiConfig {
           final path = e.requestOptions.path.toLowerCase();
           final bool isAuthOrBiometric =
               path.contains('/auth/login') ||
+              path.contains('/auth/browser-login') ||
+              path.contains('/auth/exchange-code') ||
+              path.contains('/auth/update-password') ||
+              path.contains('/auth/token') ||
               path.contains('/auth/device/') ||
               path.contains('/auth/refresh');
           final bool isAdminOrOptional =
@@ -161,7 +173,9 @@ class ApiConfig {
           if (e.response?.statusCode == 401 &&
               !isAuthOrBiometric &&
               !isAdminOrOptional) {
-            debugPrint("ApiConfig 401 on core route: $path. Session expired upstream.");
+            debugPrint(
+              "ApiConfig 401 on core route: $path. Session expired upstream.",
+            );
             final box = GetStorage();
             await box.remove('token');
             await box.remove('access_token');
@@ -185,4 +199,3 @@ class ApiConfig {
     return false;
   }
 }
-

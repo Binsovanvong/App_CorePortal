@@ -190,6 +190,7 @@ class AppIconWidget extends StatelessWidget {
     final bool isInternal = url.contains('core-gateway') ||
         url.contains('127.0.0.1:8080') ||
         url.contains('localhost:8080') ||
+        url.contains('172.30.192.1') ||
         url.contains('172.30.192.253') ||
         url.contains('172.30.192.127') ||
         url.contains('172.30.1.128') ||
@@ -425,11 +426,13 @@ class AppIconWidget extends StatelessWidget {
       cleanToken = null;
     }
 
-    final String? cpSession = GetStorage().read('CP_SESSION')?.toString();
+    final String? cpSession = ApiClient.currentCpSession ??
+        GetStorage().read('CP_SESSION')?.toString();
 
     final bool isOwnServer = cleanUrl.contains(ApiConfig.bffHost) ||
         cleanUrl.startsWith(ApiConfig.baseUrl) ||
         cleanUrl.contains('interior.gov.kh') ||
+        cleanUrl.contains('172.30.192.1') ||
         cleanUrl.contains('172.30.192.253') ||
         cleanUrl.contains('172.30.192.127') ||
         cleanUrl.contains('172.30.1.128');
@@ -443,8 +446,6 @@ class AppIconWidget extends StatelessWidget {
             'Authorization': 'Bearer $cleanToken',
             if (cpSession != null && cpSession.isNotEmpty) 'Cookie': 'CP_SESSION=$cpSession',
           };
-
-    final String relPath = extractRelativePath(iconUrl);
 
     // 1. Local Asset String
     final cleanLower = cleanUrl.toLowerCase();
@@ -492,7 +493,7 @@ class AppIconWidget extends StatelessWidget {
       );
     }
 
-    // 3. Raster Network Image (PNG / JPEG / WebP / etc.)
+    // 3. Network App Icon Image (PNG / JPEG / WebP / etc.)
     if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
       if (kIsWeb) {
         return Image.network(
@@ -503,7 +504,7 @@ class AppIconWidget extends StatelessWidget {
           fit: fit,
           filterQuality: FilterQuality.high,
           errorBuilder: (ctx, err, stack) {
-            debugPrint("AppIconWidget web failed to load raster image ($cleanUrl): $err");
+            debugPrint("AppIconWidget web failed to load app icon ($cleanUrl): $err");
             return fallbackWidget();
           },
           loadingBuilder: (ctx, child, progress) {
@@ -513,57 +514,31 @@ class AppIconWidget extends StatelessWidget {
         );
       }
 
-      final bool shouldUseDirectGateway = !kIsWeb &&
-          ApiConfig.useUat &&
-          cleanToken != null &&
-          relPath.isNotEmpty &&
-          !cleanUrl.contains('172.30.192.253');
-
-      final String primaryImageUrl = shouldUseDirectGateway
-          ? 'http://172.30.192.253:8080/api/v1/uploads/$relPath'
-          : cleanUrl;
-
-      final Map<String, String>? primaryHeaders = shouldUseDirectGateway
-          ? {
-              'Authorization': 'Bearer $cleanToken',
-              if (cpSession != null && cpSession.isNotEmpty) 'Cookie': 'CP_SESSION=$cpSession',
-            }
-          : authHeaders;
-
       return CachedNetworkImage(
-        imageUrl: primaryImageUrl,
+        imageUrl: cleanUrl,
         width: size,
         height: size,
         fit: fit,
         filterQuality: FilterQuality.high,
-        httpHeaders: primaryHeaders,
+        httpHeaders: authHeaders,
         fadeInDuration: const Duration(milliseconds: 150),
         fadeOutDuration: const Duration(milliseconds: 100),
         placeholder: (context, url) => fallbackWidget(),
         errorWidget: (context, url, error) {
-          debugPrint("AppIconWidget failed to load raster image ($primaryImageUrl): $error");
-          // Fallback to the alternative URL if primary failed
-          final fallbackImageUrl = shouldUseDirectGateway ? cleanUrl : (relPath.isNotEmpty ? 'http://172.30.192.253:8080/api/v1/uploads/$relPath' : '');
-          if (!kIsWeb && cleanToken != null && fallbackImageUrl.isNotEmpty && fallbackImageUrl != primaryImageUrl) {
-            return CachedNetworkImage(
-              imageUrl: fallbackImageUrl,
-              width: size,
-              height: size,
-              fit: fit,
-              filterQuality: FilterQuality.high,
-              httpHeaders: {
-                'Authorization': 'Bearer $cleanToken',
-                if (cpSession != null && cpSession.isNotEmpty) 'Cookie': 'CP_SESSION=$cpSession',
-              },
-              fadeInDuration: const Duration(milliseconds: 150),
-              placeholder: (ctx, u) => fallbackWidget(),
-              errorWidget: (ctx, errUrl, err) {
-                debugPrint("AppIconWidget secondary fallback also failed ($fallbackImageUrl): $err");
-                return fallbackWidget();
-              },
-            );
-          }
-          return fallbackWidget();
+          debugPrint("AppIconWidget cached network image failed for app icon ($cleanUrl): $error");
+          // Fallback to Image.network directly if CachedNetworkImage encounters an issue
+          return Image.network(
+            cleanUrl,
+            headers: authHeaders,
+            width: size,
+            height: size,
+            fit: fit,
+            filterQuality: FilterQuality.high,
+            errorBuilder: (ctx, err, stack) {
+              debugPrint("AppIconWidget Image.network fallback also failed ($cleanUrl): $err");
+              return fallbackWidget();
+            },
+          );
         },
       );
     }

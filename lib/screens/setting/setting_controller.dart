@@ -21,6 +21,9 @@ class SettingViewController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    newPasswordController.addListener(() {
+      newPasswordInput.value = newPasswordController.text;
+    });
     updateRoleDisplay();
     loadCompleteProfileDashboard();
   }
@@ -328,8 +331,19 @@ class SettingViewController extends GetxController {
   final confirmPasswordController = TextEditingController();
   final isUpdatingPassword = false.obs;
   final passwordStrength = 0.obs;
+  final newPasswordInput = ''.obs;
+
+  bool get hasMinLength => newPasswordInput.value.length >= 8;
+  bool get hasBothCases =>
+      newPasswordInput.value.contains(RegExp(r'[a-z]')) &&
+      newPasswordInput.value.contains(RegExp(r'[A-Z]'));
+  bool get hasNumber => newPasswordInput.value.contains(RegExp(r'[0-9]'));
+  bool get hasSpecialChar =>
+      RegExp(r'[!@#\$&*~%^()_\+=\-\[\]{}|;:<>?\/]').hasMatch(newPasswordInput.value) ||
+      RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(newPasswordInput.value);
 
   void _updatePasswordStrength(String password) {
+    newPasswordInput.value = password;
     if (password.isEmpty) {
       passwordStrength.value = 0;
       return;
@@ -341,7 +355,10 @@ class SettingViewController extends GetxController {
       score++;
     }
     if (RegExp(r'[0-9]').hasMatch(password)) score++;
-    if (RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)) score++;
+    if (RegExp(r'[!@#\$&*~%^()_\+=\-\[\]{}|;:<>?\/]').hasMatch(password) ||
+        RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)) {
+      score++;
+    }
 
     if (score <= 1) {
       passwordStrength.value = 1;
@@ -356,6 +373,7 @@ class SettingViewController extends GetxController {
     currentPasswordController.clear();
     newPasswordController.clear();
     confirmPasswordController.clear();
+    newPasswordInput.value = '';
     isUpdatingPassword.value = false;
     passwordStrength.value = 0;
 
@@ -460,61 +478,7 @@ class SettingViewController extends GetxController {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-
-              // Security Guideline Banner Card
-              Container(
-                width: double.infinity,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEFF6FF),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: const Color(0xFFDBEAFE),
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.only(top: 2),
-                      child: Icon(
-                        Icons.verified_user_outlined,
-                        color: Color(0xFF2563EB),
-                        size: 19,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'security_level'.tr,
-                            style: GoogleFonts.kantumruyPro(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF2563EB),
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            'password_rule_desc'.tr,
-                            style: GoogleFonts.kantumruyPro(
-                              fontSize: 11.5,
-                              color: const Color(0xFF475569),
-                              height: 1.4,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 20),
 
               // 1. Current Password Label
               Text(
@@ -823,6 +787,11 @@ class SettingViewController extends GetxController {
                   ),
                 ),
               ),
+              const SizedBox(height: 20),
+
+              // Password Requirements Card
+              _buildPasswordRequirementsCard(),
+
               const SizedBox(height: 24),
 
               // Submit Button: "ធ្វើបច្ចុប្បន្នភាពលេខសម្ងាត់ ➔"
@@ -984,6 +953,7 @@ class SettingViewController extends GetxController {
       currentPasswordController.clear();
       newPasswordController.clear();
       confirmPasswordController.clear();
+      newPasswordInput.value = '';
       passwordStrength.value = 0;
       CustomSnackbar.showSuccess(
         message: 'password_changed_success'.tr,
@@ -1027,6 +997,205 @@ class SettingViewController extends GetxController {
     } finally {
       isUpdatingPassword.value = false;
     }
+  }
+
+  Widget _buildChecklistRow(String text, bool isMet) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Container(
+          width: 18,
+          height: 18,
+          decoration: BoxDecoration(
+            color: isMet ? const Color(0xFF2563EB) : const Color(0xFFE2E8F0),
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Icon(
+              Icons.check_rounded,
+              size: 13,
+              color: isMet ? Colors.white : const Color(0xFF94A3B8),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: GoogleFonts.kantumruyPro(
+              fontSize: 12,
+              fontWeight: isMet ? FontWeight.w600 : FontWeight.w400,
+              color: isMet ? const Color(0xFF0F172A) : const Color(0xFF475569),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPasswordRequirementsCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF4F8FE),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFFE0EDFD),
+          width: 1.2,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Card Header
+          Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF1D6EEB),
+                  shape: BoxShape.circle,
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.verified_user_rounded,
+                    color: Colors.white,
+                    size: 19,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'password_characteristics'.tr,
+                      style: GoogleFonts.kantumruyPro(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF1D6EEB),
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      'password_characteristics_desc'.tr,
+                      style: GoogleFonts.kantumruyPro(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w400,
+                        color: const Color(0xFF64748B),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // Checklist & Document Graphic
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Checklist on Left
+              Expanded(
+                flex: 6,
+                child: Obx(() {
+                  return Column(
+                    children: [
+                      _buildChecklistRow(
+                        'req_min_8_chars'.tr,
+                        hasMinLength,
+                      ),
+                      const SizedBox(height: 8),
+                      _buildChecklistRow(
+                        'req_both_cases'.tr,
+                        hasBothCases,
+                      ),
+                      const SizedBox(height: 8),
+                      _buildChecklistRow(
+                        'req_numbers'.tr,
+                        hasNumber,
+                      ),
+                      const SizedBox(height: 8),
+                      _buildChecklistRow(
+                        'req_special_chars'.tr,
+                        hasSpecialChar,
+                      ),
+                    ],
+                  );
+                }),
+              ),
+
+              // Document Graphic & Floating Accent Dots on Right
+              Expanded(
+                flex: 4,
+                child: SizedBox(
+                  height: 110,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    clipBehavior: Clip.none,
+                    children: [
+                      // Top right blue dot
+                      Positioned(
+                        top: 2,
+                        right: 10,
+                        child: Container(
+                          width: 6,
+                          height: 6,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF3B82F6),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                      // Left blue dot
+                      Positioned(
+                        left: 0,
+                        top: 55,
+                        child: Container(
+                          width: 5,
+                          height: 5,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF60A5FA),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                      // Bottom right amber dot
+                      Positioned(
+                        bottom: 6,
+                        right: 18,
+                        child: Container(
+                          width: 5,
+                          height: 5,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFFBBF24),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                      // 3D Document Illustration
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: Image.asset(
+                          'assets/img/security_card_doc.jpg',
+                          width: 90,
+                          height: 90,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> testBiometric() async {

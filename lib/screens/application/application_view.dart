@@ -20,8 +20,11 @@ class ApplicationView extends GetView<ApplicationViewController> {
   @override
   Widget build(BuildContext context) {
     final storage = GetStorage();
-    final String sessionToken =
-        (storage.read('token') ?? storage.read('access_token') ?? '').toString();
+    final String sessionToken = (ApiClient.currentToken ??
+            storage.read('token') ??
+            storage.read('access_token') ??
+            '')
+        .toString();
 
     final bool canPop = Navigator.of(context).canPop();
 
