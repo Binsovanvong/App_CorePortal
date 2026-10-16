@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:core_portal/core/api/services/auth_service.dart';
 import 'package:core_portal/controllers/nav_controller.dart';
-import 'package:core_portal/screens/super_admin/super_admin_controller.dart';
 import 'package:core_portal/screens/admin/admin_controller.dart';
 import 'package:dio/dio.dart' show DioException, DioExceptionType;
 
@@ -277,9 +276,6 @@ class AnnouncementController extends GetxController {
   }
 
   void _refreshDashboards() {
-    if (Get.isRegistered<SuperAdminController>()) {
-      Get.find<SuperAdminController>().fetchDashboardData();
-    }
     if (Get.isRegistered<AdminController>()) {
       Get.find<AdminController>().fetchDashboardData();
     }

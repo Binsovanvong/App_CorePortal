@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
 import 'package:flutter/widgets.dart' show debugPrint;
@@ -45,6 +46,7 @@ class ApiClient {
 
   /// In-memory token cache for instantaneous, synchronous access by widgets and formatters
   static String? currentToken;
+  static String? currentRefreshToken;
   static String? currentCpSession;
 
   /// Retrieves the current access token:
@@ -91,6 +93,30 @@ class ApiClient {
     return token;
   }
 
+  /// Retrieves the current refresh token from memory or hardware secure storage
+  static Future<String?> getRefreshToken() async {
+    String? rToken = currentRefreshToken;
+    if (rToken != null && rToken.isNotEmpty && rToken != 'null') {
+      return rToken;
+    }
+
+    try {
+      rToken = await storage.read(key: 'refresh_token');
+    } catch (e) {
+      debugPrint("FlutterSecureStorage read refresh_token warning: $e");
+    }
+
+    if (rToken != null) {
+      rToken = rToken.trim();
+      if (rToken.isEmpty || rToken == 'null' || rToken == 'undefined') {
+        rToken = null;
+      } else {
+        currentRefreshToken = rToken;
+      }
+    }
+    return rToken;
+  }
+
   /// Persists authentication secrets strictly inside FlutterSecureStorage (hardware-backed).
   /// Only non-sensitive metadata (username, login state) is saved in GetStorage.
   static Future<void> saveToken(
@@ -103,6 +129,9 @@ class ApiClient {
       cleanToken = cleanToken.substring(7).trim();
     }
     currentToken = cleanToken;
+    if (refreshToken != null && refreshToken.isNotEmpty) {
+      currentRefreshToken = refreshToken.trim();
+    }
     currentCpSession = cpSession;
 
     // 1. Write non-sensitive metadata only to GetStorage
@@ -136,9 +165,130 @@ class ApiClient {
     }
   }
 
+  /// Persists authentication tokens returned from login or update-password endpoints.
+  static Future<void> saveTokens(
+    dynamic responseData, {
+    Map<String, dynamic>? headers,
+    Headers? dioHeaders,
+  }) async {
+    if (responseData is! Map) return;
+    final data = Map<String, dynamic>.from(responseData);
+    final accessToken = data['access_token']?.toString() ??
+        data['token']?.toString() ??
+        data['data']?['access_token']?.toString() ??
+        data['data']?['token']?.toString();
+    final refreshToken = data['refresh_token']?.toString() ??
+        data['data']?['refresh_token']?.toString();
+
+    String? cpSession;
+    dynamic setCookie = headers?['set-cookie'] ?? dioHeaders?['set-cookie'];
+    if (setCookie is List) {
+      for (final c in setCookie) {
+        final cookieStr = c.toString();
+        if (cookieStr.contains('CP_SESSION=')) {
+          cpSession = cookieStr.split('CP_SESSION=')[1].split(';')[0];
+          break;
+        }
+      }
+    } else if (setCookie is String && setCookie.contains('CP_SESSION=')) {
+      cpSession = setCookie.split('CP_SESSION=')[1].split(';')[0];
+    }
+
+    if (accessToken != null && accessToken.isNotEmpty) {
+      await saveToken(
+        accessToken,
+        refreshToken: refreshToken,
+        cpSession: cpSession,
+      );
+    }
+  }
+
+  static Completer<bool>? _refreshCompleter;
+
+  /// Renews the login session via POST /api/mobile/auth/refresh using the stored refresh_token.
+  ///
+  /// Request:
+  /// POST /api/mobile/auth/refresh
+  /// Content-Type: application/json
+  /// {
+  ///   "refresh_token": "<refresh_token received from login>"
+  /// }
+  ///
+  /// Response:
+  /// {
+  ///   "access_token": "<new access token>",
+  ///   "refresh_token": "<new rotated refresh token>",
+  ///   "expires_in": 300
+  /// }
+  ///
+  /// Always replaces both stored tokens with the returned values.
+  /// Returns true if renewed successfully; false if refresh token is expired or revoked.
+  static Future<bool> refreshSession() async {
+    if (_refreshCompleter != null) {
+      return await _refreshCompleter!.future;
+    }
+
+    final completer = Completer<bool>();
+    _refreshCompleter = completer;
+
+    try {
+      final rToken = await getRefreshToken();
+      if (rToken == null || rToken.isEmpty) {
+        debugPrint("ApiClient: No refresh_token available for session renewal.");
+        completer.complete(false);
+        return false;
+      }
+
+      // Dedicated client without authorization interceptors to avoid recursive loops
+      final refreshDio = Dio(
+        BaseOptions(
+          baseUrl: defaultBaseUrl,
+          connectTimeout: const Duration(seconds: 15),
+          receiveTimeout: const Duration(seconds: 15),
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        ),
+      );
+
+      final response = await refreshDio.post(
+        '/api/mobile/auth/refresh',
+        data: {
+          'refresh_token': rToken,
+        },
+      );
+
+      if (response.statusCode == 200 && response.data is Map) {
+        final data = Map<String, dynamic>.from(response.data as Map);
+        final newAccessToken = data['access_token']?.toString() ??
+            data['token']?.toString() ??
+            data['data']?['access_token']?.toString();
+
+        if (newAccessToken != null && newAccessToken.isNotEmpty) {
+          // Always replace both stored tokens with the returned values
+          await saveTokens(data, dioHeaders: response.headers);
+          debugPrint("ApiClient: Session renewed successfully (tokens rotated).");
+          completer.complete(true);
+          return true;
+        }
+      }
+
+      completer.complete(false);
+      return false;
+    } catch (e) {
+      debugPrint("ApiClient: Token refresh failed: $e");
+      completer.complete(false);
+      return false;
+    } finally {
+      _refreshCompleter = null;
+    }
+  }
+
   /// Clears stored tokens and sessions across secure storage and cache
   static Future<void> logout() async {
     currentToken = null;
+    currentRefreshToken = null;
     currentCpSession = null;
     try {
       await storage.delete(key: 'access_token');
@@ -306,19 +456,36 @@ class ApiClient {
                   path.contains('/auth/device/') ||
                   path.contains('/auth/refresh');
 
-              // Handle 401 unauthorized on protected endpoints
+              // Handle 401 unauthorized on protected endpoints with automatic session renewal
               if (e.response?.statusCode == 401 && !isAuthEndpoint) {
                 debugPrint(
-                  "ApiClient 401 on ${e.requestOptions.path}: ${e.response?.data}",
+                  "ApiClient 401 on ${e.requestOptions.path}: renewing session via /api/mobile/auth/refresh...",
                 );
-                // Redirect to login only if not already there, avoiding infinite loops
-                try {
-                  final currentRoute = Get.currentRoute;
-                  if (currentRoute != AppRoutes.login) {
-                    await logout();
-                    Get.offAllNamed(AppRoutes.login);
+                final refreshed = await refreshSession();
+                if (refreshed) {
+                  final options = e.requestOptions;
+                  final newToken = currentToken ?? await getAccessToken();
+                  if (newToken != null && newToken.isNotEmpty) {
+                    options.headers['Authorization'] = 'Bearer $newToken';
                   }
-                } catch (_) {}
+                  try {
+                    final retryResponse = await dio.fetch(options);
+                    return handler.resolve(retryResponse);
+                  } on DioException catch (retryErr) {
+                    return handler.next(retryErr);
+                  }
+                } else {
+                  debugPrint(
+                    "ApiClient: Refresh token expired or revoked. Redirecting to login.",
+                  );
+                  try {
+                    final currentRoute = Get.currentRoute;
+                    if (currentRoute != AppRoutes.login) {
+                      await logout();
+                      Get.offAllNamed(AppRoutes.login);
+                    }
+                  } catch (_) {}
+                }
               }
               return handler.next(e);
             },

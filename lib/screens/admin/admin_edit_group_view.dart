@@ -202,7 +202,10 @@ class _AdminEditGroupViewState extends State<AdminEditGroupView> {
       }
 
       if (rawApps.isNotEmpty) {
-        addAppsFrom(rawApps);
+        final filteredApps = controller.isPortalAdministrator()
+            ? rawApps
+            : rawApps.where((e) => controller.isAppInAdminGeneralDepartment(Map<String, dynamic>.from(e is Map ? e : {}))).toList();
+        addAppsFrom(filteredApps);
         apiAppsList.assignAll(list);
       }
     } catch (e) {

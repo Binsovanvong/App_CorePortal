@@ -19,9 +19,8 @@ import 'package:get/get.dart';
 import 'package:core_portal/screens/web_view/web_view_screen.dart';
 import 'package:core_portal/screens/first_login_change_password/first_login_change_password_view.dart';
 import 'package:core_portal/screens/first_login_change_password/first_login_change_password_binding.dart';
+import 'package:core_portal/screens/update_password/update_password_screen.dart';
 
-import 'package:core_portal/screens/super_admin/super_admin_binding.dart';
-import 'package:core_portal/screens/super_admin/super_admin_view.dart';
 import 'package:core_portal/screens/admin/admin_binding.dart';
 import 'package:core_portal/screens/admin/admin_view.dart';
 import 'package:core_portal/screens/splash/splash_binding.dart';
@@ -103,12 +102,6 @@ class AppPages {
       binding: FirstLoginChangePasswordBinding(),
     ),
     GetPage(
-      name: AppRoutes.superAdmin,
-      page: () => const SuperAdminView(),
-      binding: SuperAdminBinding(),
-      middlewares: [AdminMiddleware()],
-    ),
-    GetPage(
       name: AppRoutes.admin,
       page: () => const AdminView(),
       binding: AdminBinding(),
@@ -124,6 +117,15 @@ class AppPages {
       name: AppRoutes.resetPassword,
       page: () => const ResetPasswordView(),
       binding: ResetPasswordBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.updatePassword,
+      page: () {
+        final args = Get.arguments;
+        final ticket = (args is Map ? args['ticket'] : null)?.toString() ?? '';
+        final username = (args is Map ? args['username'] : null)?.toString();
+        return UpdatePasswordScreen(ticket: ticket, username: username);
+      },
     ),
   ];
 }

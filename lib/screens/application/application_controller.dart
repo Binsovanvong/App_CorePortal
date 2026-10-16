@@ -196,17 +196,29 @@ class ApplicationViewController extends GetxController {
     final String unit = (app['unit'] ?? '').toString().trim().toLowerCase();
     final String deptName = (app['departmentName'] ?? '').toString().trim().toLowerCase();
 
+    bool isGeneralDept(String s) {
+      if (s.isEmpty) return false;
+      final lower = s.toLowerCase();
+      return lower.contains('general department') ||
+          lower.contains('general_department') ||
+          lower.contains('general-department') ||
+          lower.contains('អគ្គនាយកដ្ឋាន') ||
+          lower.contains('អគ្គស្នងការដ្ឋាន') ||
+          lower.contains('អគ្គាធិការដ្ឋាន') ||
+          lower.contains('អគ្គលេខាធិការដ្ឋាន');
+    }
+
     final bool isGen = app['isGeneral'] == true ||
         app['is_general'] == true ||
-        cat == 'general' ||
+        ((cat == 'general' || cat == 'public' || cat == 'tools' || cat == 'utility' || cat == 'utilities') && !isGeneralDept(cat)) ||
         cat == 'ទូទៅ' ||
-        subCat == 'general' ||
+        ((subCat == 'general' || subCat == 'tools' || subCat == 'utility' || subCat == 'utilities') && !isGeneralDept(subCat)) ||
         subCat == 'ទូទៅ' ||
-        dept.toLowerCase() == 'general' ||
+        (dept.toLowerCase() == 'general' && !isGeneralDept(dept)) ||
         dept.toLowerCase() == 'ទូទៅ' ||
-        unit == 'general' ||
+        (unit == 'general' && !isGeneralDept(unit)) ||
         unit == 'ទូទៅ' ||
-        deptName == 'general' ||
+        (deptName == 'general' && !isGeneralDept(deptName)) ||
         deptName == 'ទូទៅ';
 
     final String desc = (app['description'] ??
@@ -244,7 +256,129 @@ class ApplicationViewController extends GetxController {
       'description': desc,
       'desc': desc,
       'accessRules': accessRules,
+      'userCount': app['userCount'] ??
+          app['usersCount'] ??
+          app['totalUsers'] ??
+          app['activeUsers'] ??
+          app['users_count'],
     };
+  }
+
+  /// Checks if an app is permitted for the currently logged-in user or GD Admin
+  bool isAppAllowedForCurrentUser(Map<String, dynamic> app) {
+    if (Get.isRegistered<AdminController>()) {
+      final adminCtrl = Get.find<AdminController>();
+      if (adminCtrl.isPortalAdministrator()) return true;
+      if (app['isGeneral'] == true) return true;
+      return adminCtrl.isAppInAdminGeneralDepartment(app);
+    }
+
+    final box = GetStorage();
+    final rawRoles = box.read('roles');
+    final List list = (rawRoles is List && rawRoles.isNotEmpty) ? rawRoles : [];
+    final roles = list.map((e) => e.toString().toUpperCase().trim()).toList();
+    final isPortalAdmin = roles.any((r) =>
+        (r.contains('PORTAL') && (r.contains('ADMIN') || r.contains('ADMINISTRATOR'))) ||
+        r == 'ADMIN' ||
+        r == 'ADMINISTRATOR' ||
+        r == 'SUPER_ADMIN' ||
+        r == 'SUPERADMIN');
+    if (isPortalAdmin) return true;
+    if (app['isGeneral'] == true) return true;
+
+    final targetDeptCode = (box.read('generalDepartmentCode') ??
+            box.read('departmentCode') ??
+            box.read('orgCode') ??
+            '')
+        .toString()
+        .toUpperCase()
+        .trim();
+    final targetDeptKh = (box.read('generalDepartmentNameKh') ??
+            box.read('departmentNameKh') ??
+            '')
+        .toString()
+        .trim();
+
+    // If no specific department constraint exists, allow all
+    if (targetDeptCode.isEmpty &&
+        (targetDeptKh.isEmpty || targetDeptKh == 'អគ្គនាយកដ្ឋាន')) {
+      return true;
+    }
+
+    bool matchesDept(dynamic val) {
+      if (val == null) return false;
+      final s = val.toString().trim();
+      if (s.isEmpty || s == '—' || s == '-' || s == 'null') return false;
+      final upper = s.toUpperCase();
+      if (upper == 'ALL' || upper == 'ទាំងអស់' || upper == 'PUBLIC') return true;
+      if (targetDeptCode.isNotEmpty &&
+          (upper == targetDeptCode ||
+              upper.startsWith('${targetDeptCode}_') ||
+              upper.startsWith('${targetDeptCode}-') ||
+              upper.startsWith('${targetDeptCode} ') ||
+              upper.startsWith('/${targetDeptCode}') ||
+              upper.endsWith('_${targetDeptCode}') ||
+              upper.contains('_${targetDeptCode}_') ||
+              upper.contains('/${targetDeptCode}') ||
+              upper.contains(targetDeptCode))) {
+        return true;
+      }
+      if (targetDeptKh.isNotEmpty &&
+          targetDeptKh != 'អគ្គនាយកដ្ឋាន' &&
+          (s.contains(targetDeptKh) || targetDeptKh.contains(s))) {
+        return true;
+      }
+      return false;
+    }
+
+    if (matchesDept(app['ownerOrgCode']) ||
+        matchesDept(app['generalDepartmentCode']) ||
+        matchesDept(app['departmentCode']) ||
+        matchesDept(app['orgCode']) ||
+        matchesDept(app['department']) ||
+        matchesDept(app['departmentName']) ||
+        matchesDept(app['unit']) ||
+        matchesDept(app['generalDepartmentNameKh']) ||
+        matchesDept(app['departmentNameKh']) ||
+        matchesDept(app['category']) ||
+        matchesDept(app['subCategory'])) {
+      return true;
+    }
+
+    final code = (app['code'] ?? '').toString().toUpperCase().trim();
+    if (targetDeptCode.isNotEmpty &&
+        (code == targetDeptCode ||
+            code.startsWith('${targetDeptCode}_') ||
+            code.startsWith('${targetDeptCode}-') ||
+            code.contains('_${targetDeptCode}_') ||
+            code.contains(targetDeptCode))) {
+      return true;
+    }
+
+    final List accessRules = app['accessRules'] is List
+        ? app['accessRules']
+        : (app['access_rules'] is List
+            ? app['access_rules']
+            : (app['rules'] is List ? app['rules'] : []));
+
+    for (final rule in accessRules) {
+      if (rule is Map) {
+        final rVal = (rule['ruleValue'] ?? rule['rule_value'] ?? rule['value'] ?? rule['target'] ?? '').toString().trim();
+        if (matchesDept(rVal)) return true;
+      } else if (rule is String) {
+        if (matchesDept(rule)) return true;
+        final parts = rule.split(':');
+        if (parts.length > 1 && matchesDept(parts.sublist(1).join(':').trim())) {
+          return true;
+        }
+      }
+    }
+
+    if (matchesDept(app['ruleValue']) || matchesDept(app['rule_value'])) {
+      return true;
+    }
+
+    return false;
   }
 
   List<Map<String, dynamic>> get sourceApps {
@@ -273,6 +407,8 @@ class ApplicationViewController extends GetxController {
 
     if (apiApps.isNotEmpty) {
       addApps(apiApps);
+    } else if (Get.isRegistered<AdminController>() && Get.find<AdminController>().appsList.isNotEmpty) {
+      addApps(Get.find<AdminController>().appsList);
     } else {
       final cached = GetStorage().read('cached_admin_apps_list');
       if (cached is List && cached.isNotEmpty) {
@@ -280,23 +416,26 @@ class ApplicationViewController extends GetxController {
       }
     }
 
-    return all;
+    return all.where((app) => isAppAllowedForCurrentUser(app)).toList();
   }
 
   List<String> get availableUnits {
     final Set<String> groups = {};
 
-    // 1. If AdminController is available, get all admin groups
+    // 1. If AdminController is available and user is Portal Administrator, include all admin groups
     if (Get.isRegistered<AdminController>()) {
-      final adminGroups = Get.find<AdminController>().adminGroups;
-      for (var g in adminGroups) {
-        if (g != 'all_units'.tr && g != 'អង្គភាពទាំងអស់' && g.isNotEmpty) {
-          groups.add(g);
+      final adminCtrl = Get.find<AdminController>();
+      if (adminCtrl.isPortalAdministrator()) {
+        final adminGroups = adminCtrl.adminGroups;
+        for (var g in adminGroups) {
+          if (g != 'all_units'.tr && g != 'អង្គភាពទាំងអស់' && g.isNotEmpty) {
+            groups.add(g);
+          }
         }
       }
     }
 
-    // 2. Dynamic group categories from all apps
+    // 2. Dynamic group categories from department-filtered apps
     for (var app in sourceApps) {
       final rawRules = app['accessRules'] is List
           ? app['accessRules']
@@ -329,7 +468,15 @@ class ApplicationViewController extends GetxController {
 
     // 3. Fallbacks if empty
     if (groups.isEmpty) {
-      groups.addAll(['GDDTM', 'GDI', 'GNP', 'GDP', 'GIA']);
+      if (Get.isRegistered<AdminController>()) {
+        final code = Get.find<AdminController>().adminGeneralDepartmentCode;
+        if (code.isNotEmpty) {
+          groups.add(code);
+        }
+      }
+      if (groups.isEmpty) {
+        groups.addAll(['GDDTM', 'GDI', 'GNP', 'GDP', 'GIA']);
+      }
     }
 
     final sorted = groups.toList();
@@ -343,7 +490,11 @@ class ApplicationViewController extends GetxController {
 
     if (Get.isRegistered<AdminController>()) {
       final adminCtrl = Get.find<AdminController>();
-      ever(adminCtrl.appsList, (_) => _filterApps());
+      ever(adminCtrl.appsList, (_) {
+        if (apiApps.isEmpty) {
+          _filterApps();
+        }
+      });
     }
 
     // Listener for search input
@@ -430,6 +581,15 @@ class ApplicationViewController extends GetxController {
         }
       }
 
+      // If still null or empty, fallback to /portals/tiles
+      if (adminAppsRes == null || (adminAppsRes is List && adminAppsRes.isEmpty)) {
+        try {
+          adminAppsRes = await _authService.fetchApps();
+        } catch (e) {
+          debugPrint("ApplicationViewController fallback fetchApps (tiles) error: $e");
+        }
+      }
+
       if (adminAppsRes != null) {
         List list = [];
         if (adminAppsRes is List) {
@@ -456,8 +616,10 @@ class ApplicationViewController extends GetxController {
             parsed.add(normalized);
           }
         }
-        apiApps.assignAll(parsed);
-        GetStorage().write('cached_admin_apps_list', parsed);
+        final filteredByDept = parsed.where((app) => isAppAllowedForCurrentUser(app)).toList();
+        apiApps.assignAll(filteredByDept);
+        ApplicationView.clearUserCountCache();
+        GetStorage().write('cached_admin_apps_list', filteredByDept);
       }
     } catch (e) {
       debugPrint("ApplicationViewController fetchAppsFromApi error: $e");

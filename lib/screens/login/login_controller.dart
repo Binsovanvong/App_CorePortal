@@ -7,19 +7,21 @@ import 'package:core_portal/core/api/services/biometric_service.dart';
 import 'package:core_portal/controllers/nav_controller.dart';
 import 'package:core_portal/routes/page_route.dart';
 import 'package:core_portal/widgets/custom_snackbar.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:convert' show base64Url, json, utf8;
+import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 
-import 'package:dio/dio.dart' show DioException, DioExceptionType;
+import 'package:dio/dio.dart' show DioException, DioExceptionType, Options;
 import 'package:core_portal/core/api/pkce_helper.dart';
+import 'package:core_portal/screens/update_password/update_password_screen.dart';
 
 class LoginController extends GetxController {
   // Controllers for the input fields
-  final usernameController = TextEditingController(text: 'bin.sovanvong');
-  final passwordController = TextEditingController(text: 'Abc1234567*');
+  final usernameController = TextEditingController(text: '');
+  final passwordController = TextEditingController(text: '');
 
   // Observable toggle for password visibility
   final obscurePassword = true.obs;
@@ -31,7 +33,7 @@ class LoginController extends GetxController {
   final isLoading = false.obs;
 
   // Toggle to require/disable Face ID & Fingerprint prompt after login
-  static const bool requireBiometricOnLogin = false;
+  static const bool requireBiometricOnLogin = true;
 
   // Observable for biometric lock screen mode (session unlock)
   final isBiometricLockMode = false.obs;
@@ -119,8 +121,23 @@ class LoginController extends GetxController {
     }
 
     final box = GetStorage();
-    final token = await ApiClient.getAccessToken() ?? '';
-    final username = box.read('username')?.toString() ?? '';
+    String token = await ApiClient.getAccessToken() ?? '';
+    String username =
+        box.read('username')?.toString() ??
+        box.read('cached_current_username')?.toString() ??
+        '';
+
+    // If access token is empty, try refreshing with stored refresh token
+    if (token.isEmpty) {
+      final refreshed = await ApiClient.refreshSession();
+      if (refreshed) {
+        token = await ApiClient.getAccessToken() ?? '';
+        username =
+            box.read('username')?.toString() ??
+            box.read('cached_current_username')?.toString() ??
+            '';
+      }
+    }
 
     if (token.isNotEmpty && username.isNotEmpty) {
       final rawRoles = box.read('roles');
@@ -147,125 +164,129 @@ class LoginController extends GetxController {
   }
 
   List<String> _parseRoles(String username, Map<String, dynamic> response) {
-    final roles = <String>[];
+    final roles = <String>{};
 
-    // Helper to normalize and add a role
-    void addNormalizedRole(dynamic rawRole) {
+    void addRole(dynamic rawRole) {
       if (rawRole == null) return;
-      String r = '';
-      if (rawRole is Map) {
-        r =
-            (rawRole['code'] ??
-                    rawRole['name'] ??
-                    rawRole['role'] ??
-                    rawRole['groupCode'] ??
-                    '')
-                .toString()
-                .toLowerCase()
-                .trim();
-      } else {
-        r = rawRole.toString().toLowerCase().trim();
-      }
+      final String str =
+          (rawRole is Map
+                  ? (rawRole['code'] ??
+                        rawRole['name'] ??
+                        rawRole['role'] ??
+                        '')
+                  : rawRole)
+              .toString()
+              .trim();
+      if (str.isEmpty) return;
 
-      if (r == 'general_department_admin' ||
-          r == 'general_department' ||
-          r == 'gddtm_admin' ||
-          r == 'gddtm_admins' ||
-          r.contains('general_department')) {
-        if (!roles.contains('general_department_admin')) {
+      final lower = str.toLowerCase();
+      roles.add(str);
+      roles.add(lower);
+
+      // Automatically detect administrative privilege from role string
+      final upper = str.toUpperCase();
+      if (upper.contains('ADMIN') ||
+          upper.contains('ADMINISTRATOR') ||
+          upper.contains('SUPER')) {
+        roles.add('admin');
+        if (upper.contains('GENERAL_DEPARTMENT')) {
           roles.add('general_department_admin');
-        }
-        if (!roles.contains('admin')) roles.add('admin');
-      } else if (r == 'portal_administrator' ||
-          r == 'administrator' ||
-          r == 'admin' ||
-          r == 'portal_admin' ||
-          r == 'portal_admins' ||
-          r.contains('administrator')) {
-        if (!roles.contains('portal_administrator')) {
+        } else if (upper.contains('PORTAL')) {
           roles.add('portal_administrator');
         }
-        if (!roles.contains('admin')) roles.add('admin');
-      } else if (r.contains('portal_user') ||
-          r == 'user' ||
-          r == 'resident_user' ||
-          r == 'gddtm') {
-        if (!roles.contains('portal_user')) roles.add('portal_user');
-        if (!roles.contains('user')) roles.add('user');
       }
-      if (r.isNotEmpty && !roles.contains(r)) roles.add(r);
     }
 
-    // 1. Check explicit roles/groups arrays from backend response
-    if (response['roles'] is List) {
-      for (var item in response['roles']) {
-        addNormalizedRole(item);
+    // 1. Roles array directly from backend response or nested user object
+    final dynamic rolesData =
+        response['roles'] ??
+        response['user']?['roles'] ??
+        response['data']?['roles'] ??
+        response['data']?['user']?['roles'];
+    if (rolesData is List) {
+      for (final item in rolesData) {
+        addRole(item);
       }
     }
-    if (response['groups'] is List) {
-      for (var item in response['groups']) {
-        addNormalizedRole(item);
-      }
-    }
-    if (response['userGroups'] is List) {
-      for (var item in response['userGroups']) {
-        addNormalizedRole(item);
-      }
-    }
-    if (response['user_groups'] is List) {
-      for (var item in response['user_groups']) {
-        addNormalizedRole(item);
-      }
-    }
-    if (response['user'] is Map) {
-      final u = response['user'] as Map;
-      if (u['roles'] is List) {
-        for (var item in u['roles']) {
-          addNormalizedRole(item);
-        }
-      }
-      if (u['groups'] is List) {
-        for (var item in u['groups']) {
-          addNormalizedRole(item);
-        }
-      }
-      if (u['userGroups'] is List) {
-        for (var item in u['userGroups']) {
-          addNormalizedRole(item);
+
+    // 2. Groups array from backend response or nested user object
+    final dynamic groupsData =
+        response['groups'] ??
+        response['user']?['groups'] ??
+        response['userGroups'] ??
+        response['user_groups'] ??
+        response['data']?['groups'] ??
+        response['data']?['user']?['groups'];
+    if (groupsData is List) {
+      for (final item in groupsData) {
+        final g = (item is Map ? (item['code'] ?? item['name'] ?? '') : item)
+            .toString()
+            .trim();
+        if (g.toUpperCase().contains('ADMIN')) {
+          addRole(g);
         }
       }
     }
 
-    // 2. Check permissions list ONLY if no explicit roles were found
-    if (roles.isEmpty && response['permissions'] is List) {
-      final perms = (response['permissions'] as List)
-          .map((e) => e.toString().toUpperCase())
+    // 3. Permissions check: auto-grant admin if user has any management permissions
+    final dynamic permsData =
+        response['permissions'] ??
+        response['user']?['permissions'] ??
+        response['data']?['permissions'] ??
+        response['data']?['user']?['permissions'];
+    if (permsData is List) {
+      final perms = permsData
+          .map((e) => e.toString().toUpperCase().trim())
           .toList();
-      if (perms.contains('PORTAL_APP_MANAGE') ||
-          perms.contains('PORTAL_USER_MANAGE') ||
-          perms.contains('USER_MANAGE') ||
-          perms.contains('ADMIN_ACCESS') ||
-          perms.contains('PORTAL_ROLE_MANAGE')) {
-        if (!roles.contains('admin')) roles.add('admin');
-        if (!roles.contains('portal_administrator')) {
+      final hasAdminPerms = perms.any(
+        (p) =>
+            p.contains('MANAGE') ||
+            p.contains('ADMIN') ||
+            p.contains('CREATE') ||
+            p.contains('DELETE') ||
+            p.contains('ASSIGN'),
+      );
+      if (hasAdminPerms && !roles.contains('admin')) {
+        roles.add('admin');
+        if (!roles.contains('portal_administrator') &&
+            !roles.contains('general_department_admin')) {
           roles.add('portal_administrator');
         }
       }
-      if (!roles.contains('portal_user')) roles.add('portal_user');
     }
 
-    // 3. Fallbacks only for explicit mock admin dev logins
-    final lowerUser = username.toLowerCase().trim();
-    if (lowerUser == 'admin') {
-      roles.insert(0, 'admin');
-      roles.add('portal_administrator');
+    // 4. Fallback decode from JWT access token payload if present
+    final token = (response['access_token'] ?? response['token'])?.toString();
+    if (token != null && token.isNotEmpty) {
+      try {
+        final clean = token
+            .replaceFirst(RegExp(r'^Bearer ', caseSensitive: false), '')
+            .trim();
+        final parts = clean.split('.');
+        if (parts.length >= 2) {
+          final payload = parts[1];
+          final normalized = base64Url.normalize(payload);
+          final decoded = utf8.decode(base64Url.decode(normalized));
+          final Map<String, dynamic> jwtMap = json.decode(decoded);
+          final realmRoles = jwtMap['realm_access']?['roles'];
+          if (realmRoles is List) {
+            for (final r in realmRoles) {
+              addRole(r);
+            }
+          }
+        }
+      } catch (_) {}
     }
 
     if (roles.isEmpty) {
-      roles.add('portal_user');
-      roles.add('user');
+      roles.addAll(['portal_user', 'user']);
+    } else {
+      if (!roles.contains('portal_user') && !roles.contains('admin')) {
+        roles.add('portal_user');
+      }
     }
-    return roles;
+
+    return roles.toList();
   }
 
   void _routeUserByRoles(List<String> roles) {
@@ -400,21 +421,21 @@ class LoginController extends GetxController {
 
       case BiometricResult.failed:
         CustomSnackbar.showError(message: 'biometric_failed'.tr);
-        if (isUnlockMode) {
+        if (isUnlockMode && isBiometricLockMode.value) {
           await Future.delayed(const Duration(milliseconds: 800));
           exitApp();
         }
 
       case BiometricResult.cancelled:
         CustomSnackbar.showWarning(message: 'biometric_cancelled'.tr);
-        if (isUnlockMode) {
+        if (isUnlockMode && isBiometricLockMode.value) {
           await Future.delayed(const Duration(milliseconds: 800));
           exitApp();
         }
 
       case BiometricResult.unavailable:
         CustomSnackbar.showError(message: 'biometric_unavailable'.tr);
-        if (isUnlockMode) {
+        if (isUnlockMode && isBiometricLockMode.value) {
           await Future.delayed(const Duration(milliseconds: 800));
           exitApp();
         }
@@ -560,21 +581,105 @@ class LoginController extends GetxController {
     AuthService.completeAuthProcess();
 
     final box = GetStorage();
+    final prevUser = box.read('cached_current_username');
+    if (prevUser != null &&
+        prevUser.toString().toLowerCase() != username.toLowerCase()) {
+      box.remove('cached_admin_users_list');
+      box.remove('cached_admin_user_groups_map');
+      box.remove('cached_admin_apps_list');
+      box.remove('cached_portal_services');
+    }
+    await box.write('cached_current_username', username);
     await box.write('username', username);
     await box.write('roles', roles);
 
+    // 🟢 Extract and persist user profile metadata (General Department, Groups, Display Name)
+    final userMap = credentialResponse['user'] is Map
+        ? Map<String, dynamic>.from(credentialResponse['user'] as Map)
+        : credentialResponse;
+
+    final gCode =
+        userMap['generalDepartmentCode'] ??
+        userMap['departmentCode'] ??
+        userMap['orgCode'];
+    if (gCode != null && gCode.toString().isNotEmpty) {
+      await box.write('generalDepartmentCode', gCode.toString().trim());
+    }
+
+    final gNameKh =
+        userMap['generalDepartmentNameKh'] ?? userMap['departmentNameKh'];
+    if (gNameKh != null && gNameKh.toString().isNotEmpty) {
+      await box.write('generalDepartmentNameKh', gNameKh.toString().trim());
+    }
+
+    final gName = userMap['generalDepartmentName'] ?? userMap['departmentName'];
+    if (gName != null && gName.toString().isNotEmpty) {
+      await box.write('generalDepartmentName', gName.toString().trim());
+    }
+
+    final orgCode = userMap['orgCode'];
+    if (orgCode != null && orgCode.toString().isNotEmpty) {
+      await box.write('orgCode', orgCode.toString().trim());
+    }
+
+    final empInfos = userMap['employmentInfos'];
+    if (empInfos is List && empInfos.isNotEmpty && empInfos[0] is Map) {
+      final firstEmp = empInfos[0];
+      final empGCode =
+          firstEmp['generalDepartmentCode'] ??
+          firstEmp['departmentCode'] ??
+          firstEmp['orgCode'];
+      if (empGCode != null && empGCode.toString().isNotEmpty) {
+        await box.write('generalDepartmentCode', empGCode.toString().trim());
+      }
+      final empGNameKh =
+          firstEmp['generalDepartmentNameKh'] ?? firstEmp['departmentNameKh'];
+      if (empGNameKh != null && empGNameKh.toString().isNotEmpty) {
+        await box.write(
+          'generalDepartmentNameKh',
+          empGNameKh.toString().trim(),
+        );
+      }
+      final empGName =
+          firstEmp['generalDepartmentName'] ?? firstEmp['departmentName'];
+      if (empGName != null && empGName.toString().isNotEmpty) {
+        await box.write('generalDepartmentName', empGName.toString().trim());
+      }
+    }
+
+    final dispName =
+        userMap['displayName'] ??
+        userMap['display_name'] ??
+        userMap['fullName'] ??
+        userMap['name'];
+    if (dispName != null && dispName.toString().isNotEmpty) {
+      await box.write('displayName', dispName.toString().trim());
+      await box.write('user_display_name', dispName.toString().trim());
+    }
+
+    final groups =
+        userMap['groups'] ??
+        credentialResponse['groups'] ??
+        userMap['userGroups'] ??
+        credentialResponse['userGroups'];
+    if (groups is List && groups.isNotEmpty) {
+      await box.write('groups', groups);
+      await box.write('user_groups', groups);
+      await box.write('userGroups', groups);
+    }
+
+    final userProfileUserId =
+        userMap['userProfileUserId'] ?? userMap['id'] ?? userMap['subject'];
+    if (userProfileUserId != null && userProfileUserId.toString().isNotEmpty) {
+      await box.write('userProfileUserId', userProfileUserId.toString().trim());
+    }
+
     final bool hasAdmin = roles.any((r) {
-      final s = r.toString().toLowerCase().trim();
-      return s == 'admin' ||
-          s == 'administrator' ||
-          s == 'super_admin' ||
-          s == 'superadmin' ||
-          s == 'portal_admin' ||
-          s == 'general_department_admin' ||
-          s == 'general_department' ||
-          s.contains('general_department') ||
-          s.contains('admin') ||
-          s == 'gddtm_admin';
+      final s = r.toString().toUpperCase().trim();
+      return s.contains('ADMIN') ||
+          s.contains('ADMINISTRATOR') ||
+          s.contains('SUPER') ||
+          s.contains('MANAGE');
     });
     await box.write('isAdmin', hasAdmin);
 
@@ -593,9 +698,41 @@ class LoginController extends GetxController {
     _routeUserByRoles(roles);
   }
 
+  /// Helper to query live user profile and merge roles, groups, and department information
+  Future<Map<String, dynamic>> _enrichWithProfileData(
+    Map<String, dynamic> rawCredentials,
+  ) async {
+    final Map<String, dynamic> enriched = Map<String, dynamic>.from(
+      rawCredentials,
+    );
+    try {
+      final profile = await _authService.fetchProfile();
+      if (profile is Map) {
+        final profileUser = profile['user'] is Map
+            ? Map<String, dynamic>.from(profile['user'] as Map)
+            : Map<String, dynamic>.from(profile);
+
+        enriched['user'] = profileUser;
+        if (profile['roles'] is List) enriched['roles'] = profile['roles'];
+        if (profile['groups'] is List) enriched['groups'] = profile['groups'];
+        if (profile['permissions'] is List)
+          enriched['permissions'] = profile['permissions'];
+        if (profileUser['roles'] is List)
+          enriched['roles'] = profileUser['roles'];
+        if (profileUser['groups'] is List)
+          enriched['groups'] = profileUser['groups'];
+        if (profileUser['permissions'] is List)
+          enriched['permissions'] = profileUser['permissions'];
+      }
+    } catch (e) {
+      debugPrint("Live profile enrichment notice: $e");
+    }
+    return enriched;
+  }
+
   // ─── Credential Login ────────────────────────────────────────────────────
 
-  Future<void> loginWithCredentials() async {
+  Future<void> loginWithCredentials([BuildContext? context]) async {
     if (isLoading.value) return;
 
     final username = usernameController.text.trim();
@@ -609,31 +746,39 @@ class LoginController extends GetxController {
     passwordController.clear();
     AuthService.startAuthProcess();
 
-    final lowerUser = username.toLowerCase();
-    if (lowerUser == 'admin') {
-      try {
-        isLoading.value = true;
-        Map<String, dynamic> response;
-        try {
-          response = await _authService.loginService(
-            username: username,
-            password: password,
-          );
-        } catch (e) {
-          response = {'access_token': 'mock_admin_token', 'first_login': false};
-        }
+    try {
+      isLoading.value = true;
+      final response = await ApiClient.dio.post(
+        '/api/mobile/auth/login',
+        data: {'username': username, 'password': password},
+        options: Options(
+          validateStatus: (status) =>
+              status != null &&
+              ((status >= 200 && status < 300) || status == 409),
+        ),
+      );
 
-        final token = response['access_token'] ??
-            response['token'] ??
-            response['data']?['access_token'] ??
-            response['data']?['token'];
+      if (response.statusCode == 200) {
+        await ApiClient.saveTokens(response.data, dioHeaders: response.headers);
+
+        final data = response.data is Map
+            ? Map<String, dynamic>.from(response.data as Map)
+            : <String, dynamic>{};
+
+        final token =
+            data['access_token'] ??
+            data['token'] ??
+            data['data']?['access_token'] ??
+            data['data']?['token'];
+
         if (token != null && token.toString().isNotEmpty) {
-          final bool isFirstLogin = response['first_login'] == true ||
-              response['firstLogin'] == true ||
-              response['data']?['first_login'] == true ||
-              response['data']?['firstLogin'] == true ||
-              response['first_login']?.toString().toLowerCase() == 'true' ||
-              response['first_login'] == 1;
+          final bool isFirstLogin =
+              data['first_login'] == true ||
+              data['firstLogin'] == true ||
+              data['data']?['first_login'] == true ||
+              data['data']?['firstLogin'] == true ||
+              data['first_login']?.toString().toLowerCase() == 'true' ||
+              data['first_login'] == 1;
 
           if (isFirstLogin) {
             AuthService.completeAuthProcess();
@@ -648,16 +793,112 @@ class LoginController extends GetxController {
             return;
           }
 
-          final roles = _parseRoles(username, response);
-          // Biometric second factor
+          // 🟢 Fetch live profile to populate real roles, department and permissions
+          final combinedData = await _enrichWithProfileData(data);
+          final roles = _parseRoles(username, combinedData);
+
           await _runBiometricAuth(
             username: username,
             roles: roles,
-            credentialResponse: response,
+            credentialResponse: combinedData,
           );
           return;
         }
-      } catch (e) {
+
+        CustomSnackbar.showError(
+          message: 'ការឆ្លើយតបពីម៉ាស៊ីនមេមិនត្រឹមត្រូវឡើយ',
+        );
+        AuthService.completeAuthProcess();
+        return;
+      }
+
+      if (response.statusCode == 409) {
+        final body = response.data;
+
+        if (body is Map) {
+          final detail = body['detail'];
+
+          debugPrint('LOGIN STATUS: ${response.statusCode}');
+          if (detail is Map && detail['code'] != null) {
+            debugPrint('LOGIN ACTION: ${detail['code']}');
+          }
+
+          if (detail is Map &&
+              detail['code'] == 'update_password_required' &&
+              detail['ticket'] is String) {
+            final ticket = detail['ticket'] as String;
+
+            // Keep the ticket only in memory. Do not log or save in storage.
+            passwordController.clear();
+            AuthService.completeAuthProcess();
+
+            final navContext = context ?? Get.context;
+            if (navContext != null) {
+              await Navigator.of(navContext).push(
+                MaterialPageRoute(
+                  builder: (_) => UpdatePasswordScreen(ticket: ticket),
+                ),
+              );
+              return;
+            }
+
+            await Get.to(() => UpdatePasswordScreen(ticket: ticket));
+            return;
+          }
+
+          if (detail is Map &&
+              detail['code'] == 'unsupported_required_action') {
+            throw Exception(
+              'This account has another required action that cannot be completed in the app.',
+            );
+          }
+        }
+
+        throw Exception('Account requires an unsupported action.');
+      }
+
+      throw DioException(
+        requestOptions: response.requestOptions,
+        response: response,
+        type: DioExceptionType.badResponse,
+      );
+    } on DioException catch (error) {
+      AuthService.completeAuthProcess();
+      final response = error.response;
+      final detail = response?.data is Map ? response?.data['detail'] : null;
+
+      debugPrint('LOGIN STATUS: ${response?.statusCode}');
+      if (detail is Map && detail['code'] != null) {
+        debugPrint('LOGIN ACTION: ${detail['code']}');
+      }
+
+      if (response?.statusCode == 409 &&
+          detail is Map &&
+          detail['code'] == 'update_password_required' &&
+          detail['ticket'] is String) {
+        final ticket = detail['ticket'] as String;
+
+        // Keep the ticket only in memory.
+        passwordController.clear();
+
+        final navContext = context ?? Get.context;
+        if (navContext != null) {
+          await Navigator.of(navContext).push(
+            MaterialPageRoute(
+              builder: (_) => UpdatePasswordScreen(ticket: ticket),
+            ),
+          );
+        } else {
+          await Get.to(() => UpdatePasswordScreen(ticket: ticket));
+        }
+        return;
+      }
+
+      // Offline dev fallback for admin only
+      if (kDebugMode &&
+          username.toLowerCase() == 'admin' &&
+          (error.type == DioExceptionType.connectionError ||
+              error.type == DioExceptionType.connectionTimeout)) {
         final roles = _parseRoles(username, {});
         final mockResponse = {'access_token': 'mock_admin_token'};
         await _runBiometricAuth(
@@ -666,222 +907,13 @@ class LoginController extends GetxController {
           credentialResponse: mockResponse,
         );
         return;
-      } finally {
-        if (Get.isRegistered<LoginController>()) {
-          isLoading.value = false;
-        }
-      }
-    }
-
-    try {
-      isLoading.value = true;
-      final response = await _authService.loginService(
-        username: username,
-        password: password,
-      );
-
-      final token = response['access_token'] ??
-          response['token'] ??
-          response['data']?['access_token'] ??
-          response['data']?['token'];
-      if (token != null && token.toString().isNotEmpty) {
-        // Native mobile first_login sequence:
-        // When first_login is true, navigate directly to app's password-change screen
-        final bool isFirstLogin = response['first_login'] == true ||
-            response['firstLogin'] == true ||
-            response['data']?['first_login'] == true ||
-            response['data']?['firstLogin'] == true ||
-            response['first_login']?.toString().toLowerCase() == 'true' ||
-            response['first_login'] == 1;
-
-        if (isFirstLogin) {
-          AuthService.completeAuthProcess();
-          Get.offAllNamed(
-            AppRoutes.firstLoginChangePassword,
-            arguments: {
-              'username': username,
-              'tempPassword': password,
-              'current_password': password,
-            },
-          );
-          return;
-        }
-
-        final roles = _parseRoles(username, response);
-
-        await _runBiometricAuth(
-          username: username,
-          roles: roles,
-          credentialResponse: response,
-        );
-        return;
       }
 
-      CustomSnackbar.showError(
-        message: 'ការឆ្លើយតបពីម៉ាស៊ីនមេមិនត្រឹមត្រូវឡើយ',
-      );
-      AuthService.completeAuthProcess();
+      await _showLoginError(detail, error, username);
     } catch (e) {
       AuthService.completeAuthProcess();
-      String errorMessage =
-          'Authentication failed. Please check your credentials.';
-      if (e is DioException) {
-        debugPrint(
-          "LOGIN FAILED -> Status: ${e.response?.statusCode}, Data: ${e.response?.data}",
-        );
-        if (e.type == DioExceptionType.connectionTimeout ||
-            e.type == DioExceptionType.sendTimeout ||
-            e.type == DioExceptionType.receiveTimeout) {
-          errorMessage = 'timeout_error'.tr;
-        } else if (e.type == DioExceptionType.connectionError) {
-          errorMessage = 'no_internet_error'.tr;
-        } else if (e.response?.statusCode == 409) {
-          // 409 Conflict: Keycloak reports account not fully set up (required_action)
-          final data = e.response?.data;
-          String msg = '';
-          String code = '';
-          if (data is Map) {
-            final detail = data['detail'];
-            if (detail is Map) {
-              code = (detail['code'] ?? data['code'] ?? '').toString();
-              msg = (detail['message'] ?? '').toString();
-            } else if (detail is String) {
-              msg = detail;
-              code = (data['code'] ?? '').toString();
-            } else {
-              msg = (data['message'] ?? '').toString();
-              code = (data['code'] ?? '').toString();
-            }
-          }
-
-          final detailMap = (data is Map && data['detail'] is Map)
-              ? (data['detail'] as Map)
-              : (data is Map ? data : null);
-          final reqAction = (detailMap?['required_action'] ??
-                  (data is Map ? data['required_action'] : null) ??
-                  '')
-              .toString()
-              .toUpperCase();
-
-          if (code == 'update_password_required' || reqAction == 'UPDATE_PASSWORD') {
-            final ticket = (detailMap?['ticket'] ??
-                    (data is Map ? data['ticket'] : null))
-                ?.toString();
-            final rawExpires = detailMap?['expires_in'] ??
-                (data is Map ? data['expires_in'] : null);
-            final expiresIn = rawExpires is int
-                ? rawExpires
-                : (int.tryParse(rawExpires?.toString() ?? '') ?? 180);
-            if (ticket != null && ticket.isNotEmpty && expiresIn > 0) {
-              debugPrint(
-                "Native update_password_required ticket received. Navigating to native change password screen.",
-              );
-              AuthService.completeAuthProcess();
-              passwordController.clear();
-              Get.toNamed(
-                AppRoutes.firstLoginChangePassword,
-                arguments: {
-                  'username': username,
-                  'ticket': ticket,
-                  'expiresIn': expiresIn,
-                },
-              );
-              return;
-            }
-          }
-
-          if (code == 'required_action') {
-            final detailMap = data is Map && data['detail'] is Map
-                ? data['detail'] as Map
-                : null;
-            final browserEndpoint =
-                detailMap?['browser_login_endpoint']?.toString();
-            if (browserEndpoint != null && browserEndpoint.isNotEmpty) {
-              debugPrint(
-                "Keycloak reported required_action: starting browser-login with PKCE...",
-              );
-              try {
-                await loginWithBrowserPkce(username: username);
-                return;
-              } catch (browserError) {
-                debugPrint("Browser login flow error: $browserError");
-                if (browserError is DioException &&
-                    browserError.response?.statusCode == 503) {
-                  final errData = browserError.response?.data;
-                  final detailMsg = (errData is Map ? errData['detail'] : null) ??
-                      'Mobile browser callbacks are not configured on server';
-                  CustomSnackbar.showError(message: detailMsg.toString());
-                  return;
-                }
-                final errStr = browserError.toString().toLowerCase();
-                if (errStr.contains('cancel') || errStr.contains('user')) {
-                  CustomSnackbar.showWarning(
-                    message: 'ការផ្ទៀងផ្ទាត់ត្រូវបានបោះបង់ (Login cancelled)',
-                  );
-                  return;
-                }
-                CustomSnackbar.showError(
-                  message:
-                      'Browser login failed: ${browserError.toString().replaceAll("Exception: ", "")}',
-                );
-                return;
-              }
-            } else {
-              // Generic required_action without browser endpoint: never opens password update form
-              errorMessage = msg.isNotEmpty
-                  ? msg
-                  : 'The account has pending required actions that cannot be completed natively.';
-            }
-          }
-
-          errorMessage = msg.isNotEmpty
-              ? msg
-              : 'Keycloak requires UPDATE_PASSWORD action. Please contact administrator.';
-        } else if (e.response?.statusCode == 429) {
-          // 429 Too Many Requests: Rate limited to 5 attempts per minute per IP
-          final data = e.response?.data;
-          String msg = '';
-          if (data is Map) {
-            msg = (data['detail'] ?? data['message'] ?? '').toString();
-          }
-          errorMessage = msg.isNotEmpty
-              ? msg
-              : 'Login attempt limit exceeded (5 attempts per minute). Please try again shortly.';
-        } else if (e.response?.data != null && e.response?.data is Map) {
-          dynamic rawDetail =
-              e.response?.data['detail'] ?? e.response?.data['message'];
-          String serverMessage = rawDetail?.toString() ?? '';
-          if (serverMessage.contains('<!DOCTYPE') ||
-              serverMessage.contains('<html')) {
-            if (serverMessage.contains('Invalid parameter: redirect_uri')) {
-              errorMessage = 'Invalid parameter: redirect_uri';
-            } else {
-              errorMessage = 'Invalid username or password.';
-            }
-          } else if (serverMessage == 'An unexpected error occurred') {
-            errorMessage = 'Invalid username or password.';
-          } else if (serverMessage.isNotEmpty) {
-            errorMessage = serverMessage;
-          }
-        } else {
-          errorMessage = 'server_error'.tr;
-        }
-      }
-      final cleanMessage = errorMessage.toLowerCase().trim();
-      final String translatedMessage;
-      if (e is DioException &&
-          (e.response?.statusCode == 409 || e.response?.statusCode == 429)) {
-        translatedMessage = errorMessage;
-      } else if (cleanMessage.contains('invalid username or password') ||
-          cleanMessage.contains('bad credentials') ||
-          cleanMessage.contains('invalid_credentials') ||
-          cleanMessage.contains('authentication failed')) {
-        translatedMessage = 'invalid_credentials'.tr;
-      } else {
-        translatedMessage = errorMessage;
-      }
-
-      CustomSnackbar.showError(message: translatedMessage);
+      final errorMsg = e.toString().replaceAll('Exception: ', '');
+      CustomSnackbar.showError(message: errorMsg);
     } finally {
       if (Get.isRegistered<LoginController>()) {
         isLoading.value = false;
@@ -889,13 +921,120 @@ class LoginController extends GetxController {
     }
   }
 
+  /// Handles ordinary login errors without leaking sensitive payload data
+  Future<void> _showLoginError(
+    dynamic detail,
+    DioException error,
+    String username,
+  ) async {
+    // DO NOT log the ticket or raw request/response body
+    debugPrint('LOGIN STATUS: ${error.response?.statusCode}');
+    if (detail is Map && detail['code'] != null) {
+      debugPrint('LOGIN ACTION: ${detail['code']}');
+    }
+
+    String errorMessage = 'invalid_credentials'.tr;
+
+    if (error.type == DioExceptionType.connectionTimeout ||
+        error.type == DioExceptionType.sendTimeout ||
+        error.type == DioExceptionType.receiveTimeout) {
+      errorMessage = 'timeout_error'.tr;
+    } else if (error.type == DioExceptionType.connectionError) {
+      errorMessage = 'no_internet_error'.tr;
+    } else if (error.response?.statusCode == 429) {
+      // 429 Too Many Requests: Rate limited to 5 attempts per minute per IP
+      final resData = error.response?.data;
+      String msg = '';
+      if (resData is Map) {
+        msg = (resData['detail'] ?? resData['message'] ?? '').toString();
+      }
+      errorMessage = msg.isNotEmpty
+          ? msg
+          : 'Login attempt limit exceeded (5 attempts per minute). Please try again shortly.';
+    } else if (error.response?.statusCode == 409) {
+      // 409 Conflict: Not update_password_required (do not treat every 409 as Update Password!)
+      if (detail is Map && detail['code'] == 'required_action') {
+        final browserEndpoint = detail['browser_login_endpoint']?.toString();
+        if (browserEndpoint != null && browserEndpoint.isNotEmpty) {
+          debugPrint(
+            "Keycloak reported required_action: starting browser-login with PKCE...",
+          );
+          try {
+            await loginWithBrowserPkce(username: username);
+            return;
+          } catch (browserError) {
+            if (browserError is DioException &&
+                browserError.response?.statusCode == 503) {
+              final errData = browserError.response?.data;
+              final detailMsg =
+                  (errData is Map ? errData['detail'] : null) ??
+                  'Mobile browser callbacks are not configured on server';
+              CustomSnackbar.showError(message: detailMsg.toString());
+              return;
+            }
+            final errStr = browserError.toString().toLowerCase();
+            if (errStr.contains('cancel') || errStr.contains('user')) {
+              CustomSnackbar.showWarning(
+                message: 'ការផ្ទៀងផ្ទាត់ត្រូវបានបោះបង់ (Login cancelled)',
+              );
+              return;
+            }
+            CustomSnackbar.showError(
+              message:
+                  'Browser login failed: ${browserError.toString().replaceAll("Exception: ", "")}',
+            );
+            return;
+          }
+        }
+      }
+
+      String msg = '';
+      if (detail is Map && detail['message'] != null) {
+        msg = detail['message'].toString();
+      } else if (detail is String) {
+        msg = detail;
+      } else if (error.response?.data is Map &&
+          error.response?.data['message'] != null) {
+        msg = error.response!.data['message'].toString();
+      }
+      errorMessage = msg.isNotEmpty ? msg : 'server_error'.tr;
+    } else if (detail != null) {
+      if (detail is Map && detail['message'] != null) {
+        errorMessage = detail['message'].toString();
+      } else if (detail is String && detail.isNotEmpty) {
+        errorMessage = detail;
+      }
+    } else if (error.response?.data != null && error.response?.data is Map) {
+      final resData = error.response!.data as Map;
+      final rawMsg = resData['message'] ?? resData['detail'];
+      if (rawMsg != null && rawMsg.toString().isNotEmpty) {
+        errorMessage = rawMsg.toString();
+      }
+    }
+
+    final cleanMessage = errorMessage.toLowerCase().trim();
+    final String translatedMessage;
+    if (error.response?.statusCode == 409 ||
+        error.response?.statusCode == 429) {
+      translatedMessage = errorMessage;
+    } else if (cleanMessage.contains('invalid username or password') ||
+        cleanMessage.contains('bad credentials') ||
+        cleanMessage.contains('invalid_credentials') ||
+        cleanMessage.contains('authentication failed')) {
+      translatedMessage = 'invalid_credentials'.tr;
+    } else {
+      translatedMessage = errorMessage;
+    }
+
+    CustomSnackbar.showError(message: translatedMessage);
+  }
+
   /// Starts PKCE browser login via BFF /api/mobile/auth/browser-login
   /// and exchanges the callback code via /api/mobile/auth/exchange-code
   Future<void> loginWithBrowserPkce({String? username}) async {
     isLoading.value = true;
     try {
-      final effectiveUsername =
-          (username ?? usernameController.text).trim();
+      final effectiveUsername = (username ?? usernameController.text).trim();
       final String callbackScheme = kIsWeb ? 'http' : 'myapp';
       final String redirectUri = kIsWeb
           ? '${Uri.base.origin}/auth.html'
@@ -911,7 +1050,8 @@ class LoginController extends GetxController {
         nonce: pkce.nonce,
       );
 
-      final String? browserUrl = browserResp['url']?.toString() ??
+      final String? browserUrl =
+          browserResp['url']?.toString() ??
           browserResp['login_url']?.toString() ??
           browserResp['authorization_url']?.toString() ??
           browserResp['redirect_url']?.toString() ??
@@ -930,7 +1070,9 @@ class LoginController extends GetxController {
       final Uri callbackUri = Uri.parse(callbackResult);
       final String? code = callbackUri.queryParameters['code'];
       if (code == null || code.isEmpty) {
-        throw StateError('No authorization code returned from browser callback.');
+        throw StateError(
+          'No authorization code returned from browser callback.',
+        );
       }
 
       final exchangeResp = await _authService.exchangeCodeService(
@@ -939,21 +1081,25 @@ class LoginController extends GetxController {
         codeVerifier: pkce.codeVerifier,
       );
 
-      final String token = exchangeResp['access_token']?.toString() ??
+      final String token =
+          exchangeResp['access_token']?.toString() ??
           exchangeResp['token']?.toString() ??
           exchangeResp['data']?['access_token']?.toString() ??
           exchangeResp['data']?['token']?.toString() ??
           '';
 
       if (token.isEmpty) {
-        throw StateError('Token exchange succeeded but returned no access token.');
+        throw StateError(
+          'Token exchange succeeded but returned no access token.',
+        );
       }
 
-      final roles = _parseRoles(effectiveUsername, exchangeResp);
+      final combinedResp = await _enrichWithProfileData(exchangeResp);
+      final roles = _parseRoles(effectiveUsername, combinedResp);
       await _runBiometricAuth(
         username: effectiveUsername,
         roles: roles,
-        credentialResponse: exchangeResp,
+        credentialResponse: combinedResp,
       );
     } finally {
       if (Get.isRegistered<LoginController>()) {
@@ -970,7 +1116,8 @@ class LoginController extends GetxController {
       debugPrint("SSO login error: $e");
       if (e is DioException && e.response?.statusCode == 503) {
         final errData = e.response?.data;
-        final detailMsg = (errData is Map ? errData['detail'] : null) ??
+        final detailMsg =
+            (errData is Map ? errData['detail'] : null) ??
             'Mobile browser callbacks are not configured';
         CustomSnackbar.showError(message: detailMsg.toString());
       } else {

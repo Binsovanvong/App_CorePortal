@@ -76,13 +76,22 @@ class SettingViewController extends GetxController {
           box.write('displayName', userName.value);
         }
 
-        // Read the populated Khmer names directly from the profile response
         if (data['generalDepartmentNameKh'] != null &&
             data['generalDepartmentNameKh'].toString().isNotEmpty) {
           userInstitution.value = data['generalDepartmentNameKh'];
+          await box.write('generalDepartmentNameKh', data['generalDepartmentNameKh'].toString().trim());
         } else if (data['generalDepartmentName'] != null &&
             data['generalDepartmentName'].toString().isNotEmpty) {
           userInstitution.value = data['generalDepartmentName'];
+          await box.write('generalDepartmentName', data['generalDepartmentName'].toString().trim());
+        }
+
+        final gCode = data['generalDepartmentCode'] ?? data['departmentCode'] ?? data['orgCode'];
+        if (gCode != null && gCode.toString().isNotEmpty) {
+          await box.write('generalDepartmentCode', gCode.toString().trim());
+        }
+        if (data['orgCode'] != null && data['orgCode'].toString().isNotEmpty) {
+          await box.write('orgCode', data['orgCode'].toString().trim());
         }
 
         if (data['departmentNameKh'] != null &&
@@ -105,7 +114,6 @@ class SettingViewController extends GetxController {
         final profileId =
             data['userProfileUserId'] ?? data['id'] ?? data['sub'];
         if (profileId != null && profileId.toString().isNotEmpty) {
-          final box = GetStorage();
           await box.write('userProfileUserId', profileId.toString());
         }
 
@@ -151,23 +159,20 @@ class SettingViewController extends GetxController {
         }
 
         final normalized = [
-          ...rolesList.map((e) => e.toString().toLowerCase().trim()),
-          ...permsList.map((e) => e.toString().toLowerCase().trim()),
+          ...rolesList.map((e) => e.toString().toUpperCase().trim()),
+          ...permsList.map((e) => e.toString().toUpperCase().trim()),
         ];
 
         final bool isAdm = normalized.any(
           (r) =>
-              r == 'admin' ||
-              r == 'administrator' ||
-              r == 'portal_administrator' ||
-              r == 'general_department_admin' ||
-              r == 'general_department' ||
-              r == 'portal_admin' ||
-              r == 'gddtm_admin' ||
-              r.contains('general_department') ||
-              r.contains('administrator') ||
-              r.contains('app_manage') ||
-              r.contains('user_manage'),
+              r.contains('ADMIN') ||
+              r.contains('ADMINISTRATOR') ||
+              r.contains('SUPER') ||
+              r.contains('MANAGE') ||
+              r.contains('GENERAL_DEPARTMENT') ||
+              r.contains('CREATE') ||
+              r.contains('DELETE') ||
+              r.contains('ASSIGN'),
         );
 
         _isAdmin = isAdm;
@@ -1236,20 +1241,22 @@ class SettingViewController extends GetxController {
     final box = GetStorage();
     final rawRoles = box.read('roles');
     final List list = (rawRoles is List && rawRoles.isNotEmpty) ? rawRoles : [];
-    final roles = list.map((e) => e.toString().toLowerCase().trim()).toList();
+    final roles = list.map((e) => e.toString().toUpperCase().trim()).toList();
 
-    if (roles.contains('general_department_admin') ||
-        roles.contains('general_department') ||
-        roles.contains('gddtm_admin') ||
-        roles.any((r) => r.contains('general_department'))) {
+    if (roles.any((r) => r.contains('GENERAL_DEPARTMENT') && (r.contains('ADMIN') || r.contains('ADMINISTRATOR')))) {
       userRoleDisplay.value = 'general_department_admin';
       return;
     }
-    if (roles.contains('portal_administrator') ||
-        roles.contains('administrator') ||
-        roles.contains('admin') ||
-        roles.contains('portal_admin') ||
-        roles.any((r) => r.contains('administrator'))) {
+    if (roles.any((r) => r.contains('PORTAL') && (r.contains('ADMIN') || r.contains('ADMINISTRATOR'))) ||
+        roles.any((r) => r == 'ADMIN' || r == 'ADMINISTRATOR')) {
+      userRoleDisplay.value = 'portal_administrator';
+      return;
+    }
+    if (roles.any((r) => r.contains('GENERAL_DEPARTMENT'))) {
+      userRoleDisplay.value = 'general_department_admin';
+      return;
+    }
+    if (roles.any((r) => r.contains('ADMIN') || r.contains('ADMINISTRATOR'))) {
       userRoleDisplay.value = 'portal_administrator';
       return;
     }
@@ -1264,18 +1271,13 @@ class SettingViewController extends GetxController {
 
     final rawRoles = box.read('roles');
     final List list = (rawRoles is List && rawRoles.isNotEmpty) ? rawRoles : [];
-    final roles = list.map((e) => e.toString().toLowerCase().trim()).toList();
-
-    return roles.any((r) =>
-        r == 'admin' ||
-        r == 'administrator' ||
-        r == 'portal_administrator' ||
-        r == 'general_department_admin' ||
-        r == 'general_department' ||
-        r == 'portal_admin' ||
-        r == 'gddtm_admin' ||
-        r.contains('general_department') ||
-        r.contains('administrator'));
+    return list.any((r) {
+      final s = r.toString().toUpperCase().trim();
+      return s.contains('ADMIN') ||
+          s.contains('ADMINISTRATOR') ||
+          s.contains('SUPER') ||
+          s.contains('MANAGE');
+    });
   }
 
   void goToAdmin() {

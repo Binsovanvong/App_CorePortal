@@ -194,6 +194,32 @@ class HomeController extends GetxController {
         debugPrint("fetchApps (tiles) error: $e");
       }
 
+      // If /portals/tiles returned empty or failed (non-401), fallback to /portals/apps
+      if (rawApps.isEmpty && !is401) {
+        try {
+          final portalAppsRes = await _authService.fetchPortalApps();
+          if (portalAppsRes != null) {
+            List list = [];
+            if (portalAppsRes is List) {
+              list = portalAppsRes;
+            } else if (portalAppsRes is Map) {
+              final data = portalAppsRes['data'] ??
+                  portalAppsRes['value'] ??
+                  portalAppsRes['items'] ??
+                  portalAppsRes['content'] ??
+                  portalAppsRes['apps'] ??
+                  [];
+              if (data is List) list = data;
+            }
+            for (var item in list) {
+              addAppIfNew(item, isGeneral: false);
+            }
+          }
+        } catch (e) {
+          debugPrint("Fallback fetchPortalApps in home controller error: $e");
+        }
+      }
+
       // If 401 occurred, redirect to login
       if (is401) {
         debugPrint("401 Unauthorized encountered. Redirecting to login.");
@@ -327,9 +353,11 @@ class HomeController extends GetxController {
     }
   }
 
-  /// Identifies general utility, admin, or third-party apps
-  /// (such as Google Map, Google Calendar, and general department utilities)
+  /// Identifies general utility, external tools, or public utilities
+  /// (such as Google Map, Google Calendar, public links)
   /// that must never appear on the user's primary Home screen.
+  /// IMPORTANT: Official General Department applications (e.g., General Department of Prisons / GDP,
+  /// GDDTM, GDI, GNP, etc.) are core ministry services and MUST NEVER be marked as general utility apps.
   static bool isGeneralApp(Map<String, dynamic> app) {
     if (app['isGeneral'] == true || app['is_general'] == true) return true;
 
@@ -343,51 +371,47 @@ class HomeController extends GetxController {
     final titleKh = (app['titleKh'] ?? app['nameKh'] ?? '').toString().toLowerCase().trim();
     final route = (app['route'] ?? app['url'] ?? app['launchUrl'] ?? app['appUrl'] ?? '').toString().toLowerCase().trim();
 
-    // 1. General category or department names
-    if (cat == 'general' ||
-        cat == 'ទូទៅ' ||
-        cat.contains('general') ||
-        cat.contains('ទូទៅ') ||
-        cat == 'public' ||
-        cat == 'tools' ||
-        cat == 'utility' ||
-        cat == 'utilities' ||
-        cat == 'external') {
-      return true;
+    // Helper: returns true if the string designates an official General Department (not generic utility)
+    bool isGeneralDeptString(String s) {
+      if (s.isEmpty) return false;
+      final lower = s.toLowerCase();
+      return lower.contains('general department') ||
+          lower.contains('general_department') ||
+          lower.contains('general-department') ||
+          lower.contains('អគ្គនាយកដ្ឋាន') ||
+          lower.contains('អគ្គស្នងការដ្ឋាន') ||
+          lower.contains('អគ្គាធិការដ្ឋាន') ||
+          lower.contains('អគ្គលេខាធិការដ្ឋាន');
     }
 
-    if (subCat == 'general' ||
-        subCat == 'ទូទៅ' ||
-        subCat.contains('general') ||
-        subCat.contains('ទូទៅ')) {
-      return true;
+    // Helper: checks if a field represents a generic utility category
+    bool isGenericUtility(String s) {
+      if (s.isEmpty) return false;
+      if (isGeneralDeptString(s)) return false;
+      final lower = s.toLowerCase().trim();
+      return lower == 'general' ||
+          lower == 'ទូទៅ' ||
+          lower == 'public' ||
+          lower == 'tools' ||
+          lower == 'utility' ||
+          lower == 'utilities' ||
+          lower == 'external' ||
+          (lower.contains('utility') && !isGeneralDeptString(lower));
     }
 
-    if (dept == 'general' ||
-        dept == 'ទូទៅ' ||
-        dept.contains('general') ||
-        dept.contains('ទូទៅ')) {
-      return true;
-    }
-
-    if (unit == 'general' ||
-        unit == 'ទូទៅ' ||
-        unit.contains('general') ||
-        unit.contains('ទូទៅ')) {
-      return true;
-    }
-
-    if (deptName == 'general' ||
-        deptName == 'ទូទៅ' ||
-        deptName.contains('general') ||
-        deptName.contains('ទូទៅ')) {
+    // 1. General category or utilities (excluding official General Departments)
+    if (isGenericUtility(cat) ||
+        isGenericUtility(subCat) ||
+        isGenericUtility(dept) ||
+        isGenericUtility(unit) ||
+        isGenericUtility(deptName)) {
       return true;
     }
 
     // 2. Google and external utility apps (Google Map, Google Calendar, etc.)
-    if (code.contains('GOOGLE') ||
-        code.contains('MAP') ||
-        code.contains('CALENDAR') ||
+    if (code == 'GOOGLE_MAP' ||
+        code == 'GOOGLE_CALENDAR' ||
+        code.contains('GOOGLE') ||
         titleEn.contains('google map') ||
         titleEn.contains('google calendar') ||
         titleEn.contains('google') ||
@@ -467,6 +491,36 @@ class HomeController extends GetxController {
         if (userData['permissions'] is List && (userData['permissions'] as List).isNotEmpty) {
           await _storage.write('permissions', userData['permissions']);
         }
+
+        final gCode = userData['generalDepartmentCode'] ??
+            userData['departmentCode'] ??
+            userData['orgCode'];
+        if (gCode != null && gCode.toString().isNotEmpty) {
+          await _storage.write('generalDepartmentCode', gCode.toString().trim());
+        }
+
+        final gNameKh = userData['generalDepartmentNameKh'] ??
+            userData['departmentNameKh'];
+        if (gNameKh != null && gNameKh.toString().isNotEmpty) {
+          await _storage.write('generalDepartmentNameKh', gNameKh.toString().trim());
+        }
+
+        final gName = userData['generalDepartmentName'] ??
+            userData['departmentName'];
+        if (gName != null && gName.toString().isNotEmpty) {
+          await _storage.write('generalDepartmentName', gName.toString().trim());
+        }
+
+        final orgCode = userData['orgCode'];
+        if (orgCode != null && orgCode.toString().isNotEmpty) {
+          await _storage.write('orgCode', orgCode.toString().trim());
+        }
+
+        final profileUserId = userData['userProfileUserId'] ?? userData['id'] ?? userData['subject'];
+        if (profileUserId != null && profileUserId.toString().isNotEmpty) {
+          await _storage.write('userProfileUserId', profileUserId.toString().trim());
+        }
+
         if (Get.isRegistered<NavController>()) {
           Get.find<NavController>().checkAdminRole();
         }

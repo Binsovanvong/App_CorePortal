@@ -29,264 +29,196 @@ class LoginView extends GetView<LoginController> {
 
   Widget _buildLoginForm(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final bottomSafeArea = MediaQuery.of(context).padding.bottom;
+    final isKeyboardOpen = bottomInset > 0;
 
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFF1A3E82), Color(0xFF163774), Color(0xFF102652)],
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF1A3E82), Color(0xFF163774), Color(0xFF102652)],
+          ),
         ),
-      ),
-      child: Stack(
-        children: [
-          // Main scrollable container
-          SafeArea(
-            bottom: false,
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              physics: isKeyboardOpen
+                  ? const ClampingScrollPhysics()
+                  : const NeverScrollableScrollPhysics(),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  minHeight: screenHeight - MediaQuery.of(context).padding.top,
+                  minHeight: constraints.maxHeight,
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Top Section: Language switcher & Ministry Branding
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (showLanguageSwitcher) ...[
-                            const SizedBox(height: 12),
-                            // Language Switcher at Top Right
-                            Align(
-                              alignment: Alignment.topRight,
-                              child: _buildDiscreetLanguageDropdown(),
+                child: IntrinsicHeight(
+                  child: Column(
+                    children: [
+                      // Top Section: Language switcher & Ministry Branding
+                      Expanded(
+                        child: SafeArea(
+                          bottom: false,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 8,
                             ),
-                            const SizedBox(height: 110),
-                          ] else
-                            const SizedBox(height: 149),
-
-                          // Circular Logo Badge with double golden border
-                          Container(
-                            width: 174,
-                            height: 174,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white,
-                              border: Border.all(
-                                color: const Color(0xFFD4AF37),
-                                width: 3.8,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.22),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 8),
-                                ),
-                              ],
-                            ),
-                            padding: const EdgeInsets.all(5.5),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: const Color(
-                                    0xFFEAB308,
-                                  ).withOpacity(0.45),
-                                  width: 1.1,
-                                ),
-                              ),
-                              padding: const EdgeInsets.all(4.5),
-                              child: ClipOval(
-                                child: Image.asset(
-                                  "assets/img/about-moi-logo.png",
-                                  fit: BoxFit.contain,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-
-                          // Ministry Title (Royal Gold Khmer)
-                          Text(
-                            'ក្រសួងមហាផ្ទៃ',
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.kantumruyPro(
-                              fontSize: 27,
-                              fontWeight: FontWeight.w800,
-                              color: const Color(0xFFD4AF37),
-                              letterSpacing: 0.2,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-
-                          // Ministry Subtitle (English - Royal Gold / Champagne)
-                          Text(
-                            'MINISTRY OF INTERIOR',
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.poppins(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFFDFBC66),
-                              letterSpacing: 1.2,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                        ],
-                      ),
-                    ),
-
-                    // Bottom Section: White Rounded Bottom Card
-                    Container(
-                      width: double.infinity,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(36),
-                          topRight: Radius.circular(36),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color(0x14000000),
-                            blurRadius: 20,
-                            offset: Offset(0, -6),
-                          ),
-                        ],
-                      ),
-                      child: Stack(
-                        children: [
-                          // Subtle bottom wave illustration inside card
-                          Positioned(
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            height: 110,
-                            child: IgnorePointer(
-                              child: CustomPaint(
-                                painter: _BottomCardWavePainter(),
-                              ),
-                            ),
-                          ),
-
-                          // Content inside white card
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(
-                              24,
-                              28,
-                              24,
-                              bottomInset > 0 ? bottomInset + 16 : 28,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Welcome Title
-                                Text(
-                                  'welcome_title'.tr,
-                                  style: GoogleFonts.kantumruyPro(
-                                    fontSize: 26,
-                                    fontWeight: FontWeight.w800,
-                                    color: const Color(0xFF163774),
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-
-                                // Subtitle
-                                Text(
-                                  'login_hint_subtitle'.tr,
-                                  style: GoogleFonts.kantumruyPro(
-                                    fontSize: 13.5,
-                                    fontWeight: FontWeight.w400,
-                                    color: const Color(0xFF64748B),
-                                  ),
-                                ),
-                                const SizedBox(height: 22),
-
-                                // 1. Email / Username Input
-                                TextField(
-                                  controller: controller.usernameController,
-                                  textInputAction: TextInputAction.next,
-                                  style: GoogleFonts.kantumruyPro(
-                                    fontSize: 14.5,
-                                    color: const Color(0xFF0F172A),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  decoration: InputDecoration(
-                                    filled: true,
-                                    fillColor: const Color(0xFFF8FAFC),
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 16,
+                            child: Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (showLanguageSwitcher) ...[
+                                    Align(
+                                      alignment: Alignment.topRight,
+                                      child: _buildDiscreetLanguageDropdown(),
                                     ),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: const BorderSide(
-                                        color: Color(0xFFCBD5E1),
-                                        width: 1.5,
+                                    const SizedBox(height: 10),
+                                  ],
+
+                                  // Circular Logo Badge with double golden border
+                                  Container(
+                                    width: 110,
+                                    height: 110,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white,
+                                      border: Border.all(
+                                        color: const Color(0xFFD4AF37),
+                                        width: 3.2,
                                       ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.22),
+                                          blurRadius: 18,
+                                          offset: const Offset(0, 6),
+                                        ),
+                                      ],
                                     ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: const BorderSide(
-                                        color: Color(0xFFCBD5E1),
-                                        width: 1.5,
-                                      ),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                      borderSide: const BorderSide(
-                                        color: Color(0xFF163774),
-                                        width: 1.8,
-                                      ),
-                                    ),
-                                    prefixIcon: Container(
-                                      margin: const EdgeInsets.only(
-                                        left: 10,
-                                        right: 12,
-                                      ),
-                                      width: 38,
-                                      height: 38,
+                                    padding: const EdgeInsets.all(4.5),
+                                    child: Container(
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFFEFF4FB),
-                                        borderRadius: BorderRadius.circular(10),
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: const Color(
+                                            0xFFEAB308,
+                                          ).withOpacity(0.45),
+                                          width: 1.0,
+                                        ),
                                       ),
-                                      child: const Icon(
-                                        Icons.mail_outline_rounded,
-                                        color: Color(0xFF163774),
-                                        size: 20,
+                                      padding: const EdgeInsets.all(3.5),
+                                      child: ClipOval(
+                                        child: Image.asset(
+                                          "assets/img/about-moi-logo.png",
+                                          fit: BoxFit.contain,
+                                        ),
                                       ),
-                                    ),
-                                    prefixIconConstraints: const BoxConstraints(
-                                      minWidth: 50,
-                                      minHeight: 48,
-                                    ),
-                                    hintText: 'enter_email_hint'.tr,
-                                    hintStyle: GoogleFonts.kantumruyPro(
-                                      color: const Color(0xFF94A3B8),
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w400,
                                     ),
                                   ),
-                                ),
-                                const SizedBox(height: 14),
+                                  const SizedBox(height: 12),
 
-                                // 2. Password Input
-                                Obx(
-                                  () => TextField(
-                                    controller: controller.passwordController,
-                                    obscureText:
-                                        controller.obscurePassword.value,
-                                    textInputAction: TextInputAction.done,
-                                    onSubmitted: (_) {
-                                      if (!controller.isLoading.value) {
-                                        controller.loginWithCredentials();
-                                      }
-                                    },
+                                  // Ministry Title (Royal Gold Khmer)
+                                  Text(
+                                    'ក្រសួងមហាផ្ទៃ',
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.kantumruyPro(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w800,
+                                      color: const Color(0xFFD4AF37),
+                                      letterSpacing: 0.2,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+
+                                  // Ministry Subtitle (English - Royal Gold / Champagne)
+                                  Text(
+                                    'MINISTRY OF INTERIOR',
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xFFDFBC66),
+                                      letterSpacing: 1.1,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Bottom Section: White Rounded Bottom Card
+                      Container(
+                        width: double.infinity,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(32),
+                            topRight: Radius.circular(32),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Color(0x14000000),
+                              blurRadius: 20,
+                              offset: Offset(0, -6),
+                            ),
+                          ],
+                        ),
+                        child: Stack(
+                          children: [
+                            // Subtle bottom wave illustration inside card
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              bottom: 0,
+                              height: 100,
+                              child: IgnorePointer(
+                                child: CustomPaint(
+                                  painter: _BottomCardWavePainter(),
+                                ),
+                              ),
+                            ),
+
+                            // Content inside white card
+                            Padding(
+                              padding: EdgeInsets.fromLTRB(
+                                24,
+                                22,
+                                24,
+                                bottomSafeArea > 0 ? bottomSafeArea + 8 : 20,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Welcome Title
+                                  Text(
+                                    'welcome_title'.tr,
+                                    style: GoogleFonts.kantumruyPro(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w800,
+                                      color: const Color(0xFF163774),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+
+                                  // Subtitle
+                                  Text(
+                                    'login_hint_subtitle'.tr,
+                                    style: GoogleFonts.kantumruyPro(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w400,
+                                      color: const Color(0xFF64748B),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+
+                                  // 1. Email / Username Input
+                                  TextField(
+                                    controller: controller.usernameController,
+                                    textInputAction: TextInputAction.next,
                                     style: GoogleFonts.kantumruyPro(
                                       fontSize: 14.5,
                                       color: const Color(0xFF0F172A),
@@ -295,11 +227,10 @@ class LoginView extends GetView<LoginController> {
                                     decoration: InputDecoration(
                                       filled: true,
                                       fillColor: const Color(0xFFF8FAFC),
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                            horizontal: 16,
-                                            vertical: 16,
-                                          ),
+                                      contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 14,
+                                      ),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(16),
                                         borderSide: const BorderSide(
@@ -330,34 +261,19 @@ class LoginView extends GetView<LoginController> {
                                         height: 38,
                                         decoration: BoxDecoration(
                                           color: const Color(0xFFEFF4FB),
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
+                                          borderRadius: BorderRadius.circular(10),
                                         ),
                                         child: const Icon(
-                                          Icons.lock_outline_rounded,
+                                          Icons.mail_outline_rounded,
                                           color: Color(0xFF163774),
                                           size: 20,
                                         ),
                                       ),
-                                      prefixIconConstraints:
-                                          const BoxConstraints(
-                                            minWidth: 50,
-                                            minHeight: 48,
-                                          ),
-                                      suffixIcon: IconButton(
-                                        splashRadius: 20,
-                                        icon: Icon(
-                                          controller.obscurePassword.value
-                                              ? Icons.visibility_off_outlined
-                                              : Icons.visibility_outlined,
-                                          color: const Color(0xFF64748B),
-                                          size: 20,
-                                        ),
-                                        onPressed:
-                                            controller.obscurePassword.toggle,
+                                      prefixIconConstraints: const BoxConstraints(
+                                        minWidth: 50,
+                                        minHeight: 48,
                                       ),
-                                      hintText: 'enter_password_hint'.tr,
+                                      hintText: 'enter_email_hint'.tr,
                                       hintStyle: GoogleFonts.kantumruyPro(
                                         color: const Color(0xFF94A3B8),
                                         fontSize: 14,
@@ -365,382 +281,474 @@ class LoginView extends GetView<LoginController> {
                                       ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(height: 16),
+                                  const SizedBox(height: 12),
 
-                                // 3. Remember Me & Forgot Password
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    // Checkbox + Remember Me
-                                    GestureDetector(
-                                      onTap: () =>
-                                          controller.rememberMe.toggle(),
-                                      behavior: HitTestBehavior.opaque,
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Obx(
-                                            () => SizedBox(
-                                              width: 19,
-                                              height: 19,
-                                              child: Checkbox(
-                                                value:
-                                                    controller.rememberMe.value,
-                                                onChanged: (val) =>
-                                                    controller
-                                                            .rememberMe
-                                                            .value =
-                                                        val ?? false,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(5),
-                                                ),
-                                                side: const BorderSide(
-                                                  color: Color(0xFFCBD5E1),
-                                                  width: 1.5,
-                                                ),
-                                                activeColor: const Color(
-                                                  0xFF163774,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            'remember_me'.tr,
-                                            style: GoogleFonts.kantumruyPro(
-                                              fontSize: 13.5,
-                                              fontWeight: FontWeight.w600,
-                                              color: const Color(0xFF1E293B),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-
-                                    // Forgot Password Link
-                                    GestureDetector(
-                                      onTap: () {
-                                        CustomSnackbar.showInfo(
-                                          message: 'contact_admin_reset_pwd'.tr,
-                                        );
+                                  // 2. Password Input
+                                  Obx(
+                                    () => TextField(
+                                      controller: controller.passwordController,
+                                      obscureText:
+                                          controller.obscurePassword.value,
+                                      textInputAction: TextInputAction.done,
+                                      onSubmitted: (_) {
+                                        if (!controller.isLoading.value) {
+                                          controller.loginWithCredentials();
+                                        }
                                       },
-                                      behavior: HitTestBehavior.opaque,
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            'forgot_password_q'.tr,
-                                            style: GoogleFonts.kantumruyPro(
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w700,
-                                              color: const Color(0xFF163774),
-                                            ),
-                                          ),
-                                          const Icon(
-                                            Icons.chevron_right_rounded,
-                                            size: 18,
-                                            color: Color(0xFF163774),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 22),
-
-                                // 4. Primary Login Button (Navy Gradient)
-                                SizedBox(
-                                  width: double.infinity,
-                                  height: 52,
-                                  child: Obx(
-                                    () => Container(
-                                      decoration: BoxDecoration(
-                                        gradient: const LinearGradient(
-                                          colors: [
-                                            Color(0xFF163774),
-                                            Color(0xFF244F9C),
-                                          ],
-                                        ),
-                                        borderRadius: BorderRadius.circular(16),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: const Color(
-                                              0xFF163774,
-                                            ).withOpacity(0.35),
-                                            blurRadius: 14,
-                                            offset: const Offset(0, 5),
-                                          ),
-                                        ],
-                                      ),
-                                      child: ElevatedButton(
-                                        onPressed: controller.isLoading.value
-                                            ? null
-                                            : controller.loginWithCredentials,
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.transparent,
-                                          shadowColor: Colors.transparent,
-                                          foregroundColor: Colors.white,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              16,
-                                            ),
-                                          ),
-                                        ),
-                                        child: controller.isLoading.value
-                                            ? const SizedBox(
-                                                width: 22,
-                                                height: 22,
-                                                child:
-                                                    CircularProgressIndicator(
-                                                      color: Colors.white,
-                                                      strokeWidth: 2.4,
-                                                    ),
-                                              )
-                                            : Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Text(
-                                                    'login'.tr,
-                                                    style:
-                                                        GoogleFonts.kantumruyPro(
-                                                          fontSize: 16,
-                                                          fontWeight:
-                                                              FontWeight.w700,
-                                                          color: Colors.white,
-                                                        ),
-                                                  ),
-                                                  const SizedBox(width: 8),
-                                                  const Icon(
-                                                    Icons.arrow_forward_rounded,
-                                                    color: Colors.white,
-                                                    size: 20,
-                                                  ),
-                                                ],
-                                              ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 22),
-
-                                // 5. Divider with OR & 6. Biometric Options (Fingerprint & Face ID Cards)
-                                if (showBiometricOptions) ...[
-                                  // 5. Divider with OR
-                                  Row(
-                                    children: [
-                                      const Expanded(
-                                        child: Divider(
-                                          color: Color(0xFFE2E8F0),
-                                          thickness: 1,
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 14,
-                                        ),
-                                        child: Text(
-                                          'or_divider'.tr,
-                                          style: GoogleFonts.kantumruyPro(
-                                            fontSize: 13,
-                                            color: const Color(0xFF94A3B8),
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                      const Expanded(
-                                        child: Divider(
-                                          color: Color(0xFFE2E8F0),
-                                          thickness: 1,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 18),
-
-                                  // 6. Biometric Options (Fingerprint & Face ID Cards)
-                                  Row(
-                                    children: [
-                                      // Fingerprint Card
-                                      Expanded(
-                                        child: Material(
-                                          color: Colors.transparent,
-                                          child: InkWell(
-                                            onTap: () => controller
-                                                .loginWithBiometricsQuick(
-                                                  isFace: false,
-                                                ),
-                                            borderRadius: BorderRadius.circular(
-                                              16,
-                                            ),
-                                            child: Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    vertical: 16,
-                                                    horizontal: 8,
-                                                  ),
-                                              decoration: BoxDecoration(
-                                                color: const Color(0xFFF8FAFC),
-                                                borderRadius:
-                                                    BorderRadius.circular(16),
-                                                border: Border.all(
-                                                  color: const Color(
-                                                    0xFFE2E8F0,
-                                                  ),
-                                                  width: 1.2,
-                                                ),
-                                              ),
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  const Icon(
-                                                    Icons.fingerprint_rounded,
-                                                    color: Color(0xFF163774),
-                                                    size: 32,
-                                                  ),
-                                                  const SizedBox(height: 8),
-                                                  Text(
-                                                    'login_fingerprint'.tr,
-                                                    textAlign: TextAlign.center,
-                                                    style:
-                                                        GoogleFonts.kantumruyPro(
-                                                          fontSize: 12.5,
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                          color: const Color(
-                                                            0xFF1E293B,
-                                                          ),
-                                                        ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 14),
-
-                                      // Face ID Card
-                                      Expanded(
-                                        child: Material(
-                                          color: Colors.transparent,
-                                          child: InkWell(
-                                            onTap: () => controller
-                                                .loginWithBiometricsQuick(
-                                                  isFace: true,
-                                                ),
-                                            borderRadius: BorderRadius.circular(
-                                              16,
-                                            ),
-                                            child: Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    vertical: 16,
-                                                    horizontal: 8,
-                                                  ),
-                                              decoration: BoxDecoration(
-                                                color: const Color(0xFFF8FAFC),
-                                                borderRadius:
-                                                    BorderRadius.circular(16),
-                                                border: Border.all(
-                                                  color: const Color(
-                                                    0xFFE2E8F0,
-                                                  ),
-                                                  width: 1.2,
-                                                ),
-                                              ),
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  const _FaceIdIconWidget(
-                                                    size: 32,
-                                                    color: Color(0xFF163774),
-                                                  ),
-                                                  const SizedBox(height: 8),
-                                                  Text(
-                                                    'login_face'.tr,
-                                                    textAlign: TextAlign.center,
-                                                    style:
-                                                        GoogleFonts.kantumruyPro(
-                                                          fontSize: 12.5,
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                          color: const Color(
-                                                            0xFF1E293B,
-                                                          ),
-                                                        ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 24),
-                                ],
-
-                                // 7. Support / Help Link
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(
-                                      Icons.headset_mic_outlined,
-                                      size: 18,
-                                      color: Color(0xFF64748B),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      'need_help_q'.tr,
                                       style: GoogleFonts.kantumruyPro(
-                                        fontSize: 13,
-                                        color: const Color(0xFF64748B),
+                                        fontSize: 14.5,
+                                        color: const Color(0xFF0F172A),
                                         fontWeight: FontWeight.w500,
                                       ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    GestureDetector(
-                                      onTap: () =>
-                                          _showContactSupportDialog(context),
-                                      behavior: HitTestBehavior.opaque,
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            'contact_service'.tr,
-                                            style: GoogleFonts.kantumruyPro(
-                                              fontSize: 13,
-                                              color: const Color(0xFF163774),
-                                              fontWeight: FontWeight.w700,
+                                      decoration: InputDecoration(
+                                        filled: true,
+                                        fillColor: const Color(0xFFF8FAFC),
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                              vertical: 14,
+                                            ),
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(16),
+                                          borderSide: const BorderSide(
+                                            color: Color(0xFFCBD5E1),
+                                            width: 1.5,
+                                          ),
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(16),
+                                          borderSide: const BorderSide(
+                                            color: Color(0xFFCBD5E1),
+                                            width: 1.5,
+                                          ),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(16),
+                                          borderSide: const BorderSide(
+                                            color: Color(0xFF163774),
+                                            width: 1.8,
+                                          ),
+                                        ),
+                                        prefixIcon: Container(
+                                          margin: const EdgeInsets.only(
+                                            left: 10,
+                                            right: 12,
+                                          ),
+                                          width: 38,
+                                          height: 38,
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFEFF4FB),
+                                            borderRadius: BorderRadius.circular(
+                                              10,
                                             ),
                                           ),
-                                          const Icon(
-                                            Icons.chevron_right_rounded,
-                                            size: 17,
+                                          child: const Icon(
+                                            Icons.lock_outline_rounded,
                                             color: Color(0xFF163774),
+                                            size: 20,
                                           ),
-                                        ],
+                                        ),
+                                        prefixIconConstraints:
+                                            const BoxConstraints(
+                                              minWidth: 50,
+                                              minHeight: 48,
+                                            ),
+                                        suffixIcon: IconButton(
+                                          splashRadius: 20,
+                                          icon: Icon(
+                                            controller.obscurePassword.value
+                                                ? Icons.visibility_off_outlined
+                                                : Icons.visibility_outlined,
+                                            color: const Color(0xFF64748B),
+                                            size: 20,
+                                          ),
+                                          onPressed:
+                                              controller.obscurePassword.toggle,
+                                        ),
+                                        hintText: 'enter_password_hint'.tr,
+                                        hintStyle: GoogleFonts.kantumruyPro(
+                                          color: const Color(0xFF94A3B8),
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                        ),
                                       ),
                                     ),
+                                  ),
+                                  const SizedBox(height: 12),
+
+                                  // 3. Remember Me & Forgot Password
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      // Checkbox + Remember Me
+                                      GestureDetector(
+                                        onTap: () =>
+                                            controller.rememberMe.toggle(),
+                                        behavior: HitTestBehavior.opaque,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Obx(
+                                              () => SizedBox(
+                                                width: 19,
+                                                height: 19,
+                                                child: Checkbox(
+                                                  value:
+                                                      controller.rememberMe.value,
+                                                  onChanged: (val) =>
+                                                      controller
+                                                              .rememberMe
+                                                              .value =
+                                                          val ?? false,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(5),
+                                                  ),
+                                                  side: const BorderSide(
+                                                    color: Color(0xFFCBD5E1),
+                                                    width: 1.5,
+                                                  ),
+                                                  activeColor: const Color(
+                                                    0xFF163774,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              'remember_me'.tr,
+                                              style: GoogleFonts.kantumruyPro(
+                                                fontSize: 13.5,
+                                                fontWeight: FontWeight.w600,
+                                                color: const Color(0xFF1E293B),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+
+                                      // Forgot Password Link
+                                      GestureDetector(
+                                        onTap: () {
+                                          CustomSnackbar.showInfo(
+                                            message: 'contact_admin_reset_pwd'.tr,
+                                          );
+                                        },
+                                        behavior: HitTestBehavior.opaque,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              'forgot_password_q'.tr,
+                                              style: GoogleFonts.kantumruyPro(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w700,
+                                                color: const Color(0xFF163774),
+                                              ),
+                                            ),
+                                            const Icon(
+                                              Icons.chevron_right_rounded,
+                                              size: 18,
+                                              color: Color(0xFF163774),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 16),
+
+                                  // 4. Primary Login Button (Navy Gradient)
+                                  SizedBox(
+                                    width: double.infinity,
+                                    height: 50,
+                                    child: Obx(
+                                      () => Container(
+                                        decoration: BoxDecoration(
+                                          gradient: const LinearGradient(
+                                            colors: [
+                                              Color(0xFF163774),
+                                              Color(0xFF244F9C),
+                                            ],
+                                          ),
+                                          borderRadius: BorderRadius.circular(16),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: const Color(
+                                                0xFF163774,
+                                              ).withOpacity(0.35),
+                                              blurRadius: 14,
+                                              offset: const Offset(0, 5),
+                                            ),
+                                          ],
+                                        ),
+                                        child: ElevatedButton(
+                                          onPressed: controller.isLoading.value
+                                              ? null
+                                              : controller.loginWithCredentials,
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.transparent,
+                                            shadowColor: Colors.transparent,
+                                            foregroundColor: Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(
+                                                16,
+                                              ),
+                                            ),
+                                          ),
+                                          child: controller.isLoading.value
+                                              ? const SizedBox(
+                                                  width: 22,
+                                                  height: 22,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                        color: Colors.white,
+                                                        strokeWidth: 2.4,
+                                                      ),
+                                                )
+                                              : Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Text(
+                                                      'login'.tr,
+                                                      style:
+                                                          GoogleFonts.kantumruyPro(
+                                                            fontSize: 16,
+                                                            fontWeight:
+                                                                FontWeight.w700,
+                                                            color: Colors.white,
+                                                          ),
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    const Icon(
+                                                      Icons.arrow_forward_rounded,
+                                                      color: Colors.white,
+                                                      size: 20,
+                                                    ),
+                                                  ],
+                                                ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+
+                                  // 5. Divider with OR & 6. Biometric Options (Fingerprint & Face ID Cards)
+                                  if (showBiometricOptions) ...[
+                                    // 5. Divider with OR
+                                    Row(
+                                      children: [
+                                        const Expanded(
+                                          child: Divider(
+                                            color: Color(0xFFE2E8F0),
+                                            thickness: 1,
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 14,
+                                          ),
+                                          child: Text(
+                                            'or_divider'.tr,
+                                            style: GoogleFonts.kantumruyPro(
+                                              fontSize: 13,
+                                              color: const Color(0xFF94A3B8),
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                        const Expanded(
+                                          child: Divider(
+                                            color: Color(0xFFE2E8F0),
+                                            thickness: 1,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 14),
+
+                                    // 6. Biometric Options (Fingerprint & Face ID Cards)
+                                    Row(
+                                      children: [
+                                        // Fingerprint Card
+                                        Expanded(
+                                          child: Material(
+                                            color: Colors.transparent,
+                                            child: InkWell(
+                                              onTap: () => controller
+                                                  .loginWithBiometricsQuick(
+                                                    isFace: false,
+                                                  ),
+                                              borderRadius: BorderRadius.circular(
+                                                16,
+                                              ),
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      vertical: 10,
+                                                      horizontal: 8,
+                                                    ),
+                                                decoration: BoxDecoration(
+                                                  color: const Color(0xFFF8FAFC),
+                                                  borderRadius:
+                                                      BorderRadius.circular(16),
+                                                  border: Border.all(
+                                                    color: const Color(
+                                                      0xFFE2E8F0,
+                                                    ),
+                                                    width: 1.2,
+                                                  ),
+                                                ),
+                                                child: Column(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    const Icon(
+                                                      Icons.fingerprint_rounded,
+                                                      color: Color(0xFF163774),
+                                                      size: 28,
+                                                    ),
+                                                    const SizedBox(height: 5),
+                                                    Text(
+                                                      'login_fingerprint'.tr,
+                                                      textAlign: TextAlign.center,
+                                                      style:
+                                                          GoogleFonts.kantumruyPro(
+                                                            fontSize: 12.5,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            color: const Color(
+                                                              0xFF1E293B,
+                                                            ),
+                                                          ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+
+                                        // Face ID Card
+                                        Expanded(
+                                          child: Material(
+                                            color: Colors.transparent,
+                                            child: InkWell(
+                                              onTap: () => controller
+                                                  .loginWithBiometricsQuick(
+                                                    isFace: true,
+                                                  ),
+                                              borderRadius: BorderRadius.circular(
+                                                16,
+                                              ),
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      vertical: 10,
+                                                      horizontal: 8,
+                                                    ),
+                                                decoration: BoxDecoration(
+                                                  color: const Color(0xFFF8FAFC),
+                                                  borderRadius:
+                                                      BorderRadius.circular(16),
+                                                  border: Border.all(
+                                                    color: const Color(
+                                                      0xFFE2E8F0,
+                                                    ),
+                                                    width: 1.2,
+                                                  ),
+                                                ),
+                                                child: Column(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    const _FaceIdIconWidget(
+                                                      size: 28,
+                                                      color: Color(0xFF163774),
+                                                    ),
+                                                    const SizedBox(height: 5),
+                                                    Text(
+                                                      'login_face'.tr,
+                                                      textAlign: TextAlign.center,
+                                                      style:
+                                                          GoogleFonts.kantumruyPro(
+                                                            fontSize: 12.5,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            color: const Color(
+                                                              0xFF1E293B,
+                                                            ),
+                                                          ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 16),
                                   ],
-                                ),
-                                const SizedBox(height: 6),
-                              ],
+
+                                  // 7. Support / Help Link
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(
+                                        Icons.headset_mic_outlined,
+                                        size: 17,
+                                        color: Color(0xFF64748B),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        'need_help_q'.tr,
+                                        style: GoogleFonts.kantumruyPro(
+                                          fontSize: 13,
+                                          color: const Color(0xFF64748B),
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      GestureDetector(
+                                        onTap: () =>
+                                            _showContactSupportDialog(context),
+                                        behavior: HitTestBehavior.opaque,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              'contact_service'.tr,
+                                              style: GoogleFonts.kantumruyPro(
+                                                fontSize: 13,
+                                                color: const Color(0xFF163774),
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                            const Icon(
+                                              Icons.chevron_right_rounded,
+                                              size: 16,
+                                              color: Color(0xFF163774),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ),
-        ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -760,42 +768,62 @@ class LoginView extends GetView<LoginController> {
           colors: [Color(0xFF1A3E82), Color(0xFF163774), Color(0xFF102652)],
         ),
       ),
-      child: Stack(
+      child: Column(
         children: [
-          SafeArea(
-            bottom: false,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+          Expanded(
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 8,
+                ),
+                child: Center(
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       if (showLanguageSwitcher) ...[
-                        const SizedBox(height: 12),
                         Align(
                           alignment: Alignment.topRight,
                           child: _buildDiscreetLanguageDropdown(),
                         ),
-                        const SizedBox(height: 110),
-                      ] else
-                        const SizedBox(height: 149),
+                        const SizedBox(height: 10),
+                      ],
                       Container(
-                        width: 155,
-                        height: 155,
+                        width: 120,
+                        height: 120,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.white,
                           border: Border.all(
                             color: const Color(0xFFD4AF37),
-                            width: 3.5,
+                            width: 3.2,
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.22),
+                              blurRadius: 18,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
                         ),
-                        padding: const EdgeInsets.all(5.0),
-                        child: ClipOval(
-                          child: Image.asset(
-                            "assets/img/about-moi-logo.png",
-                            fit: BoxFit.contain,
+                        padding: const EdgeInsets.all(4.5),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: const Color(
+                                0xFFEAB308,
+                              ).withOpacity(0.45),
+                              width: 1.0,
+                            ),
+                          ),
+                          padding: const EdgeInsets.all(3.5),
+                          child: ClipOval(
+                            child: Image.asset(
+                              "assets/img/about-moi-logo.png",
+                              fit: BoxFit.contain,
+                            ),
                           ),
                         ),
                       ),
@@ -808,6 +836,7 @@ class LoginView extends GetView<LoginController> {
                           fontSize: 24,
                           fontWeight: FontWeight.w800,
                           color: const Color(0xFFD4AF37),
+                          letterSpacing: 0.2,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -817,7 +846,7 @@ class LoginView extends GetView<LoginController> {
                         'MINISTRY OF INTERIOR',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.poppins(
-                          fontSize: 12,
+                          fontSize: 13,
                           fontWeight: FontWeight.w700,
                           color: const Color(0xFFDFBC66),
                           letterSpacing: 1.1,
@@ -826,125 +855,133 @@ class LoginView extends GetView<LoginController> {
                     ],
                   ),
                 ),
+              ),
+            ),
+          ),
+          Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(32),
+                topRight: Radius.circular(32),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x14000000),
+                  blurRadius: 20,
+                  offset: Offset(0, -6),
+                ),
+              ],
+            ),
+            padding: EdgeInsets.fromLTRB(
+              24,
+              28,
+              24,
+              bottomInset > 0 ? bottomInset + 16 : 28,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'biometric_title'.tr,
+                  style: GoogleFonts.kantumruyPro(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF0F172A),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'biometric_reason'.tr,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.kantumruyPro(
+                    fontSize: 14,
+                    color: const Color(0xFF64748B),
+                  ),
+                ),
+                const SizedBox(height: 24),
                 Container(
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(36),
-                      topRight: Radius.circular(36),
+                  width: 74,
+                  height: 74,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFFEFF4FB),
+                    border: Border.all(
+                      color: const Color(0xFFC7D7EC),
+                      width: 2,
                     ),
                   ),
-                  padding: EdgeInsets.fromLTRB(
-                    24,
-                    36,
-                    24,
-                    bottomInset > 0 ? bottomInset + 20 : 40,
+                  child: const Icon(
+                    Icons.fingerprint_rounded,
+                    size: 44,
+                    color: Color(0xFF163774),
                   ),
-                  child: Column(
-                    children: [
-                      Text(
-                        'biometric_title'.tr,
-                        style: GoogleFonts.kantumruyPro(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF0F172A),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'biometric_reason'.tr,
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.kantumruyPro(
-                          fontSize: 14,
-                          color: const Color(0xFF64748B),
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: const Color(0xFFEFF4FB),
-                          border: Border.all(
-                            color: const Color(0xFFC7D7EC),
-                            width: 2,
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons.fingerprint_rounded,
-                          size: 48,
-                          color: Color(0xFF163774),
-                        ),
-                      ),
-                      const SizedBox(height: 36),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: Obx(
-                          () => ElevatedButton.icon(
-                            onPressed: controller.isLoading.value
-                                ? null
-                                : controller.retryBiometricUnlock,
-                            icon: controller.isLoading.value
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2.2,
-                                    ),
-                                  )
-                                : const Icon(Icons.fingerprint_rounded),
-                            label: Text(
-                              controller.isLoading.value
-                                  ? 'biometric_verifying'.tr
-                                  : 'verify_again'.tr,
-                              style: GoogleFonts.kantumruyPro(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: Obx(
+                    () => ElevatedButton.icon(
+                      onPressed: controller.isLoading.value
+                          ? null
+                          : controller.retryBiometricUnlock,
+                      icon: controller.isLoading.value
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
                                 color: Colors.white,
+                                strokeWidth: 2.2,
                               ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF163774),
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              elevation: 0,
-                            ),
-                          ),
+                            )
+                          : const Icon(Icons.fingerprint_rounded),
+                      label: Text(
+                        controller.isLoading.value
+                            ? 'biometric_verifying'.tr
+                            : 'verify_again'.tr,
+                        style: GoogleFonts.kantumruyPro(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: Colors.white,
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: OutlinedButton.icon(
-                          onPressed: controller.exitApp,
-                          icon: const Icon(
-                            Icons.exit_to_app_rounded,
-                            color: Color(0xFFDC2626),
-                          ),
-                          label: Text(
-                            'exit_app'.tr,
-                            style: GoogleFonts.kantumruyPro(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14.5,
-                              color: const Color(0xFFDC2626),
-                            ),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Color(0xFFFCA5A5)),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF163774),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
                         ),
+                        elevation: 0,
                       ),
-                    ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: OutlinedButton.icon(
+                    onPressed: controller.exitApp,
+                    icon: const Icon(
+                      Icons.exit_to_app_rounded,
+                      color: Color(0xFFDC2626),
+                    ),
+                    label: Text(
+                      'exit_app'.tr,
+                      style: GoogleFonts.kantumruyPro(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14.5,
+                        color: const Color(0xFFDC2626),
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Color(0xFFFCA5A5)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
                   ),
                 ),
               ],

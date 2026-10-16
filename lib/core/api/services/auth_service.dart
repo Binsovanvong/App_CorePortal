@@ -71,6 +71,10 @@ class AuthService {
     final response = await ApiClient.dio.post(
       '/api/mobile/auth/login',
       data: {'username': username, 'password': password},
+      options: Options(
+        validateStatus: (status) =>
+            status != null && ((status >= 200 && status < 300) || status == 409),
+      ),
     );
 
     final data = Map<String, dynamic>.from(response.data as Map);
@@ -79,29 +83,23 @@ class AuthService {
         data['token']?.toString() ??
         data['data']?['access_token']?.toString() ??
         data['data']?['token']?.toString();
-    final refreshToken =
-        data['refresh_token']?.toString() ??
-        data['data']?['refresh_token']?.toString();
 
     if (accessToken == null || accessToken.isEmpty) {
       throw Exception('Login response did not contain an access token');
     }
 
-    String? cpSession;
-    final setCookie = response.headers['set-cookie'];
-    if (setCookie != null) {
-      for (final c in setCookie) {
-        if (c.contains('CP_SESSION=')) {
-          cpSession = c.split('CP_SESSION=')[1].split(';')[0];
-        }
-      }
-    }
+    await ApiClient.saveTokens(data, dioHeaders: response.headers);
+  }
 
-    await ApiClient.saveToken(
-      accessToken,
-      refreshToken: refreshToken,
-      cpSession: cpSession,
-    );
+  /// Persists authentication tokens returned from login or update-password.
+  Future<void> saveTokens(dynamic responseData, {Headers? headers}) async {
+    await ApiClient.saveTokens(responseData, dioHeaders: headers);
+  }
+
+  /// Renews login session via POST /api/mobile/auth/refresh using stored refresh_token.
+  /// Always replaces both stored tokens with returned values.
+  Future<bool> refreshToken() async {
+    return await ApiClient.refreshSession();
   }
 
   /// 2. Protected profile endpoint using ApiClient (/portals/me with fallback to /accounts/profile)
@@ -257,31 +255,7 @@ class AuthService {
     );
 
     final data = Map<String, dynamic>.from(response.data as Map);
-    final accessToken = data['access_token']?.toString() ??
-        data['token']?.toString() ??
-        data['data']?['access_token']?.toString() ??
-        data['data']?['token']?.toString();
-    final refreshToken = data['refresh_token']?.toString() ??
-        data['data']?['refresh_token']?.toString();
-
-    String? cpSession;
-    final setCookie = response.headers['set-cookie'];
-    if (setCookie != null) {
-      for (final c in setCookie) {
-        if (c.contains('CP_SESSION=')) {
-          cpSession = c.split('CP_SESSION=')[1].split(';')[0];
-        }
-      }
-    }
-
-    if (accessToken != null && accessToken.isNotEmpty) {
-      await ApiClient.saveToken(
-        accessToken,
-        refreshToken: refreshToken,
-        cpSession: cpSession,
-      );
-    }
-
+    await ApiClient.saveTokens(data, dioHeaders: response.headers);
     return data;
   }
 
@@ -294,37 +268,21 @@ class AuthService {
     final response = await ApiClient.dio.post(
       '/api/mobile/auth/login',
       data: {'username': username, 'password': password},
+      options: Options(
+        validateStatus: (status) =>
+            status != null && ((status >= 200 && status < 300) || status == 409),
+      ),
     );
 
-    final data = Map<String, dynamic>.from(response.data as Map);
-    final accessToken =
-        data['access_token']?.toString() ??
-        data['token']?.toString() ??
-        data['data']?['access_token']?.toString() ??
-        data['data']?['token']?.toString();
-    final refreshToken =
-        data['refresh_token']?.toString() ??
-        data['data']?['refresh_token']?.toString();
-
-    String? cpSession;
-    final setCookie = response.headers['set-cookie'];
-    if (setCookie != null) {
-      for (final c in setCookie) {
-        if (c.contains('CP_SESSION=')) {
-          cpSession = c.split('CP_SESSION=')[1].split(';')[0];
-        }
+    if (response.data is Map) {
+      final data = Map<String, dynamic>.from(response.data as Map);
+      if (response.statusCode == 200) {
+        await ApiClient.saveTokens(data, dioHeaders: response.headers);
       }
+      data['statusCode'] = response.statusCode;
+      return data;
     }
-
-    if (accessToken != null && accessToken.isNotEmpty) {
-      await ApiClient.saveToken(
-        accessToken,
-        refreshToken: refreshToken,
-        cpSession: cpSession,
-      );
-    }
-
-    return data;
+    return {'statusCode': response.statusCode};
   }
 
   Future<dynamic> fetchProfile() async {

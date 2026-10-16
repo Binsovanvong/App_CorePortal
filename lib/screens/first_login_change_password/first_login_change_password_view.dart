@@ -9,106 +9,113 @@ class FirstLoginChangePasswordView
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.of(context).padding.bottom;
+    final viewInsetsBottom = MediaQuery.of(context).viewInsets.bottom;
+    final bottomSafeArea = MediaQuery.of(context).padding.bottom;
+    final isKeyboardOpen = viewInsetsBottom > 0;
 
     return Scaffold(
       backgroundColor: const Color(0xFF163774),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            physics: const ClampingScrollPhysics(),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: IntrinsicHeight(
-                child: Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [Color(0xFF163774), Color(0xFF102652)],
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              physics: isKeyboardOpen
+                  ? const ClampingScrollPhysics()
+                  : const NeverScrollableScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Color(0xFF163774), Color(0xFF102652)],
+                      ),
                     ),
-                  ),
-                  child: CustomPaint(
-                    painter: _WaveBackgroundPainter(),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Top Navy Section (Ministry Emblem & Golden Titles)
-                        Container(
-                          constraints: BoxConstraints(
-                            minHeight: constraints.maxHeight * 0.38,
-                          ),
-                          child: SafeArea(
-                            bottom: false,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 20),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const SizedBox(height: 12),
-                                  // Ministry Emblem
-                                  Container(
-                                    width: 110,
-                                    height: 110,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.white,
-                                      border: Border.all(
-                                        color: const Color(0xFFD4AF37),
-                                        width: 3.0,
-                                      ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.20),
-                                          blurRadius: 18,
-                                          offset: const Offset(0, 6),
+                    child: CustomPaint(
+                      painter: _WaveBackgroundPainter(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Top Navy Section (Ministry Emblem & Golden Titles)
+                          Expanded(
+                            child: SafeArea(
+                              bottom: false,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 6,
+                                ),
+                                child: Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      // Ministry Emblem
+                                      Container(
+                                        width: 76,
+                                        height: 76,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.white,
+                                          border: Border.all(
+                                            color: const Color(0xFFD4AF37),
+                                            width: 2.8,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withValues(
+                                                alpha: 0.20,
+                                              ),
+                                              blurRadius: 14,
+                                              offset: const Offset(0, 5),
+                                            ),
+                                          ],
                                         ),
-                                      ],
-                                    ),
-                                    padding: const EdgeInsets.all(4),
-                                    child: ClipOval(
-                                      child: Image.asset(
-                                        "assets/img/about-moi-logo.png",
-                                        fit: BoxFit.contain,
+                                        padding: const EdgeInsets.all(3.5),
+                                        child: ClipOval(
+                                          child: Image.asset(
+                                            "assets/img/about-moi-logo.png",
+                                            fit: BoxFit.contain,
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 14),
+                                      const SizedBox(height: 8),
 
-                                  // Ministry Title (Golden Khmer Text)
-                                  Text(
-                                    'ministry_title'.tr,
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.kantumruyPro(
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.w800,
-                                      color: const Color(0xFFF1B722),
-                                      letterSpacing: 0.3,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 3),
+                                      // Ministry Title (Royal Gold Khmer)
+                                      Text(
+                                        'ក្រសួងមហាផ្ទៃ',
+                                        textAlign: TextAlign.center,
+                                        style: GoogleFonts.kantumruyPro(
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.w800,
+                                          color: const Color(0xFFD4AF37),
+                                          letterSpacing: 0.2,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
 
-                                  // Subtitle (Soft Gold Text)
-                                  Text(
-                                    'portal_subtitle'.tr,
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.kantumruyPro(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                      color: const Color(0xFFDFBC66),
-                                      letterSpacing: 0.2,
-                                    ),
+                                      // Ministry Subtitle (English - Royal Gold / Champagne)
+                                      Text(
+                                        'MINISTRY OF INTERIOR',
+                                        textAlign: TextAlign.center,
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                          color: const Color(0xFFDFBC66),
+                                          letterSpacing: 1.0,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(height: 20),
-                                ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
 
-                        // White Rounded Bottom Card Container
-                        Expanded(
-                          child: Container(
+                          // White Rounded Bottom Card Container
+                          Container(
                             width: double.infinity,
                             decoration: const BoxDecoration(
                               color: Colors.white,
@@ -125,74 +132,149 @@ class FirstLoginChangePasswordView
                               ],
                             ),
                             padding: EdgeInsets.fromLTRB(
-                              24,
-                              28,
-                              24,
-                              bottomInset > 0 ? bottomInset + 20 : 32,
+                              20,
+                              16,
+                              20,
+                              bottomSafeArea > 0 ? bottomSafeArea + 6 : 16,
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Page Title and Subtitle
-                                Text(
-                                  'change_password'.tr,
-                                  style: GoogleFonts.kantumruyPro(
-                                    fontSize: 23,
-                                    fontWeight: FontWeight.w800,
-                                    color: const Color(0xFF111827),
+                                // Page Title and Subtitle (Centered)
+                                Center(
+                                  child: Text(
+                                    'change_password'.tr,
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.kantumruyPro(
+                                      fontSize: 19,
+                                      fontWeight: FontWeight.w800,
+                                      color: const Color(0xFF111827),
+                                    ),
                                   ),
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'for_first_login'.tr,
-                                  style: GoogleFonts.kantumruyPro(
-                                    fontSize: 13.5,
-                                    fontWeight: FontWeight.w400,
-                                    color: const Color(0xFF94A3B8),
+                                const SizedBox(height: 2),
+                                Center(
+                                  child: Text(
+                                    'for_first_login'.tr,
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.kantumruyPro(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w400,
+                                      color: const Color(0xFF94A3B8),
+                                    ),
                                   ),
                                 ),
 
-                                const SizedBox(height: 20),
+                                const SizedBox(height: 10),
 
-                                // Guidelines Box (Soft Navy Tint)
+                                // Guidelines Box (Warm Amber Card with Exclamation Badge)
                                 Container(
                                   width: double.infinity,
                                   padding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 12,
+                                    horizontal: 12,
+                                    vertical: 8,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFEFF6FF),
-                                    borderRadius: BorderRadius.circular(14),
+                                    color: const Color(0xFFFEF9EE),
+                                    borderRadius: BorderRadius.circular(12),
                                     border: Border.all(
-                                      color: const Color(0xFFBFDBFE),
-                                      width: 1,
+                                      color: const Color(0xFFFDE68A),
+                                      width: 1.0,
                                     ),
                                   ),
                                   child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      const Icon(
-                                        Icons.shield_outlined,
-                                        color: Color(0xFF163774),
-                                        size: 20,
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: Text(
-                                          'password_guideline'.tr,
-                                          style: GoogleFonts.kantumruyPro(
-                                            fontSize: 12.5,
-                                            fontWeight: FontWeight.w600,
-                                            color: const Color(0xFF163774),
-                                            height: 1.4,
+                                      // Circular Warning Icon Badge with Exclamation Mark
+                                      Container(
+                                        width: 22,
+                                        height: 22,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFFDE047)
+                                              .withValues(alpha: 0.75),
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: const Color(0xFFF59E0B)
+                                                .withValues(alpha: 0.45),
+                                            width: 1.0,
                                           ),
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: const Text(
+                                          '!',
+                                          style: TextStyle(
+                                            color: Color(0xFF92400E),
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w900,
+                                            height: 1.0,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      // Guideline Text Rules
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'must_change_password'.tr,
+                                              style: GoogleFonts.kantumruyPro(
+                                                fontSize: 11.5,
+                                                fontWeight: FontWeight.w700,
+                                                color: const Color(0xFF92400E),
+                                                height: 1.3,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              'password_guideline_rule1'.tr,
+                                              style: GoogleFonts.kantumruyPro(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w400,
+                                                color: const Color(0xFF92400E),
+                                                height: 1.3,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 1.5),
+                                            Text(
+                                              'password_guideline_rule2'.tr,
+                                              style: GoogleFonts.kantumruyPro(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w400,
+                                                color: const Color(0xFF92400E),
+                                                height: 1.3,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 1.5),
+                                            Text(
+                                              'password_guideline_rule3'.tr,
+                                              style: GoogleFonts.kantumruyPro(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w400,
+                                                color: const Color(0xFF92400E),
+                                                height: 1.3,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              'password_guideline_example'.tr,
+                                              style: GoogleFonts.kantumruyPro(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w600,
+                                                color: const Color(0xFF92400E),
+                                                height: 1.3,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
 
-                                const SizedBox(height: 22),
+                                const SizedBox(height: 10),
 
                                 // Current Password Label & Field (when not passed in route arguments and not in ticket flow)
                                 if (controller.ticket == null && controller.tempPassword.isEmpty) ...[
@@ -528,15 +610,15 @@ class FirstLoginChangePasswordView
                               ],
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

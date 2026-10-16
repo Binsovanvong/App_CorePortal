@@ -120,24 +120,33 @@ class _NativePasswordLoginState extends State<NativePasswordLogin> {
       }
 
       final detail = decoded['detail'];
-      final detailMap = (detail is Map)
-          ? detail
-          : (decoded is Map ? decoded : null);
-      final code = (detailMap?['code'] ?? decoded['code'] ?? '').toString();
-      final reqAction =
-          (detailMap?['required_action'] ?? decoded['required_action'] ?? '')
-              .toString()
-              .toUpperCase();
 
+      // On password_updated_login_failed, the password changed successfully;
+      // return to login and use the new password.
+      if (changing) {
+        final errCode = (detail is Map ? detail['code'] : decoded['code'])?.toString();
+        if (errCode == 'password_updated_login_failed') {
+          setState(() {
+            _clearTicket();
+            _message = 'Password was updated. Sign in with your new password.';
+          });
+          return;
+        }
+      }
+
+      // Open the screen only when detail.code == "update_password_required"
+      // and detail['ticket'] is String. Do not treat every 409 as Update Password.
       if (!changing &&
           response.statusCode == 409 &&
-          (code == 'update_password_required' || reqAction == 'UPDATE_PASSWORD')) {
-        final ticket = (detailMap?['ticket'] ?? decoded['ticket'])?.toString();
-        final rawSeconds = detailMap?['expires_in'] ?? decoded['expires_in'];
+          detail is Map &&
+          detail['code'] == 'update_password_required' &&
+          detail['ticket'] is String) {
+        final ticket = detail['ticket'] as String;
+        final rawSeconds = detail['expires_in'];
         final seconds = rawSeconds is int
             ? rawSeconds
             : (int.tryParse(rawSeconds?.toString() ?? '') ?? 180);
-        if (ticket != null && ticket.isNotEmpty && seconds > 0) {
+        if (ticket.isNotEmpty && seconds > 0) {
           setState(() {
             _ticket = ticket;
             _expiresAt = DateTime.now().add(Duration(seconds: seconds));

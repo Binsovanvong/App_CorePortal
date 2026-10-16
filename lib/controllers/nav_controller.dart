@@ -18,16 +18,13 @@ class NavController extends GetxController {
   void checkAdminRole() {
     final roles = _box.read('roles');
     if (roles is List && roles.isNotEmpty) {
-      final list = roles.map((e) => e.toString().toLowerCase().trim()).toList();
-      final hasAdmin = list.contains('admin') ||
-          list.contains('administrator') ||
-          list.contains('portal_administrator') ||
-          list.contains('general_department_admin') ||
-          list.contains('general_department') ||
-          list.contains('portal_admin') ||
-          list.contains('gddtm_admin') ||
-          list.contains('gddtm_admins') ||
-          list.contains('portal_admins');
+      final hasAdmin = roles.any((r) {
+        final s = r.toString().toUpperCase().trim();
+        return s.contains('ADMIN') ||
+            s.contains('ADMINISTRATOR') ||
+            s.contains('SUPER') ||
+            s.contains('MANAGE');
+      });
       isAdmin.value = hasAdmin;
       _box.write('isAdmin', hasAdmin);
       return;
@@ -38,23 +35,32 @@ class NavController extends GetxController {
       for (var g in groups) {
         String str = '';
         if (g is Map) {
-          str = (g['code'] ?? g['name'] ?? g['role'] ?? g['groupCode'] ?? '').toString().toLowerCase().trim();
+          str = (g['code'] ?? g['name'] ?? g['role'] ?? g['groupCode'] ?? '').toString().toUpperCase().trim();
         } else {
-          str = g.toString().toLowerCase().trim();
+          str = g.toString().toUpperCase().trim();
         }
-        if (str == 'admin' ||
-            str == 'administrator' ||
-            str == 'portal_administrator' ||
-            str == 'general_department_admin' ||
-            str == 'general_department' ||
-            str == 'gddtm_admin' ||
-            str == 'portal_admin' ||
-            str.contains('general_department') ||
-            str.contains('administrator')) {
+        if (str.contains('ADMIN') || str.contains('ADMINISTRATOR') || str.contains('SUPER')) {
           isAdmin.value = true;
           _box.write('isAdmin', true);
           return;
         }
+      }
+    }
+
+    final perms = _box.read('permissions');
+    if (perms is List && perms.isNotEmpty) {
+      final hasAdminPerm = perms.any((p) {
+        final s = p.toString().toUpperCase().trim();
+        return s.contains('ADMIN') ||
+            s.contains('MANAGE') ||
+            s.contains('CREATE') ||
+            s.contains('DELETE') ||
+            s.contains('ASSIGN');
+      });
+      if (hasAdminPerm) {
+        isAdmin.value = true;
+        _box.write('isAdmin', true);
+        return;
       }
     }
 

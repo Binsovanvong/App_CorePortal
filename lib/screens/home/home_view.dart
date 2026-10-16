@@ -15,6 +15,8 @@ import 'package:core_portal/core/api/api_client.dart';
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
 
+  static const bool showNotification = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -227,10 +229,12 @@ class HomeView extends GetView<HomeController> {
 
                       // Language Dropdown
                       _buildLanguageDropdown(),
-                      const SizedBox(width: 8),
 
-                      // Notification Button
-                      _buildNotificationButton(),
+                      // Notification Button (Hidden)
+                      if (showNotification) ...[
+                        const SizedBox(width: 8),
+                        _buildNotificationButton(),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 6),

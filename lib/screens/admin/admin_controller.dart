@@ -56,21 +56,42 @@ class AdminController extends GetxController {
     'GDI': 'អគ្គនាយកដ្ឋានអន្តោប្រវេសន៍',
     'GNP': 'អគ្គស្នងការដ្ឋាននគរបាលជាតិ',
     'GID': 'អគ្គនាយកដ្ឋានអត្តសញ្ញាណកម្ម',
+    'GDAID': 'អគ្គនាយកដ្ឋានអត្តសញ្ញាណកម្ម',
     'GDHR': 'អគ្គនាយកដ្ឋានធនធានមនុស្ស',
     'GLF': 'អគ្គនាយកដ្ឋានភស្តុភារ និងហិរញ្ញវត្ថុ',
     'GIA': 'អគ្គនាយកដ្ឋានសវនកម្មផ្ទៃក្នុង',
     'GI': 'អគ្គាធិការដ្ឋាន',
     'GS': 'អគ្គលេខាធិការដ្ឋាន',
+    'GDA': 'អគ្គនាយកដ្ឋានរដ្ឋបាល',
     'PAC': 'បណ្ឌិត្យសភានគរបាលកម្ពុជា',
     'LC': 'ក្រុមប្រឹក្សានីតិកម្ម',
   };
 
   /// Helper to convert department code (e.g. GDP, GDDTM, GDI) or English name to Khmer
-  static String formatDepartmentToKhmer(dynamic codeOrName) {
-    if (codeOrName == null) return 'អគ្គនាយកដ្ឋានបច្ចេកវិទ្យាឌីជីថល និងផ្សព្វផ្សាយអប់រំ';
-    final str = codeOrName.toString().trim();
+  static String formatDepartmentToKhmer(dynamic codeOrName, [String? fallbackDept]) {
+    final str = codeOrName?.toString().trim() ?? '';
     if (str.isEmpty || str == '—' || str == '-' || str == 'null') {
-      return 'អគ្គនាយកដ្ឋានបច្ចេកវិទ្យាឌីជីថល និងផ្សព្វផ្សាយអប់រំ';
+      if (fallbackDept != null && fallbackDept.isNotEmpty) return fallbackDept;
+      final box = GetStorage();
+      final adminDeptKh = (box.read('generalDepartmentNameKh') ??
+              box.read('departmentNameKh') ??
+              '')
+          .toString()
+          .trim();
+      if (adminDeptKh.isNotEmpty) return adminDeptKh;
+
+      final adminCode = (box.read('generalDepartmentCode') ??
+              box.read('departmentCode') ??
+              box.read('orgCode') ??
+              '')
+          .toString()
+          .trim()
+          .toUpperCase();
+      if (adminCode.isNotEmpty && departmentKhmerMap.containsKey(adminCode)) {
+        return departmentKhmerMap[adminCode]!;
+      }
+
+      return departmentKhmerMap['GDDTM'] ?? 'អគ្គនាយកដ្ឋាន';
     }
 
     final upper = str.toUpperCase();
@@ -78,23 +99,33 @@ class AdminController extends GetxController {
       return departmentKhmerMap[upper]!;
     }
 
-    // Check if starts with a known code prefix (e.g. GDDTM-N1 or GDP Admins)
+    // Check if starts with a known code prefix (e.g. GDP_ADMIN, GDI-01, etc.)
     for (final entry in departmentKhmerMap.entries) {
-      if (upper.startsWith(entry.key)) {
+      if (upper == entry.key ||
+          upper.startsWith('${entry.key}_') ||
+          upper.startsWith('${entry.key}-') ||
+          upper.startsWith('${entry.key} ') ||
+          upper.startsWith('/${entry.key}')) {
         return entry.value;
       }
+    }
+
+    // If it contains Khmer characters, return as is
+    if (RegExp(r'[\u1780-\u17FF]').hasMatch(str)) {
+      return str;
     }
 
     return str;
   }
 
-  /// Returns the admin's General Department code (e.g. 'GDDTM')
+  /// Returns the admin's General Department code (e.g. 'GDP', 'GDDTM')
   String get adminGeneralDepartmentCode {
     final box = GetStorage();
     final storedCode = (box.read('generalDepartmentCode') ??
             box.read('departmentCode') ??
             box.read('generalDepartment') ??
             box.read('department') ??
+            box.read('orgCode') ??
             '')
         .toString()
         .trim();
@@ -107,6 +138,22 @@ class AdminController extends GetxController {
       for (final code in departmentKhmerMap.keys) {
         if (s == code ||
             s.startsWith('${code}_') ||
+            s.endsWith('_$code') ||
+            s.contains('_${code}_')) {
+          return code;
+        }
+      }
+    }
+
+    // Check groups fallback (e.g. GDP, GDP_ADMIN)
+    final rawGroups = box.read('groups') ?? box.read('user_groups') ?? box.read('userGroups');
+    final List grpList = (rawGroups is List && rawGroups.isNotEmpty) ? rawGroups : [];
+    for (final g in grpList) {
+      final s = g.toString().toUpperCase().trim();
+      for (final code in departmentKhmerMap.keys) {
+        if (s == code ||
+            s.startsWith('${code}_') ||
+            s.startsWith('/$code') ||
             s.endsWith('_$code') ||
             s.contains('_${code}_')) {
           return code;
@@ -141,6 +188,55 @@ class AdminController extends GetxController {
     return 'អគ្គនាយកដ្ឋាន';
   }
 
+  /// Checks if the logged-in user has global Portal Administrator privileges (cross-department)
+  bool isPortalAdministrator() {
+    final box = GetStorage();
+    final rawRoles = box.read('roles');
+    final List list = (rawRoles is List && rawRoles.isNotEmpty) ? rawRoles : [];
+    final roles = list.map((e) => e.toString().toUpperCase().trim()).toList();
+
+    return roles.any((r) =>
+        (r.contains('PORTAL') && (r.contains('ADMIN') || r.contains('ADMINISTRATOR'))) ||
+        r == 'ADMIN' ||
+        r == 'ADMINISTRATOR' ||
+        r == 'SUPER_ADMIN' ||
+        r == 'SUPERADMIN');
+  }
+
+  /// Returns the admin's formatted display name
+  String get adminDisplayName {
+    final box = GetStorage();
+    final name = (box.read('user_display_name') ??
+            box.read('displayName') ??
+            box.read('name') ??
+            '')
+        .toString()
+        .trim();
+    if (name.isNotEmpty) return name;
+    final uname = (box.read('username') ?? '').toString().trim();
+    if (uname.contains('.')) {
+      final parts = uname.split('.');
+      if (parts.length == 2 && parts[0].isNotEmpty && parts[1].isNotEmpty) {
+        final p0 = '${parts[0][0].toUpperCase()}${parts[0].substring(1)}';
+        final p1 = '${parts[1][0].toUpperCase()}${parts[1].substring(1)}';
+        return '$p1 $p0';
+      }
+    }
+    return uname.isNotEmpty ? uname : 'Admin';
+  }
+
+  /// Returns the admin's role title badge text
+  String get adminRoleTitle {
+    if (isPortalAdministrator()) {
+      return 'PORTAL ADMINISTRATOR';
+    }
+    final code = adminGeneralDepartmentCode;
+    if (code.isNotEmpty) {
+      return '$code ADMIN';
+    }
+    return 'ADMIN';
+  }
+
   /// Checks if a user belongs to the admin's General Department ("អគ្គ")
   /// or is assigned to any group created by this admin, or is the admin themselves
   bool isUserInAdminGeneralDepartment(
@@ -149,6 +245,9 @@ class AdminController extends GetxController {
     Map<String, List<String>> userGroupsMapLocal,
   ) {
     if (isSelfUser(usr)) return true;
+
+    // Portal administrators can see users across all departments
+    if (isPortalAdministrator()) return true;
 
     final targetDeptCode = adminGeneralDepartmentCode.toUpperCase().trim();
     final targetDeptKh = adminGeneralDepartmentNameKh.trim();
@@ -166,8 +265,14 @@ class AdminController extends GetxController {
       final upper = s.toUpperCase();
       if (targetDeptCode.isNotEmpty &&
           (upper == targetDeptCode ||
-              upper.contains(targetDeptCode) ||
-              targetDeptCode.contains(upper))) {
+              upper.startsWith('${targetDeptCode}_') ||
+              upper.startsWith('${targetDeptCode}-') ||
+              upper.startsWith('${targetDeptCode} ') ||
+              upper.startsWith('/${targetDeptCode}') ||
+              upper.endsWith('_${targetDeptCode}') ||
+              upper.contains('_${targetDeptCode}_') ||
+              upper.contains('/${targetDeptCode}') ||
+              upper.contains(targetDeptCode))) {
         return true;
       }
       if (targetDeptKh.isNotEmpty &&
@@ -185,6 +290,7 @@ class AdminController extends GetxController {
       if (emp is Map) {
         if (matchesDept(emp['generalDepartmentCode']) ||
             matchesDept(emp['departmentCode']) ||
+            matchesDept(emp['orgCode']) ||
             matchesDept(emp['generalDepartmentName']) ||
             matchesDept(emp['generalDepartmentNameKh']) ||
             matchesDept(emp['departmentName']) ||
@@ -199,11 +305,14 @@ class AdminController extends GetxController {
     // 2. Check direct user fields
     if (matchesDept(usr['generalDepartmentCode']) ||
         matchesDept(usr['departmentCode']) ||
+        matchesDept(usr['orgCode']) ||
         matchesDept(usr['generalDepartment']) ||
         matchesDept(usr['department']) ||
         matchesDept(usr['unit']) ||
         matchesDept(usr['generalDepartmentNameKh']) ||
         matchesDept(usr['departmentNameKh']) ||
+        matchesDept(usr['generalDepartmentName']) ||
+        matchesDept(usr['departmentName']) ||
         matchesDept(usr['institutionName'])) {
       return true;
     }
@@ -213,10 +322,13 @@ class AdminController extends GetxController {
       final p = usr['profile'] as Map;
       if (matchesDept(p['generalDepartmentCode']) ||
           matchesDept(p['departmentCode']) ||
+          matchesDept(p['orgCode']) ||
           matchesDept(p['generalDepartment']) ||
           matchesDept(p['department']) ||
           matchesDept(p['generalDepartmentNameKh']) ||
           matchesDept(p['departmentNameKh']) ||
+          matchesDept(p['generalDepartmentName']) ||
+          matchesDept(p['departmentName']) ||
           matchesDept(p['unit'])) {
         return true;
       }
@@ -228,6 +340,7 @@ class AdminController extends GetxController {
       for (final key in [
         'generalDepartmentCode',
         'departmentCode',
+        'orgCode',
         'generalDepartment',
         'general_department',
         'department',
@@ -246,7 +359,23 @@ class AdminController extends GetxController {
       }
     }
 
-    // 5. Check membership in groups created by this admin
+    // 5. Check user's groups (e.g. GDP, GDP_ADMIN, /GDP)
+    final rawGroups = usr['groups'] is List
+        ? usr['groups']
+        : (usr['userGroups'] is List
+            ? usr['userGroups']
+            : (usr['portalGroups'] is List ? usr['portalGroups'] : []));
+    for (final g in rawGroups) {
+      final gStr = (g is Map ? (g['code'] ?? g['name'] ?? '') : g)
+          .toString()
+          .trim();
+      if (matchesDept(gStr)) return true;
+      if (createdByMeGroupCodes.any((c) => c.toLowerCase() == gStr.toLowerCase())) {
+        return true;
+      }
+    }
+
+    // 6. Check membership in groups assigned locally or created by this admin
     final uid = (usr['id'] ??
             usr['keycloakUserId'] ??
             usr['userId'] ??
@@ -257,30 +386,108 @@ class AdminController extends GetxController {
         .trim();
     final uname = (usr['username'] ?? '').toString().toLowerCase().trim();
 
-    for (final grpCode in createdByMeGroupCodes) {
-      final members =
-          userGroupsMapLocal[grpCode] ?? userGroupsMap[grpCode] ?? [];
-      final lowerMembers =
-          members.map((m) => m.toString().toLowerCase().trim()).toSet();
-      if (lowerMembers.contains(uid) ||
-          (uname.isNotEmpty && lowerMembers.contains(uname))) {
-        return true;
+    for (final entry in userGroupsMapLocal.entries) {
+      final grpCode = entry.key;
+      final members = entry.value;
+      if (matchesDept(grpCode) || createdByMeGroupCodes.contains(grpCode.toLowerCase())) {
+        final lowerMembers = members.map((m) => m.toString().toLowerCase().trim()).toSet();
+        if (lowerMembers.contains(uid) || (uname.isNotEmpty && lowerMembers.contains(uname))) {
+          return true;
+        }
       }
     }
 
-    final rawGroups = usr['groups'] is List
-        ? usr['groups']
-        : (usr['userGroups'] is List
-            ? usr['userGroups']
-            : (usr['portalGroups'] is List ? usr['portalGroups'] : []));
-    for (final g in rawGroups) {
-      final gStr = (g is Map ? (g['code'] ?? g['name'] ?? '') : g)
-          .toString()
-          .trim()
-          .toLowerCase();
-      if (createdByMeGroupCodes.any((c) => c.toLowerCase() == gStr)) {
+    return false;
+  }
+
+  /// Checks if an application belongs to or is accessible by the admin's General Department
+  bool isAppInAdminGeneralDepartment(Map<String, dynamic> app) {
+    // Portal administrators see all apps
+    if (isPortalAdministrator()) return true;
+
+    final targetDeptCode = adminGeneralDepartmentCode.toUpperCase().trim();
+    final targetDeptKh = adminGeneralDepartmentNameKh.trim();
+
+    if (targetDeptCode.isEmpty &&
+        (targetDeptKh.isEmpty || targetDeptKh == 'អគ្គនាយកដ្ឋាន')) {
+      return true;
+    }
+
+    bool matchesDept(dynamic val) {
+      if (val == null) return false;
+      final s = val.toString().trim();
+      if (s.isEmpty || s == '—' || s == '-' || s == 'null') return false;
+      final upper = s.toUpperCase();
+      if (upper == 'ALL' || upper == 'ទាំងអស់' || upper == 'PUBLIC') return true;
+      if (targetDeptCode.isNotEmpty &&
+          (upper == targetDeptCode ||
+              upper.startsWith('${targetDeptCode}_') ||
+              upper.startsWith('${targetDeptCode}-') ||
+              upper.startsWith('${targetDeptCode} ') ||
+              upper.startsWith('/${targetDeptCode}') ||
+              upper.endsWith('_${targetDeptCode}') ||
+              upper.contains('_${targetDeptCode}_') ||
+              upper.contains('/${targetDeptCode}') ||
+              upper.contains(targetDeptCode))) {
         return true;
       }
+      if (targetDeptKh.isNotEmpty &&
+          targetDeptKh != 'អគ្គនាយកដ្ឋាន' &&
+          (s.contains(targetDeptKh) || targetDeptKh.contains(s))) {
+        return true;
+      }
+      return false;
+    }
+
+    // 1. Check owner organization / general department fields on app
+    if (matchesDept(app['ownerOrgCode']) ||
+        matchesDept(app['generalDepartmentCode']) ||
+        matchesDept(app['departmentCode']) ||
+        matchesDept(app['orgCode']) ||
+        matchesDept(app['department']) ||
+        matchesDept(app['departmentName']) ||
+        matchesDept(app['unit']) ||
+        matchesDept(app['generalDepartmentNameKh']) ||
+        matchesDept(app['departmentNameKh']) ||
+        matchesDept(app['category']) ||
+        matchesDept(app['subCategory'])) {
+      return true;
+    }
+
+    // 2. Check app code or name (e.g. GDP_APP, GDP-01, or Prisons in title)
+    final code = (app['code'] ?? '').toString().toUpperCase().trim();
+    if (targetDeptCode.isNotEmpty &&
+        (code == targetDeptCode ||
+            code.startsWith('${targetDeptCode}_') ||
+            code.startsWith('${targetDeptCode}-') ||
+            code.contains('_${targetDeptCode}_') ||
+            code.contains(targetDeptCode))) {
+      return true;
+    }
+
+    // 3. Check access rules on app
+    final List accessRules = app['accessRules'] is List
+        ? app['accessRules']
+        : (app['access_rules'] is List
+            ? app['access_rules']
+            : (app['rules'] is List ? app['rules'] : []));
+
+    for (final rule in accessRules) {
+      if (rule is Map) {
+        final rVal = (rule['ruleValue'] ?? rule['rule_value'] ?? rule['value'] ?? rule['target'] ?? '').toString().trim();
+        if (matchesDept(rVal)) return true;
+      } else if (rule is String) {
+        if (matchesDept(rule)) return true;
+        final parts = rule.split(':');
+        if (parts.length > 1 && matchesDept(parts.sublist(1).join(':').trim())) {
+          return true;
+        }
+      }
+    }
+
+    // 4. If app has ruleValue directly
+    if (matchesDept(app['ruleValue']) || matchesDept(app['rule_value'])) {
+      return true;
     }
 
     return false;
@@ -347,12 +554,11 @@ class AdminController extends GetxController {
     final box = GetStorage();
     final rawRoles = box.read('roles');
     final List list = (rawRoles is List && rawRoles.isNotEmpty) ? rawRoles : [];
-    final roles = list.map((e) => e.toString().toLowerCase().trim()).toList();
+    final roles = list.map((e) => e.toString().toUpperCase().trim()).toList();
 
-    return roles.contains('general_department_admin') ||
-        roles.contains('general_department') ||
-        roles.contains('gddtm_admin') ||
-        roles.any((r) => r.contains('general_department'));
+    return roles.any((r) =>
+        (r.contains('GENERAL_DEPARTMENT') && (r.contains('ADMIN') || r.contains('ADMINISTRATOR'))) ||
+        r.contains('GENERAL_DEPARTMENT'));
   }
 
   /// Returns false if the current user is a General Department Admin trying to edit their own account
@@ -544,11 +750,22 @@ class AdminController extends GetxController {
     return result;
   }
 
+  final Map<String, int> _appUserCountMemo = {};
+
   int getUserCountForApp(Map<String, dynamic> app) {
+    final String cacheKey =
+        (app['id'] ?? app['code'] ?? app['titleKh'] ?? app['name'] ?? '')
+            .toString();
+    if (cacheKey.isNotEmpty && _appUserCountMemo.containsKey(cacheKey)) {
+      return _appUserCountMemo[cacheKey]!;
+    }
+
     if (usersList.isEmpty) {
       final cachedUsers = GetStorage().read('cached_admin_users_list');
       if (cachedUsers is List) {
-        return cachedUsers.length;
+        final count = cachedUsers.length;
+        if (cacheKey.isNotEmpty) _appUserCountMemo[cacheKey] = count;
+        return count;
       }
       return 0;
     }
@@ -567,7 +784,18 @@ class AdminController extends GetxController {
         final status = (u['status'] ?? 'ACTIVE').toString().toUpperCase();
         return status == 'ACTIVE';
       }).length;
-      return activeCount > 0 ? activeCount : usersList.length;
+      final count = activeCount > 0 ? activeCount : usersList.length;
+      if (cacheKey.isNotEmpty) _appUserCountMemo[cacheKey] = count;
+      return count;
+    }
+
+    bool listMatchesTarget(dynamic list, String target) {
+      if (list is! List || target.isEmpty) return false;
+      for (final item in list) {
+        final s = item?.toString().toLowerCase() ?? '';
+        if (s.contains(target) || target.contains(s)) return true;
+      }
+      return false;
     }
 
     final matching = usersList.where((u) {
@@ -583,25 +811,17 @@ class AdminController extends GetxController {
               '')
           .toString()
           .toLowerCase();
-      final userGroups = (u['groups'] is List)
-          ? (u['groups'] as List).map((g) => g.toString().toLowerCase()).toList()
-          : <String>[];
-      final userUnits = (u['userUnits'] is List)
-          ? (u['userUnits'] as List)
-              .map((g) => g.toString().toLowerCase())
-              .toList()
-          : <String>[];
+      final userGroups = u['groups'];
+      final userUnits = u['userUnits'];
 
       if (ruleValue.isNotEmpty && ruleValue != 'all') {
         if (userDept.contains(ruleValue) || ruleValue.contains(userDept)) {
           return true;
         }
-        if (userGroups.any(
-            (g) => g.contains(ruleValue) || ruleValue.contains(g))) {
+        if (listMatchesTarget(userGroups, ruleValue)) {
           return true;
         }
-        if (userUnits.any(
-            (g) => g.contains(ruleValue) || ruleValue.contains(g))) {
+        if (listMatchesTarget(userUnits, ruleValue)) {
           return true;
         }
       }
@@ -617,10 +837,10 @@ class AdminController extends GetxController {
               if (userDept.contains(rVal) || rVal.contains(userDept)) {
                 return true;
               }
-              if (userGroups.any((g) => g.contains(rVal) || rVal.contains(g))) {
+              if (listMatchesTarget(userGroups, rVal)) {
                 return true;
               }
-              if (userUnits.any((g) => g.contains(rVal) || rVal.contains(g))) {
+              if (listMatchesTarget(userUnits, rVal)) {
                 return true;
               }
             }
@@ -631,7 +851,11 @@ class AdminController extends GetxController {
       return false;
     }).length;
 
-    return matching > 0 ? matching : usersList.length;
+    final count = matching > 0 ? matching : usersList.length;
+    if (cacheKey.isNotEmpty) {
+      _appUserCountMemo[cacheKey] = count;
+    }
+    return count;
   }
 
   List<String> get uniqueUserUnits {
@@ -657,6 +881,7 @@ class AdminController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    ever(usersList, (_) => _appUserCountMemo.clear());
     final box = GetStorage();
 
     // 🟢 Load cached data immediately for zero-wait rendering
@@ -1066,6 +1291,20 @@ class AdminController extends GetxController {
       debugPrint("Fallback fetchPortalApps failed: $e");
     }
 
+    try {
+      final tilesRes = await _authService.fetchApps();
+      if (tilesRes != null) {
+        if (tilesRes is List && tilesRes.isNotEmpty) return tilesRes;
+        if (tilesRes is Map &&
+            ((tilesRes['data'] is List && (tilesRes['data'] as List).isNotEmpty) ||
+                (tilesRes['value'] is List && (tilesRes['value'] as List).isNotEmpty))) {
+          return tilesRes;
+        }
+      }
+    } catch (e) {
+      debugPrint("Fallback fetchApps (tiles) failed: $e");
+    }
+
     return null;
   }
 
@@ -1303,12 +1542,16 @@ class AdminController extends GetxController {
           };
         }).toList();
 
-        appsList.assignAll(parsedApps);
-        totalApps.value = parsedApps.length;
-        runningApps.value = parsedApps
+        final List<Map<String, dynamic>> finalApps = isPortalAdministrator()
+            ? parsedApps
+            : parsedApps.where((app) => isAppInAdminGeneralDepartment(app)).toList();
+
+        appsList.assignAll(finalApps);
+        totalApps.value = finalApps.length;
+        runningApps.value = finalApps
             .where((app) => app['isActive'] == true)
             .length;
-        GetStorage().write('cached_admin_apps_list', parsedApps);
+        GetStorage().write('cached_admin_apps_list', finalApps);
       }
     } catch (e) {
       debugPrint("Failed to load apps dashboard: $e");
@@ -1706,13 +1949,14 @@ class AdminController extends GetxController {
           );
         }).toList();
 
-        // 🟢 Fallback to parsedUsers if department filter returned empty (or only self)
-        // so that General Department Admins can always see and manage users.
-        final List<Map<String, dynamic>> finalUsers = (generalDeptUsers.length > 1 ||
-                (generalDeptUsers.length == 1 &&
-                    !isSelfUser(generalDeptUsers.first)))
-            ? generalDeptUsers
-            : (parsedUsers.isNotEmpty ? parsedUsers : generalDeptUsers);
+        // 🟢 Scoped users: Portal administrators see all users across all departments;
+        // General Department Admins strictly see users belonging to their department or self.
+        // Never leaks other departments' users (e.g. GDDTM users to GDP admin).
+        final List<Map<String, dynamic>> finalUsers = isPortalAdministrator()
+            ? parsedUsers
+            : (generalDeptUsers.isNotEmpty
+                ? generalDeptUsers
+                : parsedUsers.where((u) => isSelfUser(u)).toList());
 
         usersList.assignAll(finalUsers);
         totalUsers.value = finalUsers.length;
@@ -1726,8 +1970,14 @@ class AdminController extends GetxController {
           final list = cached
               .map((e) => Map<String, dynamic>.from(e is Map ? e : {}))
               .toList();
-          usersList.assignAll(list);
-          totalUsers.value = list.length;
+          final scopedList = isPortalAdministrator()
+              ? list
+              : list.where((u) => isUserInAdminGeneralDepartment(u, {}, {})).toList();
+          final finalCached = scopedList.isNotEmpty
+              ? scopedList
+              : list.where((u) => isSelfUser(u)).toList();
+          usersList.assignAll(finalCached);
+          totalUsers.value = finalCached.length;
         } else if (localUidToGroups.isNotEmpty) {
           final List<Map<String, dynamic>> synthUsers = [];
           for (final entry in localUidToGroups.entries) {

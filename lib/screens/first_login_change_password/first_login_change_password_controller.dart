@@ -262,10 +262,26 @@ class FirstLoginChangePasswordController extends GetxController {
 
       if (e is DioException) {
         debugPrint(
-          "FIRST LOGIN CHANGE PASSWORD STATUS: ${e.response?.statusCode} - DATA: ${e.response?.data}",
+          "FIRST LOGIN CHANGE PASSWORD STATUS: ${e.response?.statusCode}",
         );
         final statusCode = e.response?.statusCode;
         final resData = e.response?.data;
+        final detail = resData is Map ? resData['detail'] : null;
+        final errorCode = (detail is Map
+                ? detail['code']
+                : (resData is Map ? resData['code'] : null))
+            ?.toString();
+
+        // 🟢 On password_updated_login_failed, the password changed successfully;
+        // return to login and use the new password.
+        if (errorCode == 'password_updated_login_failed') {
+          CustomSnackbar.showInfo(
+            message:
+                'លេខសម្ងាត់ត្រូវបានផ្លាស់ប្តូរដោយជោគជ័យ។ សូមចូលប្រើប្រាស់ឡើងវិញជាមួយលេខសម្ងាត់ថ្មីរបស់អ្នក។ (Password updated successfully. Please sign in with your new password.)',
+          );
+          await cancelAndReturnToLogin();
+          return;
+        }
 
         // Completion timeout or network drop
         if (e.type == DioExceptionType.connectionTimeout ||
@@ -309,26 +325,22 @@ class FirstLoginChangePasswordController extends GetxController {
           errorMessage =
               'សេវាប្តូរលេខសម្ងាត់នៅលើ Server មិនទាន់ត្រូវបានកំណត់រចនាសម្ព័ន្ធត្រឹមត្រូវទេ។ (Native password-change service is not configured on the server. Please contact administrator or use browser login.)';
         } else if (resData is Map) {
-          final detail = resData['detail'] ??
+          final detailObj = resData['detail'] ??
               resData['message'] ??
               resData['error_description'] ??
               resData['error'];
-          if (detail != null) {
-            if (detail is Map && detail['code'] == 'password_updated_login_failed') {
-              errorMessage =
-                  'លេខសម្ងាត់ត្រូវបានផ្លាស់ប្តូរ សូមចូលប្រើប្រាស់ឡើងវិញ (Password was updated. Sign in with your new password.)';
-              returnToLogin = true;
-            } else if (detail is List && detail.isNotEmpty) {
-              final first = detail.first;
+          if (detailObj != null) {
+            if (detailObj is List && detailObj.isNotEmpty) {
+              final first = detailObj.first;
               if (first is Map && first['msg'] != null) {
                 errorMessage = first['msg'].toString();
               } else {
-                errorMessage = detail.map((i) => i.toString()).join(", ");
+                errorMessage = detailObj.map((i) => i.toString()).join(", ");
               }
-            } else if (detail is Map && detail['message'] != null) {
-              errorMessage = detail['message'].toString();
-            } else if (detail.toString().isNotEmpty) {
-              errorMessage = detail.toString();
+            } else if (detailObj is Map && detailObj['message'] != null) {
+              errorMessage = detailObj['message'].toString();
+            } else if (detailObj.toString().isNotEmpty) {
+              errorMessage = detailObj.toString();
             }
           }
         }

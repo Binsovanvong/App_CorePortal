@@ -19,6 +19,8 @@ part 'setting_controller.dart';
 class SettingView extends GetView<SettingViewController> {
   const SettingView({super.key});
 
+  static const bool showNotification = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -717,14 +719,16 @@ class SettingView extends GetView<SettingViewController> {
             onTap: controller.changePassword,
           ),
 
-          const Divider(height: 1, color: Color(0xFFF1F5F9), thickness: 1),
+          if (showNotification) ...[
+            const Divider(height: 1, color: Color(0xFFF1F5F9), thickness: 1),
 
-          // 2. Notifications Tile
-          _buildSecurityTile(
-            icon: Icons.notifications_none_rounded,
-            title: 'notification'.tr,
-            onTap: () => Get.toNamed(AppRoutes.notification),
-          ),
+            // 2. Notifications Tile
+            _buildSecurityTile(
+              icon: Icons.notifications_none_rounded,
+              title: 'notification'.tr,
+              onTap: () => Get.toNamed(AppRoutes.notification),
+            ),
+          ],
 
           const Divider(height: 1, color: Color(0xFFF1F5F9), thickness: 1),
 

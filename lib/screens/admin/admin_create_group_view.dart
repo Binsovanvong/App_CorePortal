@@ -250,7 +250,10 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
 
       if (rawList.isNotEmpty) {
         final List<Map<String, String>> fetched = [];
-        for (final item in rawList) {
+        final filteredRawList = controller.isPortalAdministrator()
+            ? rawList
+            : rawList.where((e) => controller.isAppInAdminGeneralDepartment(Map<String, dynamic>.from(e is Map ? e : {}))).toList();
+        for (final item in filteredRawList) {
           final parsed = _parseAppItem(item);
           if (parsed != null && !fetched.any((x) => x['code'] == parsed['code'])) {
             fetched.add(parsed);
@@ -259,9 +262,9 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
         if (fetched.isNotEmpty) {
           apiAppsList.assignAll(fetched);
           controller.appsList.assignAll(
-            rawList.map((e) => Map<String, dynamic>.from(e is Map ? e : {})).toList(),
+            filteredRawList.map((e) => Map<String, dynamic>.from(e is Map ? e : {})).toList(),
           );
-          GetStorage().write('cached_admin_apps_list', rawList);
+          GetStorage().write('cached_admin_apps_list', filteredRawList);
         }
       }
     } catch (e) {

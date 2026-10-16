@@ -17,6 +17,15 @@ part 'application_controller.dart';
 class ApplicationView extends GetView<ApplicationViewController> {
   const ApplicationView({super.key});
 
+  /// Instant O(1) in-memory cache to eliminate lag and frame drops during scrolling
+  static final Map<String, int> _appUserCountCache = {};
+  static int? _cachedAdminUsersCount;
+
+  static void clearUserCountCache() {
+    _appUserCountCache.clear();
+    _cachedAdminUsersCount = null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final storage = GetStorage();
@@ -808,7 +817,7 @@ class ApplicationView extends GetView<ApplicationViewController> {
     return rawCode;
   }
 
-  /// Calculates or retrieves the actual user count for an application
+  /// Calculates or retrieves the actual user count for an application with O(1) instant lookup
   int _getAppUserCount(Map<String, dynamic> item) {
     // 1. Direct API fields
     final dynamic direct = item['userCount'] ??
@@ -821,24 +830,48 @@ class ApplicationView extends GetView<ApplicationViewController> {
       return int.parse(direct);
     }
 
+    // Fast O(1) cache check to avoid loop allocations while scrolling
+    final String cacheKey = (item['id'] ?? item['code'] ?? item['titleKh'] ?? item['name'] ?? '').toString();
+    if (cacheKey.isNotEmpty && _appUserCountCache.containsKey(cacheKey)) {
+      return _appUserCountCache[cacheKey]!;
+    }
+
+    int count = 0;
+
     // 2. Query AdminController if initialized
     if (Get.isRegistered<AdminController>()) {
       try {
         final c = Get.find<AdminController>().getUserCountForApp(item);
-        if (c > 0) return c;
+        if (c > 0) count = c;
       } catch (_) {}
     }
 
-    // 3. Fallback to cached admin users
-    final cached = GetStorage().read('cached_admin_users_list');
-    if (cached is List && cached.isNotEmpty) {
-      return cached.length;
+    // 3. Fallback to cached admin users count (read once in memory, never on every frame)
+    if (count == 0) {
+      if (_cachedAdminUsersCount == null) {
+        final cached = GetStorage().read('cached_admin_users_list');
+        if (cached is List) {
+          _cachedAdminUsersCount = cached.length;
+        } else {
+          _cachedAdminUsersCount = 0;
+        }
+      }
+      if (_cachedAdminUsersCount! > 0) {
+        count = _cachedAdminUsersCount!;
+      }
     }
 
     // 4. Consistent realistic user count based on name
-    final name = (item['titleKh'] ?? item['titleEn'] ?? item['name'] ?? '').toString();
-    final fallback = (name.codeUnits.fold<int>(0, (p, c) => p + c) % 45) + 12;
-    return fallback;
+    if (count == 0) {
+      final name = (item['titleKh'] ?? item['titleEn'] ?? item['name'] ?? '').toString();
+      count = (name.codeUnits.fold<int>(0, (p, c) => p + c) % 45) + 12;
+    }
+
+    if (cacheKey.isNotEmpty) {
+      _appUserCountCache[cacheKey] = count;
+    }
+
+    return count;
   }
 
   void _handleAppLaunch(

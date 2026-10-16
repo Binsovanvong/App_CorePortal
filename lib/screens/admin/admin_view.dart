@@ -5,9 +5,6 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:core_portal/screens/admin/admin_controller.dart';
-
-import 'package:core_portal/screens/super_admin/super_admin_role_list_view.dart';
-
 import 'package:core_portal/widgets/custom_snackbar.dart';
 
 import 'package:core_portal/routes/page_route.dart';
@@ -1216,7 +1213,7 @@ class AdminView extends GetView<AdminController> {
 
               const Color(0xff7C3AED),
 
-              () => Get.to(() => const SuperAdminRoleListView()),
+              () => controller.changeTab(2),
             ),
 
             _buildQuickAccessBtn(
@@ -1748,7 +1745,9 @@ class AdminView extends GetView<AdminController> {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  'គ្រប់គ្រង និងគ្រប់គ្រងអ្នកប្រើប្រាស់',
+                  controller.isPortalAdministrator()
+                      ? 'គ្រប់គ្រង និងចាត់ចែងអ្នកប្រើប្រាស់'
+                      : controller.adminGeneralDepartmentNameKh,
                   style: GoogleFonts.kantumruyPro(
                     fontSize: 12.5,
                     fontWeight: FontWeight.w500,
@@ -2737,7 +2736,7 @@ class AdminView extends GetView<AdminController> {
 
                       children: [
                         Text(
-                          "admin admin",
+                          controller.adminDisplayName,
 
                           style: GoogleFonts.kantumruyPro(
                             fontSize: 16,
@@ -2764,7 +2763,7 @@ class AdminView extends GetView<AdminController> {
                           ),
 
                           child: Text(
-                            "ADMIN",
+                            controller.adminRoleTitle,
 
                             style: GoogleFonts.poppins(
                               fontSize: 9,

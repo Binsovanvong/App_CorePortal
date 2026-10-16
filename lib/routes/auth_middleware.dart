@@ -22,7 +22,7 @@ class AuthMiddleware extends GetMiddleware {
   }
 }
 
-/// Middleware strictly guarding administrative portals (/admin, /super-admin)
+/// Middleware strictly guarding administrative portal (/admin)
 class AdminMiddleware extends GetMiddleware {
   @override
   int? get priority => 2;
@@ -46,8 +46,9 @@ class AdminMiddleware extends GetMiddleware {
     final bool hasAdminPrivileges = isAdmin ||
         roles.any((r) =>
             r.contains('admin') ||
-            r.contains('portal_administrator') ||
-            r.contains('general_department_admin'));
+            r.contains('administrator') ||
+            r.contains('super') ||
+            r.contains('manage'));
 
     if (!hasAdminPrivileges) {
       return const RouteSettings(name: AppRoutes.mainPage);

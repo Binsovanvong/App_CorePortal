@@ -17,197 +17,321 @@ void main() {
     const channel = MethodChannel('plugins.flutter.io/path_provider');
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-      return '.';
-    });
+          return '.';
+        });
     await GetStorage.init();
   });
 
   group('AppIconWidget & Icon URL Resolution Tests', () {
     test('extractRawIcon extracts from different API candidate fields', () {
-      expect(AppIconWidget.extractRawIcon({'iconUrl': 'https://example.com/icon.png'}), 'https://example.com/icon.png');
-      expect(AppIconWidget.extractRawIcon({'icon_url': 'portal-app-icons/complaint.png'}), 'portal-app-icons/complaint.png');
-      expect(AppIconWidget.extractRawIcon({'icon': 'portal-app-icons/anpr.png'}), 'portal-app-icons/anpr.png');
-      expect(AppIconWidget.extractRawIcon({'iconPath': 'portal-app-icons/test.png'}), 'portal-app-icons/test.png');
-      expect(AppIconWidget.extractRawIcon({'imageUrl': 'portal-app-icons/img.png'}), 'portal-app-icons/img.png');
-      expect(AppIconWidget.extractRawIcon({'tileIcon': 'portal-app-icons/tile.png'}), 'portal-app-icons/tile.png');
-      expect(AppIconWidget.extractRawIcon({'logo': 'portal-app-icons/logo.png'}), 'portal-app-icons/logo.png');
-      expect(AppIconWidget.extractRawIcon({'appIcon': 'portal-app-icons/app.png'}), 'portal-app-icons/app.png');
-      expect(AppIconWidget.extractRawIcon({'icon': {'url': 'portal-app-icons/nested.png'}}), 'portal-app-icons/nested.png');
-      expect(AppIconWidget.extractRawIcon({'icon': {'path': 'portal-app-icons/nested_path.png'}}), 'portal-app-icons/nested_path.png');
+      expect(
+        AppIconWidget.extractRawIcon({
+          'iconUrl': 'https://example.com/icon.png',
+        }),
+        'https://example.com/icon.png',
+      );
+      expect(
+        AppIconWidget.extractRawIcon({
+          'icon_url': 'portal-app-icons/complaint.png',
+        }),
+        'portal-app-icons/complaint.png',
+      );
+      expect(
+        AppIconWidget.extractRawIcon({'icon': 'portal-app-icons/anpr.png'}),
+        'portal-app-icons/anpr.png',
+      );
+      expect(
+        AppIconWidget.extractRawIcon({'iconPath': 'portal-app-icons/test.png'}),
+        'portal-app-icons/test.png',
+      );
+      expect(
+        AppIconWidget.extractRawIcon({'imageUrl': 'portal-app-icons/img.png'}),
+        'portal-app-icons/img.png',
+      );
+      expect(
+        AppIconWidget.extractRawIcon({'tileIcon': 'portal-app-icons/tile.png'}),
+        'portal-app-icons/tile.png',
+      );
+      expect(
+        AppIconWidget.extractRawIcon({'logo': 'portal-app-icons/logo.png'}),
+        'portal-app-icons/logo.png',
+      );
+      expect(
+        AppIconWidget.extractRawIcon({'appIcon': 'portal-app-icons/app.png'}),
+        'portal-app-icons/app.png',
+      );
+      expect(
+        AppIconWidget.extractRawIcon({
+          'icon': {'url': 'portal-app-icons/nested.png'},
+        }),
+        'portal-app-icons/nested.png',
+      );
+      expect(
+        AppIconWidget.extractRawIcon({
+          'icon': {'path': 'portal-app-icons/nested_path.png'},
+        }),
+        'portal-app-icons/nested_path.png',
+      );
     });
 
     test('formatIconUrl rewrites backend upload paths and adds token', () {
-      final res1 = AppIconWidget.formatIconUrl('portal-app-icons/complaint-123.png', 'token123');
-      expect(res1, equals('${ApiConfig.baseUrl}/api/mobile/portals/uploads/portal-app-icons/complaint-123.png?token=token123'));
+      final res1 = AppIconWidget.formatIconUrl(
+        'portal-app-icons/complaint-123.png',
+        'token123',
+      );
+      expect(
+        res1,
+        equals(
+          '${ApiConfig.baseUrl}/api/mobile/portals/uploads/portal-app-icons/complaint-123.png?token=token123',
+        ),
+      );
 
-      final res2 = AppIconWidget.formatIconUrl('/uploads/portal-app-icons/anpr.png', 'token123');
-      expect(res2, equals('${ApiConfig.baseUrl}/api/mobile/portals/uploads/portal-app-icons/anpr.png?token=token123'));
+      final res2 = AppIconWidget.formatIconUrl(
+        '/uploads/portal-app-icons/anpr.png',
+        'token123',
+      );
+      expect(
+        res2,
+        equals(
+          '${ApiConfig.baseUrl}/api/mobile/portals/uploads/portal-app-icons/anpr.png?token=token123',
+        ),
+      );
 
-      final res3 = AppIconWidget.formatIconUrl('http://core-gateway:8080/uploads/portal-app-icons/ees.png', 'token123');
-      expect(res3, equals('${ApiConfig.baseUrl}/api/mobile/portals/uploads/portal-app-icons/ees.png?token=token123'));
+      final res3 = AppIconWidget.formatIconUrl(
+        'http://core-gateway:8080/uploads/portal-app-icons/ees.png',
+        'token123',
+      );
+      expect(
+        res3,
+        equals(
+          '${ApiConfig.baseUrl}/api/mobile/portals/uploads/portal-app-icons/ees.png?token=token123',
+        ),
+      );
 
-      final res4 = AppIconWidget.formatIconUrl(r'portal-app-icons\windows-path.png', 'token123');
-      expect(res4, equals('${ApiConfig.baseUrl}/api/mobile/portals/uploads/portal-app-icons/windows-path.png?token=token123'));
+      final res4 = AppIconWidget.formatIconUrl(
+        r'portal-app-icons\windows-path.png',
+        'token123',
+      );
+      expect(
+        res4,
+        equals(
+          '${ApiConfig.baseUrl}/api/mobile/portals/uploads/portal-app-icons/windows-path.png?token=token123',
+        ),
+      );
 
-      final res5 = AppIconWidget.formatIconUrl('http://uat-app-core.interior.gov.kh/api/mobile/portals/uploads/api/v1/uploads/portal-app-icons/84ec8874-109c-48e8-9eb8-fc1c20f7a9ae.png', 'token123');
-      expect(res5, equals('${ApiConfig.baseUrl}/api/mobile/portals/uploads/portal-app-icons/84ec8874-109c-48e8-9eb8-fc1c20f7a9ae.png?token=token123'));
+      final res5 = AppIconWidget.formatIconUrl(
+        'http://uat-app-core.interior.gov.kh/api/mobile/portals/uploads/api/v1/uploads/portal-app-icons/84ec8874-109c-48e8-9eb8-fc1c20f7a9ae.png',
+        'token123',
+      );
+      expect(
+        res5,
+        equals(
+          '${ApiConfig.baseUrl}/api/mobile/portals/uploads/portal-app-icons/84ec8874-109c-48e8-9eb8-fc1c20f7a9ae.png?token=token123',
+        ),
+      );
 
-      final res6 = AppIconWidget.formatIconUrl('/api/v1/uploads/portal-app-icons/6acc45da-5795-4b65-aa87-8897e64f942b.png', 'token123');
-      expect(res6, equals('${ApiConfig.baseUrl}/api/mobile/portals/uploads/portal-app-icons/6acc45da-5795-4b65-aa87-8897e64f942b.png?token=token123'));
+      final res6 = AppIconWidget.formatIconUrl(
+        '/api/v1/uploads/portal-app-icons/6acc45da-5795-4b65-aa87-8897e64f942b.png',
+        'token123',
+      );
+      expect(
+        res6,
+        equals(
+          '${ApiConfig.baseUrl}/api/mobile/portals/uploads/portal-app-icons/6acc45da-5795-4b65-aa87-8897e64f942b.png?token=token123',
+        ),
+      );
     });
 
     test('formatIconUrl preserves external non-backend URLs', () {
       final externalUrl = 'https://cdn.example.com/icons/logo.svg';
-      expect(AppIconWidget.formatIconUrl(externalUrl, 'token123'), equals(externalUrl));
+      expect(
+        AppIconWidget.formatIconUrl(externalUrl, 'token123'),
+        equals(externalUrl),
+      );
     });
 
-    test('formatIconUrl ignores MOI logo default and null/undefined values', () {
-      expect(AppIconWidget.formatIconUrl('assets/img/about-moi-logo.png'), isEmpty);
-      expect(AppIconWidget.formatIconUrl('/assets/img/about-moi-logo.png'), isEmpty);
-      expect(AppIconWidget.formatIconUrl('null'), isEmpty);
-      expect(AppIconWidget.formatIconUrl('undefined'), isEmpty);
-      expect(AppIconWidget.formatIconUrl(''), isEmpty);
-      expect(AppIconWidget.formatIconUrl(null), isEmpty);
-    });
+    test(
+      'formatIconUrl ignores MOI logo default and null/undefined values',
+      () {
+        expect(
+          AppIconWidget.formatIconUrl('assets/img/about-moi-logo.png'),
+          isEmpty,
+        );
+        expect(
+          AppIconWidget.formatIconUrl('/assets/img/about-moi-logo.png'),
+          isEmpty,
+        );
+        expect(AppIconWidget.formatIconUrl('null'), isEmpty);
+        expect(AppIconWidget.formatIconUrl('undefined'), isEmpty);
+        expect(AppIconWidget.formatIconUrl(''), isEmpty);
+        expect(AppIconWidget.formatIconUrl(null), isEmpty);
+      },
+    );
 
     test('extractRelativePath normalizes various backend upload formats', () {
-      expect(AppIconWidget.extractRelativePath('portal-app-icons/app.png'), equals('portal-app-icons/app.png'));
-      expect(AppIconWidget.extractRelativePath('http://172.30.192.127/api/mobile/portals/uploads/api/v1/uploads/portal-app-icons/app.png'), equals('portal-app-icons/app.png'));
-      expect(AppIconWidget.extractRelativePath('/uploads/portal-app-icons/app.png'), equals('portal-app-icons/app.png'));
-      expect(AppIconWidget.extractRelativePath('app.png'), equals('portal-app-icons/app.png'));
-      expect(AppIconWidget.extractRelativePath('https://example.com/external.png'), equals(''));
+      expect(
+        AppIconWidget.extractRelativePath('portal-app-icons/app.png'),
+        equals('portal-app-icons/app.png'),
+      );
+      expect(
+        AppIconWidget.extractRelativePath(
+          'http://172.30.192.127/api/mobile/portals/uploads/api/v1/uploads/portal-app-icons/app.png',
+        ),
+        equals('portal-app-icons/app.png'),
+      );
+      expect(
+        AppIconWidget.extractRelativePath('/uploads/portal-app-icons/app.png'),
+        equals('portal-app-icons/app.png'),
+      );
+      expect(
+        AppIconWidget.extractRelativePath('app.png'),
+        equals('portal-app-icons/app.png'),
+      );
+      expect(
+        AppIconWidget.extractRelativePath('https://example.com/external.png'),
+        equals(''),
+      );
     });
   });
 
   group('HomeController Home Services Filtering Tests', () {
-    test('homeServices excludes general/admin apps and keeps user portal apps', () {
-      final controller = HomeController();
-      controller.services.assignAll([
-        {
-          'id': 'app1',
-          'titleKh': 'ប្រព័ន្ធស្នើសុំចេញចូលទីស្តីការក្រសួងមហាផ្ទៃ',
-          'isActive': true,
-          'isGeneral': false,
-          'category': 'security',
-          'department': 'immigration',
-        },
-        {
-          'id': 'app2',
-          'titleKh': 'ប្រព័ន្ធទទួលពាក្យបណ្តឹងអនឡាញ',
-          'isActive': true,
-          'isGeneral': false,
-          'category': 'complaints',
-          'department': 'inspection',
-        },
-        {
-          'id': 'app3_admin',
-          'titleKh': 'កម្មវិធីទូទៅ (Admin App)',
-          'isActive': true,
-          'isGeneral': true,
-          'category': 'general',
-          'department': 'general',
-        },
-        {
-          'id': 'app4_khmer_gen',
-          'titleKh': 'ការងារទូទៅ',
-          'isActive': true,
-          'isGeneral': false,
-          'category': 'ទូទៅ',
-          'department': 'ទូទៅ',
-        },
-        {
-          'id': 'app5_inactive',
-          'titleKh': 'Inactive App',
-          'isActive': false,
-          'isGeneral': false,
-          'category': 'security',
-          'department': 'immigration',
-        },
-        {
-          'id': 'app6_google_map',
-          'titleKh': 'Google Map',
-          'titleEn': 'Google Map',
-          'code': 'GOOGLE_MAP',
-          'isActive': true,
-          'isGeneral': false,
-          'category': '',
-          'department': '',
-          'url': 'https://maps.google.com',
-        },
-        {
-          'id': 'app7_google_calendar',
-          'titleKh': 'Google Calendar',
-          'titleEn': 'Google Calendar',
-          'code': 'GOOGLE_CALENDAR',
-          'isActive': true,
-          'isGeneral': false,
-          'category': '',
-          'department': '',
-          'url': 'https://calendar.google.com',
-        },
-      ]);
+    test(
+      'homeServices excludes general/admin apps and keeps user portal apps',
+      () {
+        final controller = HomeController();
+        controller.services.assignAll([
+          {
+            'id': 'app1',
+            'titleKh': 'ប្រព័ន្ធស្នើសុំចេញចូលទីស្តីការក្រសួងមហាផ្ទៃ',
+            'isActive': true,
+            'isGeneral': false,
+            'category': 'security',
+            'department': 'immigration',
+          },
+          {
+            'id': 'app2',
+            'titleKh': 'ប្រព័ន្ធទទួលពាក្យបណ្តឹងអនឡាញ',
+            'isActive': true,
+            'isGeneral': false,
+            'category': 'complaints',
+            'department': 'inspection',
+          },
+          {
+            'id': 'app3_admin',
+            'titleKh': 'កម្មវិធីទូទៅ (Admin App)',
+            'isActive': true,
+            'isGeneral': true,
+            'category': 'general',
+            'department': 'general',
+          },
+          {
+            'id': 'app4_khmer_gen',
+            'titleKh': 'ការងារទូទៅ',
+            'isActive': true,
+            'isGeneral': false,
+            'category': 'ទូទៅ',
+            'department': 'ទូទៅ',
+          },
+          {
+            'id': 'app5_inactive',
+            'titleKh': 'Inactive App',
+            'isActive': false,
+            'isGeneral': false,
+            'category': 'security',
+            'department': 'immigration',
+          },
+          {
+            'id': 'app6_google_map',
+            'titleKh': 'Google Map',
+            'titleEn': 'Google Map',
+            'code': 'GOOGLE_MAP',
+            'isActive': true,
+            'isGeneral': false,
+            'category': '',
+            'department': '',
+            'url': 'https://maps.google.com',
+          },
+          {
+            'id': 'app7_google_calendar',
+            'titleKh': 'Google Calendar',
+            'titleEn': 'Google Calendar',
+            'code': 'GOOGLE_CALENDAR',
+            'isActive': true,
+            'isGeneral': false,
+            'category': '',
+            'department': '',
+            'url': 'https://calendar.google.com',
+          },
+        ]);
 
-      final homeApps = controller.homeServices;
+        final homeApps = controller.homeServices;
 
-      // Should ONLY contain app1 (ANPR) and app2 (Complaint), excluding app3, app4, app5, app6 (Google Map), and app7 (Google Calendar)
-      expect(homeApps.length, equals(2));
-      expect(homeApps[0]['id'], equals('app1'));
-      expect(homeApps[1]['id'], equals('app2'));
-      expect(homeApps.any((a) => a['id'] == 'app3_admin'), isFalse);
-      expect(homeApps.any((a) => a['id'] == 'app4_khmer_gen'), isFalse);
-      expect(homeApps.any((a) => a['id'] == 'app5_inactive'), isFalse);
-      expect(homeApps.any((a) => a['id'] == 'app6_google_map'), isFalse);
-      expect(homeApps.any((a) => a['id'] == 'app7_google_calendar'), isFalse);
-    });
+        // Should ONLY contain app1 (ANPR) and app2 (Complaint), excluding app3, app4, app5, app6 (Google Map), and app7 (Google Calendar)
+        expect(homeApps.length, equals(2));
+        expect(homeApps[0]['id'], equals('app1'));
+        expect(homeApps[1]['id'], equals('app2'));
+        expect(homeApps.any((a) => a['id'] == 'app3_admin'), isFalse);
+        expect(homeApps.any((a) => a['id'] == 'app4_khmer_gen'), isFalse);
+        expect(homeApps.any((a) => a['id'] == 'app5_inactive'), isFalse);
+        expect(homeApps.any((a) => a['id'] == 'app6_google_map'), isFalse);
+        expect(homeApps.any((a) => a['id'] == 'app7_google_calendar'), isFalse);
+      },
+    );
   });
 
   group('ApplicationViewController Hide/Show & Filter Tabs Tests', () {
-    test('hide/show toggles displayedServices between collapsed limit and all apps', () {
-      final appCtrl = ApplicationViewController();
-      appCtrl.apiApps.assignAll([
-        {
-          'id': 'app1',
-          'titleKh': 'ប្រព័ន្ធស្នើសុំចេញចូលទីស្តីការក្រសួងមហាផ្ទៃ',
-          'isActive': true,
-          'isGeneral': false,
-        },
-        {
-          'id': 'app2',
-          'titleKh': 'ប្រព័ន្ធទទួលពាក្យបណ្តឹងអនឡាញ',
-          'isActive': true,
-          'isGeneral': false,
-        },
-        {
-          'id': 'app3',
-          'titleKh': 'Google Map',
-          'isActive': true,
-          'isGeneral': true,
-        },
-        {
-          'id': 'app4',
-          'titleKh': 'Google Calendar',
-          'isActive': true,
-          'isGeneral': true,
-        },
-      ]);
-      appCtrl.searchController.clear();
-      appCtrl.clearFilters();
+    test(
+      'hide/show toggles displayedServices between collapsed limit and all apps',
+      () {
+        final appCtrl = ApplicationViewController();
+        appCtrl.apiApps.assignAll([
+          {
+            'id': 'app1',
+            'titleKh': 'ប្រព័ន្ធស្នើសុំចេញចូលទីស្តីការក្រសួងមហាផ្ទៃ',
+            'isActive': true,
+            'isGeneral': false,
+          },
+          {
+            'id': 'app2',
+            'titleKh': 'ប្រព័ន្ធទទួលពាក្យបណ្តឹងអនឡាញ',
+            'isActive': true,
+            'isGeneral': false,
+          },
+          {
+            'id': 'app3',
+            'titleKh': 'Google Map',
+            'isActive': true,
+            'isGeneral': true,
+          },
+          {
+            'id': 'app4',
+            'titleKh': 'Google Calendar',
+            'isActive': true,
+            'isGeneral': true,
+          },
+        ]);
+        appCtrl.searchController.clear();
+        appCtrl.clearFilters();
 
-      // When expanded (Show), all 4 items are displayed
-      appCtrl.isExpanded.value = true;
-      expect(appCtrl.displayedServices.length, equals(4));
+        // When expanded (Show), all 4 items are displayed
+        appCtrl.isExpanded.value = true;
+        expect(appCtrl.displayedServices.length, equals(4));
 
-      // When collapsed (Hide), only initialItemLimit (2) items are displayed
-      appCtrl.toggleExpanded(); // isExpanded becomes false
-      expect(appCtrl.isExpanded.value, isFalse);
-      expect(appCtrl.displayedServices.length, equals(ApplicationViewController.initialItemLimit));
-      expect(appCtrl.displayedServices.length, equals(2));
+        // When collapsed (Hide), only initialItemLimit (2) items are displayed
+        appCtrl.toggleExpanded(); // isExpanded becomes false
+        expect(appCtrl.isExpanded.value, isFalse);
+        expect(
+          appCtrl.displayedServices.length,
+          equals(ApplicationViewController.initialItemLimit),
+        );
+        expect(appCtrl.displayedServices.length, equals(2));
 
-      // Toggling back to expanded shows all 4 items
-      appCtrl.toggleExpanded();
-      expect(appCtrl.isExpanded.value, isTrue);
-      expect(appCtrl.displayedServices.length, equals(4));
-    });
+        // Toggling back to expanded shows all 4 items
+        appCtrl.toggleExpanded();
+        expect(appCtrl.isExpanded.value, isTrue);
+        expect(appCtrl.displayedServices.length, equals(4));
+      },
+    );
 
     test('selectedFilterTab filters portal apps, general apps, and all', () {
       final appCtrl = ApplicationViewController();
@@ -247,91 +371,181 @@ void main() {
       // Portal apps tab -> Hides general apps
       appCtrl.setFilterTab('portal');
       expect(appCtrl.filteredServices.length, equals(2));
-      expect(appCtrl.filteredServices.every((a) => a['isGeneral'] != true), isTrue);
+      expect(
+        appCtrl.filteredServices.every((a) => a['isGeneral'] != true),
+        isTrue,
+      );
 
       // General apps tab -> Shows only general apps
       appCtrl.setFilterTab('general');
       expect(appCtrl.filteredServices.length, equals(2));
-      expect(appCtrl.filteredServices.every((a) => a['isGeneral'] == true), isTrue);
+      expect(
+        appCtrl.filteredServices.every((a) => a['isGeneral'] == true),
+        isTrue,
+      );
     });
   });
 
   group('Admin Department Mapping Tests', () {
     test('formatDepartmentToKhmer maps known acronyms correctly', () {
-      expect(AdminController.formatDepartmentToKhmer('GDDTM'),
-          equals('អគ្គនាយកដ្ឋានបច្ចេកវិទ្យាឌីជីថល និងផ្សព្វផ្សាយអប់រំ'));
-      expect(AdminController.formatDepartmentToKhmer('GDP'),
-          equals('អគ្គនាយកដ្ឋានពន្ធនាគារ'));
-      expect(AdminController.formatDepartmentToKhmer('GDI'),
-          equals('អគ្គនាយកដ្ឋានអន្តោប្រវេសន៍'));
-      expect(AdminController.formatDepartmentToKhmer('GNP'),
-          equals('អគ្គស្នងការដ្ឋាននគរបាលជាតិ'));
-      expect(AdminController.formatDepartmentToKhmer(null),
-          equals('អគ្គនាយកដ្ឋានបច្ចេកវិទ្យាឌីជីថល និងផ្សព្វផ្សាយអប់រំ'));
-      expect(AdminController.formatDepartmentToKhmer('—'),
-          equals('អគ្គនាយកដ្ឋានបច្ចេកវិទ្យាឌីជីថល និងផ្សព្វផ្សាយអប់រំ'));
+      expect(
+        AdminController.formatDepartmentToKhmer('GDDTM'),
+        equals('អគ្គនាយកដ្ឋានបច្ចេកវិទ្យាឌីជីថល និងផ្សព្វផ្សាយអប់រំ'),
+      );
+      expect(
+        AdminController.formatDepartmentToKhmer('GDP'),
+        equals('អគ្គនាយកដ្ឋានពន្ធនាគារ'),
+      );
+      expect(
+        AdminController.formatDepartmentToKhmer('GDI'),
+        equals('អគ្គនាយកដ្ឋានអន្តោប្រវេសន៍'),
+      );
+      expect(
+        AdminController.formatDepartmentToKhmer('GNP'),
+        equals('អគ្គស្នងការដ្ឋាននគរបាលជាតិ'),
+      );
+      expect(
+        AdminController.formatDepartmentToKhmer(null),
+        equals('អគ្គនាយកដ្ឋានបច្ចេកវិទ្យាឌីជីថល និងផ្សព្វផ្សាយអប់រំ'),
+      );
+      expect(
+        AdminController.formatDepartmentToKhmer('—'),
+        equals('អគ្គនាយកដ្ឋានបច្ចេកវិទ្យាឌីជីថល និងផ្សព្វផ្សាយអប់រំ'),
+      );
     });
   });
 
   group('Home Tiles and Application Admin Apps Separation Tests', () {
-    test('ApplicationViewController._normalizeApp extracts ownerOrgCode and title correctly', () {
-      final appCtrl = ApplicationViewController();
-      final normalized = appCtrl.testNormalizeApp({
-        'id': 1,
-        'code': 'ANPR',
-        'nameKh': 'ប្រព័ន្ធស្នើរសុំចេញចូលទីស្តីការក្រសួងមហាផ្ទៃ',
-        'title': 'ANPR Access System',
-        'ownerOrgCode': 'GDDTM',
-        'appUrl': 'https://n4-anpr-uat.interior.gov.kh/admin',
-        'iconUrl': 'portal-app-icons/anpr.png',
-      });
-
-      expect(normalized['id'], equals('1'));
-      expect(normalized['code'], equals('ANPR'));
-      expect(normalized['department'], equals('GDDTM'));
-      expect(normalized['titleKh'], equals('ប្រព័ន្ធស្នើរសុំចេញចូលទីស្តីការក្រសួងមហាផ្ទៃ'));
-      expect(normalized['route'], equals('https://n4-anpr-uat.interior.gov.kh/admin'));
-    });
-
-    test('ApplicationViewController sourceApps strictly uses admin portal apps without tile injection', () {
-      final appCtrl = ApplicationViewController();
-      appCtrl.apiApps.assignAll([
-        {
-          'id': 'admin_app_1',
+    test(
+      'ApplicationViewController._normalizeApp extracts ownerOrgCode and title correctly',
+      () {
+        final appCtrl = ApplicationViewController();
+        final normalized = appCtrl.testNormalizeApp({
+          'id': 1,
           'code': 'ANPR',
-          'titleKh': 'ប្រព័ន្ធស្នើសុំចេញចូលទីស្តីការក្រសួងមហាផ្ទៃ',
-          'isActive': true,
-          'isGeneral': false,
-        },
-        {
-          'id': 'admin_app_2',
-          'code': 'COMPLAINT',
-          'titleKh': 'ប្រព័ន្ធទទួលពាក្យបណ្តឹងអនឡាញ',
-          'isActive': true,
-          'isGeneral': false,
-        },
-      ]);
+          'nameKh': 'ប្រព័ន្ធស្នើរសុំចេញចូលទីស្តីការក្រសួងមហាផ្ទៃ',
+          'title': 'ANPR Access System',
+          'ownerOrgCode': 'GDDTM',
+          'appUrl': 'https://n4-anpr-uat.interior.gov.kh/admin',
+          'iconUrl': 'portal-app-icons/anpr.png',
+        });
 
-      final apps = appCtrl.sourceApps;
-      expect(apps.length, equals(2));
-      expect(apps.map((a) => a['id']).toList(), equals(['admin_app_1', 'admin_app_2']));
-    });
+        expect(normalized['id'], equals('1'));
+        expect(normalized['code'], equals('ANPR'));
+        expect(normalized['department'], equals('GDDTM'));
+        expect(
+          normalized['titleKh'],
+          equals('ប្រព័ន្ធស្នើរសុំចេញចូលទីស្តីការក្រសួងមហាផ្ទៃ'),
+        );
+        expect(
+          normalized['route'],
+          equals('https://n4-anpr-uat.interior.gov.kh/admin'),
+        );
+      },
+    );
+
+    test(
+      'ApplicationViewController sourceApps strictly uses admin portal apps without tile injection',
+      () {
+        final appCtrl = ApplicationViewController();
+        appCtrl.apiApps.assignAll([
+          {
+            'id': 'admin_app_1',
+            'code': 'ANPR',
+            'titleKh': 'ប្រព័ន្ធស្នើសុំចេញចូលទីស្តីការក្រសួងមហាផ្ទៃ',
+            'isActive': true,
+            'isGeneral': false,
+          },
+          {
+            'id': 'admin_app_2',
+            'code': 'COMPLAINT',
+            'titleKh': 'ប្រព័ន្ធទទួលពាក្យបណ្តឹងអនឡាញ',
+            'isActive': true,
+            'isGeneral': false,
+          },
+        ]);
+
+        final apps = appCtrl.sourceApps;
+        expect(apps.length, equals(2));
+        expect(
+          apps.map((a) => a['id']).toList(),
+          equals(['admin_app_1', 'admin_app_2']),
+        );
+      },
+    );
+
+    test(
+      'ApplicationViewController sourceApps isolates apps for GD Admin and excludes other GD apps',
+      () async {
+        final box = GetStorage();
+        await box.write('generalDepartmentCode', 'GDP');
+        await box.write('roles', ['GDP_ADMIN']);
+
+        final appCtrl = ApplicationViewController();
+        appCtrl.apiApps.assignAll([
+          {
+            'id': 'gdp_app_1',
+            'code': 'GDP_PRISONS',
+            'titleKh': 'ប្រព័ន្ធគ្រប់គ្រងពន្ធនាគារ',
+            'department': 'GDP',
+            'isActive': true,
+            'isGeneral': false,
+          },
+          {
+            'id': 'gddtm_app_2',
+            'code': 'GDDTM_ANPR',
+            'titleKh': 'ប្រព័ន្ធស្នើសុំចេញចូលទីស្តីការ',
+            'department': 'GDDTM',
+            'isActive': true,
+            'isGeneral': false,
+          },
+          {
+            'id': 'general_app_3',
+            'code': 'CALENDAR',
+            'titleKh': 'ប្រតិទិនការងារ',
+            'department': 'general',
+            'isActive': true,
+            'isGeneral': true,
+          },
+        ]);
+
+        final apps = appCtrl.sourceApps;
+        final ids = apps.map((a) => a['id']).toList();
+        expect(ids, contains('gdp_app_1'));
+        expect(ids, contains('general_app_3'));
+        expect(ids, isNot(contains('gddtm_app_2')));
+
+        // Cleanup
+        await box.remove('generalDepartmentCode');
+        await box.remove('roles');
+      },
+    );
   });
 
   group('Announcement Detail Dialog Tests', () {
-    test('formatDetailKhmerDateTime formats ISO dates into official Khmer datetime string', () {
-      final formatted = formatDetailKhmerDateTime('2026-09-17T05:05:17.736741');
-      expect(formatted, contains('ថ្ងៃទី'));
-      expect(formatted, contains('កញ្ញា'));
-      expect(formatted, contains('ឆ្នាំ'));
-      expect(formatted, contains('ម៉ោង'));
-    });
+    test(
+      'formatDetailKhmerDateTime formats ISO dates into official Khmer datetime string',
+      () {
+        final formatted = formatDetailKhmerDateTime(
+          '2026-09-17T05:05:17.736741',
+        );
+        expect(formatted, contains('ថ្ងៃទី'));
+        expect(formatted, contains('កញ្ញា'));
+        expect(formatted, contains('ឆ្នាំ'));
+        expect(formatted, contains('ម៉ោង'));
+      },
+    );
 
-    test('formatDetailKhmerDateTime handles empty and invalid dates gracefully', () {
-      expect(formatDetailKhmerDateTime(''), isEmpty);
-      expect(formatDetailKhmerDateTime(null), isEmpty);
-      expect(formatDetailKhmerDateTime('invalid-date'), equals('invalid-date'));
-    });
+    test(
+      'formatDetailKhmerDateTime handles empty and invalid dates gracefully',
+      () {
+        expect(formatDetailKhmerDateTime(''), isEmpty);
+        expect(formatDetailKhmerDateTime(null), isEmpty);
+        expect(
+          formatDetailKhmerDateTime('invalid-date'),
+          equals('invalid-date'),
+        );
+      },
+    );
   });
 }
-
