@@ -203,6 +203,9 @@ class CustomSnackbar {
     required Widget icon,
     required Color accentColor,
   }) {
+    if (Get.testMode) {
+      return;
+    }
     // Ultimate safeguard: sanitize all displayed texts
     final cleanTitle = sanitizeTitle(title) ?? title;
     final cleanMessage = sanitizeMessage(message);

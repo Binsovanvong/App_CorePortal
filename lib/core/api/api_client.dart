@@ -260,12 +260,6 @@ class ApiClient {
 
     try {
       final box = GetStorage();
-      final username = box.read('username')?.toString() ??
-          box.read('cached_current_username')?.toString();
-      if (username != null && username.isNotEmpty) {
-        await box.remove('biometric_registered_$username');
-      }
-      await box.remove('is_face_enrolled');
       await box.remove('access_token');
       await box.remove('token');
       await box.remove('refresh_token');

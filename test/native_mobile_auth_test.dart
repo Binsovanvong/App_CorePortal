@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:core_portal/core/api/api_client.dart';
 import 'package:core_portal/core/api/services/auth_service.dart';
+import 'package:core_portal/core/api/services/biometric_service.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:flutter/services.dart';
 import 'package:get/get.dart' hide Response;
@@ -20,7 +21,8 @@ void main() {
     await GetStorage.init();
   });
 
-  setUp(() {
+  setUp(() async {
+    await GetStorage().erase();
     final futureExpiry =
         DateTime.now().add(const Duration(minutes: 5)).millisecondsSinceEpoch;
     FlutterSecureStorage.setMockInitialValues({
@@ -122,7 +124,7 @@ void main() {
       expect(isFirstLogin2, isFalse);
     });
 
-    test('ApiClient.logout deletes tokens and biometric registration flags from GetStorage', () async {
+    test('ApiClient.logout deletes session tokens but preserves biometric registration', () async {
       final box = GetStorage();
       await box.write('username', 'john_doe');
       await box.write('biometric_registered_john_doe', true);
@@ -137,8 +139,36 @@ void main() {
       expect(token, isNull);
       expect(refresh, isNull);
       expect(ApiClient.currentToken, isNull);
-      expect(box.read('biometric_registered_john_doe'), isNull);
-      expect(box.read('is_face_enrolled'), isNull);
+      // Biometric registration must persist across session logouts so /register does not run on every login
+      expect(box.read('biometric_registered_john_doe'), isTrue);
+      expect(box.read('is_face_enrolled'), isTrue);
+    });
+
+    test('BiometricService.getDeviceId generates UUID once and reuses it consistently', () async {
+      final id1 = await BiometricService.getDeviceId();
+      final id2 = await BiometricService.getDeviceId();
+      expect(id1, isNotEmpty);
+      expect(id1, equals(id2));
+
+      // Validate RFC 4122 v4 format (8-4-4-4-12 hex chars)
+      final uuidRegex = RegExp(r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$');
+      expect(uuidRegex.hasMatch(id1), isTrue);
+    });
+
+    test('BiometricService.resetKeys does not wipe the device_id', () async {
+      final idBefore = await BiometricService.getDeviceId();
+      await BiometricService.resetKeys();
+      final idAfter = await BiometricService.getDeviceId();
+      expect(idAfter, equals(idBefore));
+    });
+
+    test('BiometricService.isBiometricEnrolled and setBiometricEnrolled persist across stores', () async {
+      expect(await BiometricService.isBiometricEnrolled('alice_test'), isFalse);
+      await BiometricService.setBiometricEnrolled('alice_test', true);
+      expect(await BiometricService.isBiometricEnrolled('alice_test'), isTrue);
+
+      await BiometricService.setBiometricEnrolled('alice_test', false);
+      expect(await BiometricService.isBiometricEnrolled('alice_test'), isFalse);
     });
 
     test('device matching strictly requires both matching currentDeviceId and active status', () {
@@ -178,6 +208,100 @@ void main() {
             d['is_active'] != false,
       );
       expect(matchesInactive, isFalse);
+    });
+
+    test('BiometricService.shouldRegisterDevice returns false when token expired and logging in normally', () async {
+      const username = 'test_user_expired';
+      final deviceId = await BiometricService.getDeviceId();
+
+      // Ensure key pair exists and matches registered key
+      final pubKey = await BiometricService.getPublicKeyDerBase64();
+      await BiometricService.saveRegisteredPublicKey(pubKey);
+      await BiometricService.setBiometricEnrolled(username, true);
+
+      final backendDevices = [
+        {'device_id': deviceId, 'is_active': true},
+      ];
+
+      // Access token expired, user logged in normally, evaluating shouldRegister:
+      // Must NOT register again!
+      final bool shouldRegister = await BiometricService.shouldRegisterDevice(
+        username: username,
+        deviceId: deviceId,
+        backendDevices: backendDevices,
+      );
+      expect(shouldRegister, isFalse);
+    });
+
+    test('BiometricService.shouldRegisterDevice evaluates true ONLY for the 4 explicit conditions', () async {
+      const username = 'test_user_conditions';
+      final deviceId = await BiometricService.getDeviceId();
+      final pubKey = await BiometricService.getPublicKeyDerBase64();
+
+      // Setup clean baseline: enrolled, active device, key saved
+      await BiometricService.saveRegisteredPublicKey(pubKey);
+      await BiometricService.setBiometricEnrolled(username, true);
+
+      // Baseline should be false
+      expect(
+        await BiometricService.shouldRegisterDevice(
+          username: username,
+          deviceId: deviceId,
+          backendDevices: [{'device_id': deviceId, 'is_active': true}],
+        ),
+        isFalse,
+      );
+
+      // Condition 1: Biometric login is enabled for the first time
+      await BiometricService.setBiometricEnrolled('brand_new_user', false);
+      expect(
+        await BiometricService.shouldRegisterDevice(
+          username: 'brand_new_user',
+          deviceId: deviceId,
+          backendDevices: [], // Not on backend
+        ),
+        isTrue,
+      );
+
+      // Condition 2: The device was revoked
+      expect(
+        await BiometricService.shouldRegisterDevice(
+          username: username,
+          deviceId: deviceId,
+          backendDevices: [
+            {'device_id': deviceId, 'is_active': false, 'revoked_at': '2026-10-21T00:00:00Z'},
+          ],
+        ),
+        isTrue,
+      );
+
+      // Condition 3: App was reinstalled or private key was lost
+      await BiometricService.resetKeys();
+      expect(await BiometricService.hasPrivateKey(), isFalse);
+      expect(
+        await BiometricService.shouldRegisterDevice(
+          username: username,
+          deviceId: deviceId,
+          backendDevices: [{'device_id': deviceId, 'is_active': true}],
+        ),
+        isTrue,
+      );
+
+      // Condition 4: The stored public/private key pair changed
+      // Regenerate fresh key
+      final freshPubKey = await BiometricService.getPublicKeyDerBase64();
+      await BiometricService.setBiometricEnrolled(username, true);
+      // Simulate stored registered key being different from current key
+      await BiometricService.saveRegisteredPublicKey('different_previous_public_key');
+      expect(await BiometricService.hasKeyPairChanged(), isTrue);
+      expect(
+        await BiometricService.shouldRegisterDevice(
+          username: username,
+          deviceId: deviceId,
+          backendDevices: [{'device_id': deviceId, 'is_active': true}],
+        ),
+        isTrue,
+      );
     });
   });
 }

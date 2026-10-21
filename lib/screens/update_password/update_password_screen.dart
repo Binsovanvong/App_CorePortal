@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
@@ -17,11 +18,15 @@ import 'package:core_portal/widgets/custom_snackbar.dart';
 class UpdatePasswordScreen extends StatefulWidget {
   final String ticket;
   final String? username;
+  final int? expiresIn;
+  final Dio? dio;
 
   const UpdatePasswordScreen({
     super.key,
     required this.ticket,
     this.username,
+    this.expiresIn,
+    this.dio,
   });
 
   @override
@@ -36,71 +41,139 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
   bool _obscureConfirmPassword = true;
   bool _isLoading = false;
 
+  String? _ticket;
+  DateTime? _expiresAt;
+  Timer? _expiryTimer;
+
+  Dio get _dio => widget.dio ?? ApiClient.dio;
+
+  @override
+  void initState() {
+    super.initState();
+    _initTicketAndExpiry();
+    _newPasswordController.addListener(_onFieldsChanged);
+    _confirmPasswordController.addListener(_onFieldsChanged);
+  }
+
+  void _initTicketAndExpiry() {
+    final args = Get.arguments;
+    final t = widget.ticket.isNotEmpty
+        ? widget.ticket
+        : (args is Map ? args['ticket']?.toString() : null);
+    _ticket = t;
+
+    final rawExpires = widget.expiresIn ??
+        (args is Map ? (args['expires_in'] ?? args['expiresIn']) : null);
+    final expiresIn = rawExpires is int
+        ? rawExpires
+        : (int.tryParse(rawExpires?.toString() ?? '') ?? 180);
+
+    if (expiresIn > 0) {
+      _expiresAt = DateTime.now().add(Duration(seconds: expiresIn));
+      _expiryTimer = Timer(Duration(seconds: expiresIn), () {
+        _handleSessionExpired();
+      });
+    }
+  }
+
+  void _onFieldsChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  void _clearTicket() {
+    _expiryTimer?.cancel();
+    _expiryTimer = null;
+    _ticket = null;
+    _expiresAt = null;
+    _newPasswordController.clear();
+    _confirmPasswordController.clear();
+  }
+
+  Future<void> _handleSessionExpired() async {
+    if (!mounted) return;
+    _clearTicket();
+    CustomSnackbar.showWarning(message: 'pwd_session_expired'.tr);
+    await ApiClient.logout();
+    Get.offAllNamed(AppRoutes.login);
+  }
+
   @override
   void dispose() {
+    _expiryTimer?.cancel();
+    _expiryTimer = null;
+    _newPasswordController.removeListener(_onFieldsChanged);
+    _confirmPasswordController.removeListener(_onFieldsChanged);
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  bool _validatePassword(String password) {
-    if (password.length < 8) {
-      CustomSnackbar.showError(message: 'pwd_rule_length'.tr);
-      return false;
-    }
-    if (!RegExp(r'[A-Z]').hasMatch(password)) {
-      CustomSnackbar.showError(message: 'pwd_rule_upper'.tr);
-      return false;
-    }
-    if (!RegExp(r'[a-z]').hasMatch(password)) {
-      CustomSnackbar.showError(message: 'pwd_rule_lower'.tr);
-      return false;
-    }
-    if (!RegExp(r'[0-9]').hasMatch(password)) {
-      CustomSnackbar.showError(message: 'pwd_rule_number'.tr);
-      return false;
-    }
+  bool _isPasswordValid(String password) {
+    if (password.length < 8) return false;
+    if (!RegExp(r'[A-Z]').hasMatch(password)) return false;
+    if (!RegExp(r'[a-z]').hasMatch(password)) return false;
+    if (!RegExp(r'[0-9]').hasMatch(password)) return false;
     if (!RegExp(r'[!@#\$&*~%^()_\+=\-\[\]{}|;:<>?\/]').hasMatch(password)) {
-      CustomSnackbar.showError(message: 'pwd_rule_special'.tr);
       return false;
     }
-    final user = widget.username?.trim();
+    final user = (widget.username ??
+            (Get.arguments is Map ? Get.arguments['username']?.toString() : null))
+        ?.trim();
     if (user != null &&
         user.isNotEmpty &&
         password.toLowerCase().contains(user.toLowerCase())) {
-      CustomSnackbar.showError(message: 'pwd_rule_no_username'.tr);
       return false;
     }
     return true;
   }
 
+  bool get _isFormValid {
+    final newPassword = _newPasswordController.text;
+    final confirmPassword = _confirmPasswordController.text;
+    return _isPasswordValid(newPassword) &&
+        confirmPassword.isNotEmpty &&
+        newPassword == confirmPassword;
+  }
+
+  String? get _effectiveConfirmPasswordError {
+    final newPassword = _newPasswordController.text;
+    final confirmPassword = _confirmPasswordController.text;
+    if (confirmPassword.isNotEmpty && newPassword != confirmPassword) {
+      return 'pwd_rule_mismatch'.tr;
+    }
+    return null;
+  }
+
   Future<void> _submit() async {
-    if (_isLoading) return;
+    if (_isLoading || !_isFormValid) return;
+
+    if (_expiresAt != null && !DateTime.now().isBefore(_expiresAt!)) {
+      await _handleSessionExpired();
+      return;
+    }
+
+    final ticketToUse = _ticket ?? widget.ticket;
+    if (ticketToUse.isEmpty) {
+      await _handleSessionExpired();
+      return;
+    }
 
     final newPassword = _newPasswordController.text;
     final confirmPassword = _confirmPasswordController.text;
 
-    if (newPassword.isEmpty || confirmPassword.isEmpty) {
-      CustomSnackbar.showError(message: 'pwd_rule_empty'.tr);
-      return;
-    }
-
     if (newPassword != confirmPassword) {
-      CustomSnackbar.showError(message: 'pwd_rule_mismatch'.tr);
-      return;
-    }
-
-    if (!_validatePassword(newPassword)) {
       return;
     }
 
     setState(() => _isLoading = true);
 
     try {
-      final response = await ApiClient.dio.post(
+      final response = await _dio.post(
         '/api/mobile/auth/update-password',
         data: {
-          'ticket': widget.ticket,
+          'ticket': ticketToUse,
           'new_password': newPassword,
           'confirm_password': confirmPassword,
         },
@@ -121,6 +194,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
             response.data,
             dioHeaders: response.headers,
           );
+          _clearTicket();
           CustomSnackbar.showSuccess(message: 'password_changed_success'.tr);
           Get.offAllNamed(AppRoutes.mainPage);
           return;
@@ -129,6 +203,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
         // Check if server returned password_updated_login_failed in 200 body
         final code = (data?['code'] ?? data?['detail']?['code'])?.toString();
         if (code == 'password_updated_login_failed') {
+          _clearTicket();
           CustomSnackbar.showInfo(
             message: 'pwd_updated_login_again'.tr,
           );
@@ -145,10 +220,12 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
               ? detail['code']
               : (resData is Map ? resData['code'] : null))
           ?.toString();
+      final statusCode = response?.statusCode;
 
       // On password_updated_login_failed, the password changed successfully;
       // return to login and use the new password.
       if (errorCode == 'password_updated_login_failed') {
+        _clearTicket();
         CustomSnackbar.showInfo(
           message: 'pwd_updated_login_again'.tr,
         );
@@ -157,56 +234,89 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
         return;
       }
 
-      // Handle ordinary error states without logging sensitive ticket data
-      String errorMessage = 'password_change_failed'.tr;
-      bool returnToLogin = false;
-      final statusCode = response?.statusCode;
-
+      // Network timeout or uncertain result:
+      // do not automatically resubmit; return to login and tell the user to try signing in with the new password
       if (error.type == DioExceptionType.connectionTimeout ||
           error.type == DioExceptionType.sendTimeout ||
           error.type == DioExceptionType.receiveTimeout ||
           statusCode == 504) {
-        errorMessage = 'pwd_update_timeout'.tr;
-        returnToLogin = true;
-      } else if (error.type == DioExceptionType.connectionError) {
-        errorMessage = 'no_internet_error'.tr;
-        returnToLogin = true;
-      } else if (statusCode == 400) {
-        returnToLogin = true;
-        if (detail is Map && detail['message'] != null) {
-          errorMessage = detail['message'].toString();
-        } else {
-          errorMessage = 'pwd_policy_failed'.tr;
-        }
-      } else if (statusCode == 401) {
-        returnToLogin = true;
-        errorMessage = 'pwd_session_expired'.tr;
-      } else if (statusCode == 409) {
-        returnToLogin = true;
-        if (detail is Map && detail['message'] != null) {
-          errorMessage = detail['message'].toString();
-        } else {
-          errorMessage = 'account_action_unsupported'.tr;
-        }
-      } else if (statusCode == 503) {
-        returnToLogin = true;
-        errorMessage = 'pwd_service_not_configured'.tr;
-      } else if (detail != null) {
-        if (detail is Map && detail['message'] != null) {
-          errorMessage = detail['message'].toString();
-        } else if (detail is String) {
-          errorMessage = detail;
-        }
-      }
-
-      CustomSnackbar.showError(message: errorMessage);
-
-      if (returnToLogin) {
+        _clearTicket();
+        CustomSnackbar.showError(message: 'pwd_update_timeout'.tr);
         await ApiClient.logout();
         Get.offAllNamed(AppRoutes.login);
+        return;
       }
+
+      // HTTP 400 with detail.code == "password_rejected" (or policy failure):
+      // show the server message, then require the user to sign in again because the ticket has been consumed
+      if (statusCode == 400) {
+        _clearTicket();
+        String msg = 'pwd_policy_failed'.tr;
+        if (detail is Map && detail['message'] != null) {
+          msg = detail['message'].toString();
+        } else if (resData is Map && resData['message'] != null) {
+          msg = resData['message'].toString();
+        } else if (detail is String) {
+          msg = detail;
+        }
+        CustomSnackbar.showError(message: msg);
+        await ApiClient.logout();
+        Get.offAllNamed(AppRoutes.login);
+        return;
+      }
+
+      // HTTP 401:
+      // show “Your password-change session has expired. Please sign in again.”
+      // clear the ticket and navigate back to login
+      if (statusCode == 401) {
+        _clearTicket();
+        CustomSnackbar.showError(message: 'pwd_session_expired'.tr);
+        await ApiClient.logout();
+        Get.offAllNamed(AppRoutes.login);
+        return;
+      }
+
+      // HTTP 409:
+      // show that the account requires another action and direct the user back to login/support
+      if (statusCode == 409) {
+        _clearTicket();
+        String msg = 'account_requires_action'.tr;
+        if (detail is Map && detail['message'] != null) {
+          msg = detail['message'].toString();
+        } else if (resData is Map && resData['message'] != null) {
+          msg = resData['message'].toString();
+        }
+        CustomSnackbar.showError(message: msg);
+        await ApiClient.logout();
+        Get.offAllNamed(AppRoutes.login);
+        return;
+      }
+
+      // HTTP 429:
+      // show “Too many attempts. Please wait and try again.”
+      if (statusCode == 429) {
+        CustomSnackbar.showError(message: 'too_many_attempts'.tr);
+        return;
+      }
+
+      if (error.type == DioExceptionType.connectionError) {
+        CustomSnackbar.showError(message: 'no_internet_error'.tr);
+        return;
+      }
+
+      // Other errors:
+      // show a safe generic error without exposing backend details
+      _clearTicket();
+      CustomSnackbar.showError(message: 'generic_safe_error'.tr);
+      await ApiClient.logout();
+      Get.offAllNamed(AppRoutes.login);
+      return;
     } catch (_) {
-      CustomSnackbar.showError(message: 'password_change_failed'.tr);
+      _clearTicket();
+      CustomSnackbar.showError(message: 'generic_safe_error'.tr);
+      await ApiClient.logout();
+      Get.offAllNamed(AppRoutes.login);
+      return;
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -454,7 +564,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                                 // Page Title and Subtitle (Centered)
                                 Center(
                                   child: Text(
-                                    'change_password'.tr,
+                                    'update_your_password'.tr,
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.kantumruyPro(
                                       fontSize: 19,
@@ -463,15 +573,21 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 2),
+                                const SizedBox(height: 4),
                                 Center(
-                                  child: Text(
-                                    'for_first_login'.tr,
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.kantumruyPro(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w400,
-                                      color: const Color(0xFF94A3B8),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                    ),
+                                    child: Text(
+                                      'password_expired_or_must_change'.tr,
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.kantumruyPro(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w400,
+                                        color: const Color(0xFF64748B),
+                                        height: 1.35,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -494,6 +610,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                                 ),
                                 const SizedBox(height: 4),
                                 TextField(
+                                  key: const Key('update_new_password_field'),
                                   controller: _newPasswordController,
                                   obscureText: _obscureNewPassword,
                                   textInputAction: TextInputAction.next,
@@ -571,10 +688,15 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                                 ),
                                 const SizedBox(height: 4),
                                 TextField(
+                                  key: const Key('update_confirm_password_field'),
                                   controller: _confirmPasswordController,
                                   obscureText: _obscureConfirmPassword,
                                   textInputAction: TextInputAction.done,
-                                  onSubmitted: (_) => _submit(),
+                                  onSubmitted: (_) {
+                                    if (_isFormValid && !_isLoading) {
+                                      _submit();
+                                    }
+                                  },
                                   style: GoogleFonts.kantumruyPro(
                                     fontSize: 14,
                                     color: const Color(0xFF1E293B),
@@ -585,6 +707,13 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                                     hintStyle: GoogleFonts.kantumruyPro(
                                       color: const Color(0xFF94A3B8),
                                       fontSize: 13.5,
+                                    ),
+                                    errorText: _effectiveConfirmPasswordError,
+                                    errorMaxLines: 2,
+                                    errorStyle: GoogleFonts.kantumruyPro(
+                                      fontSize: 12,
+                                      color: Colors.red.shade700,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                     prefixIcon: const Icon(
                                       Icons.lock_reset_rounded,
@@ -626,6 +755,20 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                                         width: 1.8,
                                       ),
                                     ),
+                                    errorBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                        color: Colors.red.shade400,
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                    focusedErrorBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                        color: Colors.red.shade700,
+                                        width: 1.8,
+                                      ),
+                                    ),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                       borderSide: const BorderSide(
@@ -643,7 +786,11 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                                   width: double.infinity,
                                   height: 46,
                                   child: ElevatedButton(
-                                    onPressed: _isLoading ? null : _submit,
+                                    key: const Key('update_password_submit_button'),
+                                    onPressed:
+                                        (!_isFormValid || _isLoading)
+                                            ? null
+                                            : _submit,
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: const Color(0xFF163774),
                                       foregroundColor: Colors.white,
@@ -682,6 +829,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                                   width: double.infinity,
                                   height: 38,
                                   child: TextButton(
+                                    key: const Key('update_password_cancel_button'),
                                     onPressed: _isLoading
                                         ? null
                                         : () async {

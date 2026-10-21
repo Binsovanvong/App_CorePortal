@@ -51,18 +51,41 @@ class LoginController extends GetxController {
     if (_sessionUnlockAttempted) return;
     _sessionUnlockAttempted = true;
     final box = GetStorage();
-    final token = await ApiClient.getAccessToken() ?? '';
-    final username = box.read('username')?.toString() ?? '';
-    if (token.isEmpty || username.isEmpty) return;
+    final username = box.read('username')?.toString() ??
+        box.read('cached_current_username')?.toString() ??
+        '';
+    if (username.isEmpty) return;
 
-    final registrationKey = 'biometric_registered_$username';
     final bool isRegistered =
-        (box.read(registrationKey) == true) ||
-        (box.read('is_face_enrolled') == true);
+        await BiometricService.isBiometricEnrolled(username);
 
     if (requireBiometricOnLogin && isRegistered) {
       isBiometricLockMode.value = true;
     } else {
+      return;
+    }
+
+    String token = await ApiClient.getAccessToken() ?? '';
+
+    // Step 1: Ensure we have a valid access token. Refresh if expired or expiring soon.
+    final bool isExpiredOrExpiring =
+        token.isEmpty || await ApiClient.tokenStore.expiresSoon();
+
+    if (isExpiredOrExpiring) {
+      final refreshed = await ApiClient.refreshSession();
+      if (refreshed) {
+        token = await ApiClient.getAccessToken() ?? '';
+      }
+    }
+
+    // In current API architecture, /challenge and /verify require a valid bearer token.
+    // If the token is expired and cannot be refreshed, the device cannot perform biometric login.
+    // Fall back cleanly to normal login: do NOT register again.
+    if (token.isEmpty) {
+      debugPrint(
+        'Token expired and cannot be refreshed. Switching to password login.',
+      );
+      isBiometricLockMode.value = false;
       return;
     }
 
@@ -85,9 +108,31 @@ class LoginController extends GetxController {
 
   Future<void> retryBiometricUnlock() async {
     final box = GetStorage();
-    final token = await ApiClient.getAccessToken() ?? '';
-    final username = box.read('username')?.toString() ?? '';
-    if (token.isEmpty || username.isEmpty) return;
+    final username = box.read('username')?.toString() ??
+        box.read('cached_current_username')?.toString() ??
+        '';
+    if (username.isEmpty) return;
+
+    String token = await ApiClient.getAccessToken() ?? '';
+
+    final bool isExpiredOrExpiring =
+        token.isEmpty || await ApiClient.tokenStore.expiresSoon();
+    if (isExpiredOrExpiring) {
+      final refreshed = await ApiClient.refreshSession();
+      if (refreshed) {
+        token = await ApiClient.getAccessToken() ?? '';
+      }
+    }
+
+    if (token.isEmpty) {
+      isBiometricLockMode.value = false;
+      CustomSnackbar.showInfo(
+        message:
+            'សម័យការចូលប្រើប្រាស់បានផុតកំណត់ សូមចូលដោយប្រើពាក្យសម្ងាត់ (Session expired. Please log in with password)',
+      );
+      return;
+    }
+
     final rawRoles = box.read('roles');
     final roles = rawRoles is List
         ? rawRoles.map((role) => role.toString()).toList()
@@ -132,8 +177,10 @@ class LoginController extends GetxController {
         box.read('cached_current_username')?.toString() ??
         '';
 
-    // If access token is empty, try refreshing with stored refresh token
-    if (token.isEmpty) {
+    // Step 1: Ensure we have a valid access token. Refresh if expired or expiring soon.
+    final bool isExpiredOrExpiring =
+        token.isEmpty || await ApiClient.tokenStore.expiresSoon();
+    if (isExpiredOrExpiring) {
       final refreshed = await ApiClient.refreshSession();
       if (refreshed) {
         token = await ApiClient.getAccessToken() ?? '';
@@ -161,9 +208,18 @@ class LoginController extends GetxController {
         if (!isClosed) isLoading.value = false;
       }
     } else {
-      final result = await BiometricService.authenticate();
-      if (result == BiometricResult.success) {
-        CustomSnackbar.showInfo(message: 'first_login_biometric_bind_msg'.tr);
+      final bool isEnrolled = username.isNotEmpty &&
+          await BiometricService.isBiometricEnrolled(username);
+      if (isEnrolled) {
+        CustomSnackbar.showInfo(
+          message:
+              'សម័យការចូលប្រើប្រាស់បានផុតកំណត់ សូមចូលដោយប្រើពាក្យសម្ងាត់ (Session expired. Please log in with password)',
+        );
+      } else {
+        final result = await BiometricService.authenticate();
+        if (result == BiometricResult.success) {
+          CustomSnackbar.showInfo(message: 'first_login_biometric_bind_msg'.tr);
+        }
       }
     }
   }
@@ -338,50 +394,45 @@ class LoginController extends GetxController {
       return; // Do NOT route user — biometric is required
     }
 
-    final box = GetStorage();
-    final registrationKey = 'biometric_registered_$username';
-    bool isRegistered =
-        (box.read(registrationKey) == true) ||
-        (box.read('is_face_enrolled') == true);
+    final String deviceId = await BiometricService.getDeviceId();
+    final String accessToken =
+        credentialResponse['access_token']?.toString() ??
+        credentialResponse['token']?.toString() ??
+        '';
 
-    // If not marked registered locally, check if user is already enrolled on backend
-    if (!isRegistered) {
-      final String token =
-          credentialResponse['access_token']?.toString() ??
-          credentialResponse['token']?.toString() ??
-          '';
-      if (token.isNotEmpty) {
-        final List<dynamic> backendDevices =
-            await _authService.listUserDevicesService(accessToken: token);
-        if (backendDevices.isNotEmpty) {
-          final String currentDeviceId = await BiometricService.getDeviceId();
-          final bool found = backendDevices.any(
-            (d) =>
-                d is Map &&
-                d['device_id'] == currentDeviceId &&
-                d['is_active'] != false,
-          );
-          if (found) {
-            isRegistered = true;
-            await box.write(registrationKey, true);
-            await box.write('is_face_enrolled', true);
-          }
-        }
-      }
+    // Query backend devices if access token is available
+    List<dynamic> backendDevices = [];
+    if (accessToken.isNotEmpty) {
+      try {
+        backendDevices =
+            await _authService.listUserDevicesService(accessToken: accessToken);
+      } catch (_) {}
     }
 
-    // A device is registered only after the user explicitly agrees. Stay on
-    // this page when they decline; do not navigate to another route.
-    if (!isRegistered) {
-      final bool wantsToRegister = await _confirmBiometricRegistration();
-      if (!wantsToRegister) {
-        CustomSnackbar.showWarning(message: 'device_reg_cancelled'.tr);
-        await box.remove(registrationKey);
-        await box.remove('is_face_enrolled');
-        if (!isUnlockMode) {
-          await ApiClient.logout();
+    // Evaluate the 4 strict conditions for registration:
+    // 1. Biometric login is enabled for the first time.
+    // 2. The device was revoked.
+    // 3. The app was reinstalled or the private key was lost.
+    // 4. The stored public/private key pair changed.
+    final bool needsRegistration = await BiometricService.shouldRegisterDevice(
+      username: username,
+      deviceId: deviceId,
+      backendDevices: backendDevices,
+    );
+
+    // If registration is required for first-time enablement, ask user confirmation
+    if (needsRegistration) {
+      final bool isFirstTime =
+          !await BiometricService.isBiometricEnrolled(username);
+      if (isFirstTime) {
+        final bool wantsToRegister = await _confirmBiometricRegistration();
+        if (!wantsToRegister) {
+          CustomSnackbar.showWarning(message: 'device_reg_cancelled'.tr);
+          if (!isUnlockMode) {
+            await ApiClient.logout();
+          }
+          return;
         }
-        return;
       }
     }
 
@@ -390,95 +441,46 @@ class LoginController extends GetxController {
 
     switch (result) {
       case BiometricResult.success:
-        if (!isRegistered) {
+        if (needsRegistration) {
           try {
-            final String accessToken =
-                credentialResponse['access_token']?.toString() ??
-                credentialResponse['token']?.toString() ??
-                '';
             if (accessToken.isEmpty) {
               throw StateError(
                 'The login response did not include an access token.',
               );
             }
 
-            final String deviceId = await BiometricService.getDeviceId();
-
-            // Check if device is already registered on backend to avoid redundant 409 Conflict
-            final List<dynamic> backendDevices = await _authService
-                .listUserDevicesService(accessToken: accessToken);
-
-            bool alreadyRegisteredOnBackend = false;
+            // Revoke any stale devices for this user first so backend has only this clean device
             for (final d in backendDevices) {
               if (d is Map) {
-                final existingId = d['device_id']?.toString();
-                if (existingId == deviceId && d['is_active'] != false) {
-                  alreadyRegisteredOnBackend = true;
-                  break;
-                }
-              }
-            }
-
-            if (alreadyRegisteredOnBackend) {
-              debugPrint(
-                'Biometric device $deviceId is already registered on backend.',
-              );
-              await box.write(registrationKey, true);
-              await box.write('is_face_enrolled', true);
-            } else {
-              // If backend has existing devices, revoke them first so register won't conflict
-              for (final d in backendDevices) {
-                if (d is Map) {
-                  final oldId = d['device_id']?.toString();
-                  if (oldId != null && oldId.isNotEmpty) {
+                final oldId = d['device_id']?.toString();
+                if (oldId != null && oldId.isNotEmpty && oldId != deviceId) {
+                  try {
                     await _authService.revokeDeviceService(
                       deviceId: oldId,
                       accessToken: accessToken,
                     );
-                  }
+                  } catch (_) {}
                 }
               }
+            }
 
-              String publicKey =
-                  await BiometricService.getPublicKeyDerBase64();
-              int regStatus = await _authService.registerBiometricDeviceService(
-                deviceId: deviceId,
-                deviceName: Platform.isIOS ? 'iOS Device' : 'Android Device',
-                platform: Platform.isIOS ? 'ios' : 'android',
-                publicKey: publicKey,
-                accessToken: accessToken,
-              );
+            final String publicKey =
+                await BiometricService.getPublicKeyDerBase64();
+            final int regStatus = await _authService.registerBiometricDeviceService(
+              deviceId: deviceId,
+              deviceName: Platform.isIOS ? 'iOS Device' : 'Android Device',
+              platform: Platform.isIOS ? 'ios' : 'android',
+              publicKey: publicKey,
+              accessToken: accessToken,
+            );
 
-              // If registration returned 409 Conflict, the old public key or UUID
-              // has a lingering uniqueness conflict in the backend database.
-              // Reset keys to generate a brand new EC P-256 key pair and UUID, then register.
-              if (regStatus == 409) {
-                debugPrint(
-                  'Registration 409 conflict: Generating fresh key pair and retrying register...',
-                );
-                await BiometricService.resetKeys();
-                final freshDeviceId = await BiometricService.getDeviceId();
-                publicKey = await BiometricService.getPublicKeyDerBase64();
-
-                regStatus = await _authService.registerBiometricDeviceService(
-                  deviceId: freshDeviceId,
-                  deviceName: Platform.isIOS ? 'iOS Device' : 'Android Device',
-                  platform: Platform.isIOS ? 'ios' : 'android',
-                  publicKey: publicKey,
-                  accessToken: accessToken,
-                );
-              }
-
-              if (regStatus >= 200 && regStatus < 300) {
-                await box.write(registrationKey, true);
-                await box.write('is_face_enrolled', true);
-              } else {
-                throw StateError('Device registration failed with status $regStatus');
-              }
+            if (regStatus >= 200 && regStatus < 300) {
+              await BiometricService.saveRegisteredPublicKey(publicKey);
+              await BiometricService.setBiometricEnrolled(username, true);
+            } else {
+              throw StateError('Device registration failed with status $regStatus');
             }
           } on DioException catch (e) {
-            await box.remove(registrationKey);
-            await box.remove('is_face_enrolled');
             final statusCode = e.response?.statusCode;
             if (statusCode == 401) {
               await ApiClient.logout();
@@ -510,8 +512,6 @@ class LoginController extends GetxController {
               return;
             }
           } catch (e) {
-            await box.remove(registrationKey);
-            await box.remove('is_face_enrolled');
             CustomSnackbar.showError(message: 'device_registration_failed'.tr);
             if (!isUnlockMode) {
               await ApiClient.logout();
@@ -527,6 +527,7 @@ class LoginController extends GetxController {
           credentialResponse: credentialResponse,
           isUnlockMode: isUnlockMode,
         );
+        break;
 
       case BiometricResult.failed:
         CustomSnackbar.showError(message: 'biometric_failed'.tr);
@@ -534,8 +535,6 @@ class LoginController extends GetxController {
           await Future.delayed(const Duration(milliseconds: 800));
           exitApp();
         } else {
-          await box.remove(registrationKey);
-          await box.remove('is_face_enrolled');
           await ApiClient.logout();
         }
 
@@ -545,8 +544,6 @@ class LoginController extends GetxController {
           await Future.delayed(const Duration(milliseconds: 800));
           exitApp();
         } else {
-          await box.remove(registrationKey);
-          await box.remove('is_face_enrolled');
           await ApiClient.logout();
         }
 
@@ -556,8 +553,6 @@ class LoginController extends GetxController {
           await Future.delayed(const Duration(milliseconds: 800));
           exitApp();
         } else {
-          await box.remove(registrationKey);
-          await box.remove('is_face_enrolled');
           await ApiClient.logout();
         }
     }
@@ -670,19 +665,11 @@ class LoginController extends GetxController {
           'device_verification_failed'.tr;
       CustomSnackbar.showError(message: msg.toString());
       if (!isUnlockMode) {
-        final box = GetStorage();
-        await box.remove('biometric_registered_$username');
-        await box.remove('is_face_enrolled');
-        await BiometricService.resetKeys();
         await ApiClient.logout();
       }
     } catch (e) {
       CustomSnackbar.showError(message: 'device_verification_failed'.tr);
       if (!isUnlockMode) {
-        final box = GetStorage();
-        await box.remove('biometric_registered_$username');
-        await box.remove('is_face_enrolled');
-        await BiometricService.resetKeys();
         await ApiClient.logout();
       }
     }
@@ -961,6 +948,10 @@ class LoginController extends GetxController {
               detail['code'] == 'update_password_required' &&
               detail['ticket'] is String) {
             final ticket = detail['ticket'] as String;
+            final rawExpiresIn = detail['expires_in'];
+            final expiresIn = rawExpiresIn is int
+                ? rawExpiresIn
+                : int.tryParse(rawExpiresIn?.toString() ?? '');
 
             // Keep the ticket only in memory. Do not log or save in storage.
             passwordController.clear();
@@ -970,13 +961,23 @@ class LoginController extends GetxController {
             if (navContext != null) {
               await Navigator.of(navContext).push(
                 MaterialPageRoute(
-                  builder: (_) => UpdatePasswordScreen(ticket: ticket),
+                  builder: (_) => UpdatePasswordScreen(
+                    ticket: ticket,
+                    username: username,
+                    expiresIn: expiresIn,
+                  ),
                 ),
               );
               return;
             }
 
-            await Get.to(() => UpdatePasswordScreen(ticket: ticket));
+            await Get.to(
+              () => UpdatePasswordScreen(
+                ticket: ticket,
+                username: username,
+                expiresIn: expiresIn,
+              ),
+            );
             return;
           }
 
@@ -1011,6 +1012,10 @@ class LoginController extends GetxController {
           detail['code'] == 'update_password_required' &&
           detail['ticket'] is String) {
         final ticket = detail['ticket'] as String;
+        final rawExpiresIn = detail['expires_in'];
+        final expiresIn = rawExpiresIn is int
+            ? rawExpiresIn
+            : int.tryParse(rawExpiresIn?.toString() ?? '');
 
         // Keep the ticket only in memory.
         passwordController.clear();
@@ -1019,11 +1024,21 @@ class LoginController extends GetxController {
         if (navContext != null) {
           await Navigator.of(navContext).push(
             MaterialPageRoute(
-              builder: (_) => UpdatePasswordScreen(ticket: ticket),
+              builder: (_) => UpdatePasswordScreen(
+                ticket: ticket,
+                username: username,
+                expiresIn: expiresIn,
+              ),
             ),
           );
         } else {
-          await Get.to(() => UpdatePasswordScreen(ticket: ticket));
+          await Get.to(
+            () => UpdatePasswordScreen(
+              ticket: ticket,
+              username: username,
+              expiresIn: expiresIn,
+            ),
+          );
         }
         return;
       }

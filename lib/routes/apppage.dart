@@ -124,7 +124,16 @@ class AppPages {
         final args = Get.arguments;
         final ticket = (args is Map ? args['ticket'] : null)?.toString() ?? '';
         final username = (args is Map ? args['username'] : null)?.toString();
-        return UpdatePasswordScreen(ticket: ticket, username: username);
+        final rawExpires =
+            args is Map ? (args['expires_in'] ?? args['expiresIn']) : null;
+        final expiresIn = rawExpires is int
+            ? rawExpires
+            : int.tryParse(rawExpires?.toString() ?? '');
+        return UpdatePasswordScreen(
+          ticket: ticket,
+          username: username,
+          expiresIn: expiresIn,
+        );
       },
     ),
   ];
