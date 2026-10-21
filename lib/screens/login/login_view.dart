@@ -984,6 +984,18 @@ class LoginView extends GetView<LoginController> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 10),
+                TextButton(
+                  onPressed: controller.switchToPasswordLogin,
+                  child: Text(
+                    'ចូលដោយប្រើឈ្មោះគណនី និងពាក្យសម្ងាត់',
+                    style: GoogleFonts.kantumruyPro(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF163774),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

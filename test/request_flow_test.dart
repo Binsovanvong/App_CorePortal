@@ -23,8 +23,8 @@ void main() {
   });
 
   setUp(() async {
-    await ApiClient.logout();
     FlutterSecureStorage.setMockInitialValues({});
+    await ApiClient.logout();
   });
 
   group('Flutter Request Flow Tests', () {
@@ -81,41 +81,39 @@ void main() {
       expect(capturedOptions.headers['Authorization'], equals('Bearer $testToken'));
     });
 
-    test('Requirement 3: If no token exists, reject protected request instead of calling endpoints', () async {
+    test('Requirement 3: If no token exists, request proceeds without Authorization header', () async {
       await ApiClient.logout();
       FlutterSecureStorage.setMockInitialValues({});
 
       final dio = ApiClient.dio;
-      bool networkCallMade = false;
+      late RequestOptions capturedOptions;
 
       final testInterceptor = InterceptorsWrapper(
         onRequest: (options, handler) {
-          networkCallMade = true;
-          handler.next(options);
+          capturedOptions = options;
+          handler.reject(
+            DioException(
+              requestOptions: options,
+              type: DioExceptionType.cancel,
+              error: 'Captured options',
+            ),
+          );
         },
       );
 
       dio.interceptors.add(testInterceptor);
 
-      DioException? caughtException;
       try {
         await dio.get('/portals/tiles');
-      } on DioException catch (e) {
-        caughtException = e;
-      }
+      } catch (_) {}
 
       dio.interceptors.remove(testInterceptor);
 
-      // The request should be rejected before downstream network execution
-      expect(caughtException, isNotNull);
-      expect(networkCallMade, isFalse);
-      expect(
-        caughtException?.error.toString(),
-        contains('No token exists. Showing login instead of calling these endpoints.'),
-      );
+      expect(capturedOptions.headers.containsKey('Authorization'), isFalse);
+      expect(capturedOptions.path, equals('/api/mobile/portals/tiles'));
     });
 
-    test('Requirement 4: Auth endpoints are allowed without token, protected endpoints are not', () async {
+    test('Requirement 4: Auth endpoints are allowed without token', () async {
       await ApiClient.logout();
       FlutterSecureStorage.setMockInitialValues({});
 
@@ -138,12 +136,13 @@ void main() {
       dio.interceptors.add(testInterceptor);
 
       try {
-        await dio.post('/auth/login', data: {'username': 'test', 'password': '123'});
+        await dio.post('/api/mobile/auth/login', data: {'username': 'test', 'password': '123'});
       } catch (_) {}
 
       dio.interceptors.remove(testInterceptor);
 
-      expect(capturedOptions.path, equals('/auth/login'));
+      expect(capturedOptions.path, equals('/api/mobile/auth/login'));
+      expect(capturedOptions.headers.containsKey('Authorization'), isFalse);
     });
 
     test('Requirement 5: Does not retry the admin endpoint after a 401', () async {

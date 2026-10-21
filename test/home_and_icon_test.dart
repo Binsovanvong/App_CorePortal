@@ -9,6 +9,8 @@ import 'package:core_portal/core/api/api_config.dart';
 import 'package:core_portal/screens/admin/admin_controller.dart';
 import 'package:core_portal/widgets/announcement_detail_dialog.dart';
 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -20,6 +22,7 @@ void main() {
           return '.';
         });
     await GetStorage.init();
+    FlutterSecureStorage.setMockInitialValues({});
   });
 
   group('AppIconWidget & Icon URL Resolution Tests', () {

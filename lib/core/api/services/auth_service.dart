@@ -68,10 +68,11 @@ class AuthService {
 
   /// 1. Shared login using ApiClient.dio and saving tokens to flutter_secure_storage
   Future<void> login(String username, String password) async {
-    final response = await ApiClient.dio.post(
+    final response = await ApiClient.refreshApi.post(
       '/api/mobile/auth/login',
       data: {'username': username, 'password': password},
       options: Options(
+        headers: {'Content-Type': 'application/json'},
         validateStatus: (status) =>
             status != null && ((status >= 200 && status < 300) || status == 409),
       ),
@@ -88,6 +89,7 @@ class AuthService {
       throw Exception('Login response did not contain an access token');
     }
 
+    await ApiClient.tokenStore.saveTokenResponse(data);
     await ApiClient.saveTokens(data, dioHeaders: response.headers);
   }
 
@@ -1035,24 +1037,36 @@ class AuthService {
 
   // ─── Biometric / Device Auth ──────────────────────────────────────────────
 
-  Future<void> registerBiometricDeviceService({
+  Future<int> registerBiometricDeviceService({
     required String deviceId,
     required String deviceName,
     required String platform,
     required String publicKey,
-    required String accessToken,
+    String? accessToken,
   }) async {
     try {
-      await ApiClient.dio.post(
-        '/auth/device/register',
+      final response = await ApiClient.api.post(
+        '/api/mobile/auth/device/register',
         data: {
           'device_id': deviceId,
           'device_name': deviceName,
-          'platform': platform,
+          'platform': platform.toLowerCase(),
           'public_key': publicKey,
         },
-        options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
+        options: Options(
+          headers: accessToken != null && accessToken.isNotEmpty
+              ? {'Authorization': 'Bearer $accessToken'}
+              : null,
+          validateStatus: (status) =>
+              status != null &&
+              ((status >= 200 && status < 300) || status == 409),
+        ),
       );
+
+      debugPrint(
+        'POST /api/mobile/auth/device/register STATUS: ${response.statusCode}, DATA: ${response.data}',
+      );
+      return response.statusCode ?? 200;
     } on DioException catch (e) {
       debugPrint(
         'BIOMETRIC REGISTER API ERROR: ${e.response?.statusCode} — ${e.response?.data}',
@@ -1061,17 +1075,71 @@ class AuthService {
     }
   }
 
+  Future<List<dynamic>> listUserDevicesService({
+    String? accessToken,
+  }) async {
+    try {
+      final response = await ApiClient.api.get(
+        '/api/mobile/auth/device',
+        options: accessToken != null && accessToken.isNotEmpty
+            ? Options(headers: {'Authorization': 'Bearer $accessToken'})
+            : null,
+      );
+      debugPrint(
+        'GET /api/mobile/auth/device STATUS: ${response.statusCode}, DATA: ${response.data}',
+      );
+      if (response.data is List) {
+        return response.data as List;
+      }
+      if (response.data is Map) {
+        final map = response.data as Map;
+        if (map['devices'] is List) return map['devices'] as List;
+        if (map['data'] is List) return map['data'] as List;
+        if (map['data'] is Map && map['data']['devices'] is List) {
+          return map['data']['devices'] as List;
+        }
+      }
+      return [];
+    } catch (e) {
+      debugPrint('LIST USER DEVICES API ERROR: $e');
+      return [];
+    }
+  }
+
+  Future<bool> revokeDeviceService({
+    required String deviceId,
+    String? accessToken,
+  }) async {
+    try {
+      final response = await ApiClient.api.delete(
+        '/api/mobile/auth/device',
+        data: {'device_id': deviceId},
+        options: accessToken != null && accessToken.isNotEmpty
+            ? Options(headers: {'Authorization': 'Bearer $accessToken'})
+            : null,
+      );
+      debugPrint(
+        'DELETE /api/mobile/auth/device $deviceId STATUS: ${response.statusCode}, DATA: ${response.data}',
+      );
+      return true;
+    } catch (e) {
+      debugPrint('REVOKE DEVICE API ERROR: $e');
+      return false;
+    }
+  }
+
   Future<String> requestBiometricChallengeService({
     required String username,
     required String deviceId,
-    required String accessToken,
+    String? accessToken,
   }) async {
     try {
-      final response = await ApiClient.dio.post(
-        '/auth/device/challenge',
+      final response = await ApiClient.api.post(
+        '/api/mobile/auth/device/challenge',
         data: {'device_id': deviceId},
-        queryParameters: {'username': username},
-        options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
+        options: accessToken != null && accessToken.isNotEmpty
+            ? Options(headers: {'Authorization': 'Bearer $accessToken'})
+            : null,
       );
 
       final respData = response.data;
@@ -1091,17 +1159,19 @@ class AuthService {
     required String deviceId,
     required String challenge,
     required String signature,
-    required String accessToken,
+    String? accessToken,
   }) async {
     try {
-      final response = await ApiClient.dio.post(
-        '/auth/device/verify',
+      final response = await ApiClient.api.post(
+        '/api/mobile/auth/device/verify',
         data: {
           'device_id': deviceId,
           'challenge': challenge,
           'signature': signature,
         },
-        options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
+        options: accessToken != null && accessToken.isNotEmpty
+            ? Options(headers: {'Authorization': 'Bearer $accessToken'})
+            : null,
       );
       return response.data is Map<String, dynamic>
           ? response.data

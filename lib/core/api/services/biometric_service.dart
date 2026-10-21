@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
-import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
@@ -16,14 +14,39 @@ enum BiometricResult { success, failed, cancelled, unavailable }
 
 class BiometricService {
   static final LocalAuthentication _auth = LocalAuthentication();
-  static const _secureStorage = FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
-    iOptions: IOSOptions(
-      accessibility: KeychainAccessibility.first_unlock_this_device,
-    ),
-  );
+  static const _secureStorage = FlutterSecureStorage();
   static const String _privateKeyStorageKey = 'device_ec_private_key';
+  static const String _deviceIdStorageKey = 'device_unique_uuid';
   static final ECDomainParameters _domain = ECDomainParameters('prime256v1');
+
+  /// Returns a persistent canonical RFC 4122 UUID v4 device identifier.
+  static Future<String> getDeviceId() async {
+    try {
+      final existing = await _secureStorage.read(key: _deviceIdStorageKey);
+      if (existing != null && existing.isNotEmpty) {
+        return existing;
+      }
+    } catch (_) {}
+
+    final random = Random.secure();
+    final bytes = List<int>.generate(16, (_) => random.nextInt(256));
+    bytes[6] = (bytes[6] & 0x0f) | 0x40; // RFC 4122 version 4
+    bytes[8] = (bytes[8] & 0x3f) | 0x80; // RFC 4122 variant
+    final hex = bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+    final newId =
+        '${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20, 32)}';
+    try {
+      await _secureStorage.write(key: _deviceIdStorageKey, value: newId);
+    } catch (_) {}
+    return newId;
+  }
+
+  static Future<void> resetKeys() async {
+    try {
+      await _secureStorage.delete(key: _privateKeyStorageKey);
+      await _secureStorage.delete(key: _deviceIdStorageKey);
+    } catch (_) {}
+  }
 
   static Future<bool> canAuthenticate() async {
     try {

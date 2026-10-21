@@ -78,19 +78,19 @@ void main() {
       try {
         await dio.post('/api/mobile/auth/browser-login', data: {});
       } catch (_) {}
-      expect(capturedPath, equals('/auth/browser-login'));
+      expect(capturedPath, equals('/api/mobile/auth/browser-login'));
 
       capturedPath = null;
       try {
         await dio.post('/api/mobile/auth/exchange-code', data: {});
       } catch (_) {}
-      expect(capturedPath, equals('/auth/exchange-code'));
+      expect(capturedPath, equals('/api/mobile/auth/exchange-code'));
 
       capturedPath = null;
       try {
         await dio.post('/api/mobile/auth/update-password', data: {});
       } catch (_) {}
-      expect(capturedPath, equals('/auth/update-password'));
+      expect(capturedPath, equals('/api/mobile/auth/update-password'));
 
       dio.interceptors.remove(testInterceptor);
     });

@@ -1,6 +1,8 @@
 import 'dart:io' show exit;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:core_portal/core/api/api_client.dart';
 import 'package:core_portal/core/api/services/auth_service.dart';
 import 'package:core_portal/core/services/security_service.dart';
 import 'package:core_portal/routes/page_route.dart';
@@ -63,7 +65,23 @@ class SplashController extends GetxController
     }
 
     if (_isSessionRestored) {
-      Get.offAllNamed(AppRoutes.mainPage);
+      final box = GetStorage();
+      final username = box.read('username')?.toString() ?? '';
+      final registrationKey = 'biometric_registered_$username';
+      final bool isBiometricRegistered =
+          (box.read(registrationKey) == true) ||
+          (box.read('is_face_enrolled') == true);
+      final rawRoles = box.read('roles');
+      final bool hasRoles = rawRoles is List && rawRoles.isNotEmpty;
+
+      // Only enter session unlock mode if registration was completed and roles exist.
+      // If registration was not successful or roles were never persisted, clear the incomplete session.
+      if (isBiometricRegistered && hasRoles) {
+        Get.offAllNamed(AppRoutes.login);
+      } else {
+        await ApiClient.logout();
+        Get.offAllNamed(AppRoutes.login);
+      }
     } else {
       Get.offAllNamed(AppRoutes.login);
     }

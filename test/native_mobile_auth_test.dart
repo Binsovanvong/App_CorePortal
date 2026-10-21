@@ -21,9 +21,12 @@ void main() {
   });
 
   setUp(() {
+    final futureExpiry =
+        DateTime.now().add(const Duration(minutes: 5)).millisecondsSinceEpoch;
     FlutterSecureStorage.setMockInitialValues({
       'access_token': 'test_native_access_token',
       'refresh_token': 'test_native_refresh_token',
+      'access_token_expires_at': futureExpiry.toString(),
     });
     ApiClient.currentToken = 'test_native_access_token';
   });
@@ -61,7 +64,7 @@ void main() {
       // Check method is PUT
       expect(capturedOptions.method, equals('PUT'));
       // Check endpoint is normalized by ApiClient interceptor
-      expect(capturedOptions.path, equals('/accounts/change-password'));
+      expect(capturedOptions.path, equals('/api/mobile/accounts/change-password'));
       // Check headers contain Authorization Bearer token
       expect(capturedOptions.headers['Authorization'], equals('Bearer test_native_access_token'));
       // Check JSON payload contains current_password and new_password
@@ -117,6 +120,64 @@ void main() {
           (response2['data'] is Map && (response2['data'] as Map)['first_login'] == true) ||
           response2['first_login']?.toString().toLowerCase() == 'true';
       expect(isFirstLogin2, isFalse);
+    });
+
+    test('ApiClient.logout deletes tokens and biometric registration flags from GetStorage', () async {
+      final box = GetStorage();
+      await box.write('username', 'john_doe');
+      await box.write('biometric_registered_john_doe', true);
+      await box.write('is_face_enrolled', true);
+      await ApiClient.storage.write(key: 'access_token', value: 'temp_token');
+      await ApiClient.storage.write(key: 'refresh_token', value: 'temp_refresh');
+
+      await ApiClient.logout();
+
+      final token = await ApiClient.storage.read(key: 'access_token');
+      final refresh = await ApiClient.storage.read(key: 'refresh_token');
+      expect(token, isNull);
+      expect(refresh, isNull);
+      expect(ApiClient.currentToken, isNull);
+      expect(box.read('biometric_registered_john_doe'), isNull);
+      expect(box.read('is_face_enrolled'), isNull);
+    });
+
+    test('device matching strictly requires both matching currentDeviceId and active status', () {
+      const currentDeviceId = 'uuid-current-device-123';
+
+      final backendDevicesOtherActive = [
+        {'device_id': 'uuid-other-phone-999', 'is_active': true},
+      ];
+
+      // Must be false: having another active device should NOT mark currentDeviceId as registered!
+      final bool matchesOther = backendDevicesOtherActive.any(
+        (d) =>
+            d is Map &&
+            d['device_id'] == currentDeviceId &&
+            d['is_active'] != false,
+      );
+      expect(matchesOther, isFalse);
+
+      final backendDevicesSameActive = [
+        {'device_id': currentDeviceId, 'is_active': true},
+      ];
+      final bool matchesSame = backendDevicesSameActive.any(
+        (d) =>
+            d is Map &&
+            d['device_id'] == currentDeviceId &&
+            d['is_active'] != false,
+      );
+      expect(matchesSame, isTrue);
+
+      final backendDevicesSameInactive = [
+        {'device_id': currentDeviceId, 'is_active': false},
+      ];
+      final bool matchesInactive = backendDevicesSameInactive.any(
+        (d) =>
+            d is Map &&
+            d['device_id'] == currentDeviceId &&
+            d['is_active'] != false,
+      );
+      expect(matchesInactive, isFalse);
     });
   });
 }
