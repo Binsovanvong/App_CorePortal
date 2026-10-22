@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:core_portal/core/localization/app_translations.dart';
+import 'package:core_portal/core/services/app_lock_service.dart';
 import 'package:core_portal/routes/apppage.dart';
 import 'package:core_portal/routes/page_route.dart';
 import 'package:core_portal/theme/app_theme.dart';
+import 'package:core_portal/widgets/app_lock_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -61,6 +63,9 @@ void main() async {
 
   await GetStorage.init();
 
+  // Initialize global lifecycle and biometric app lock service
+  Get.put(AppLockService(), permanent: true);
+
   final box = GetStorage();
 
   // Set skipAuth: true to skip both login and face scan during development/testing.
@@ -89,6 +94,8 @@ class MainApp extends StatelessWidget {
       translations: AppTranslations(),
       locale: LocalizationService.currentLocale,
       fallbackLocale: const Locale('km', 'KH'),
+      builder: (context, child) =>
+          AppLockOverlay(child: child ?? const SizedBox.shrink()),
     );
   }
 }

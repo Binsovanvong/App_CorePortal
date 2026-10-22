@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:core_portal/core/api/api_client.dart';
 import 'package:core_portal/core/api/api_config.dart';
 import 'package:core_portal/core/api/services/api_service.dart';
+import 'package:core_portal/core/api/services/biometric_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get_storage/get_storage.dart';
@@ -296,8 +297,28 @@ class AuthService {
     }
   }
 
-  /// For Flutter JWT flow: immediately logging out clears locally stored tokens
+  /// Performs full logout: revokes server-side session / refresh token on BFF if available,
+  /// and thoroughly clears locally stored tokens, cache, and session flags.
   Future<void> logout() async {
+    try {
+      final token = await ApiClient.getAccessToken();
+      final refreshToken = await ApiClient.getRefreshToken();
+      final String deviceId = await BiometricService.getDeviceId();
+      if (token != null || refreshToken != null) {
+        await ApiClient.api.post(
+          '/api/mobile/auth/logout',
+          data: {
+            if (refreshToken != null) 'refresh_token': refreshToken,
+            'device_id': deviceId,
+          },
+          options: Options(
+            headers: {
+              if (token != null) 'Authorization': 'Bearer $token',
+            },
+          ),
+        ).catchError((_) => Response(requestOptions: RequestOptions(path: '')));
+      }
+    } catch (_) {}
     await ApiClient.logout();
   }
 

@@ -382,51 +382,58 @@ class LoginView extends GetView<LoginController> {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       // Checkbox + Remember Me
-                                      GestureDetector(
-                                        onTap: () =>
-                                            controller.rememberMe.toggle(),
-                                        behavior: HitTestBehavior.opaque,
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Obx(
-                                              () => SizedBox(
-                                                width: 19,
-                                                height: 19,
-                                                child: Checkbox(
-                                                  value:
-                                                      controller.rememberMe.value,
-                                                  onChanged: (val) =>
-                                                      controller
-                                                              .rememberMe
-                                                              .value =
-                                                          val ?? false,
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(5),
-                                                  ),
-                                                  side: const BorderSide(
-                                                    color: Color(0xFFCBD5E1),
-                                                    width: 1.5,
-                                                  ),
-                                                  activeColor: const Color(
-                                                    0xFF163774,
+                                      Flexible(
+                                        child: GestureDetector(
+                                          onTap: () =>
+                                              controller.rememberMe.toggle(),
+                                          behavior: HitTestBehavior.opaque,
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Obx(
+                                                () => SizedBox(
+                                                  width: 19,
+                                                  height: 19,
+                                                  child: Checkbox(
+                                                    value:
+                                                        controller.rememberMe.value,
+                                                    onChanged: (val) =>
+                                                        controller
+                                                                .rememberMe
+                                                                .value =
+                                                            val ?? false,
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(5),
+                                                    ),
+                                                    side: const BorderSide(
+                                                      color: Color(0xFFCBD5E1),
+                                                      width: 1.5,
+                                                    ),
+                                                    activeColor: const Color(
+                                                      0xFF163774,
+                                                    ),
                                                   ),
                                                 ),
                                               ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Text(
-                                              'remember_me'.tr,
-                                              style: GoogleFonts.kantumruyPro(
-                                                fontSize: 13.5,
-                                                fontWeight: FontWeight.w600,
-                                                color: const Color(0xFF1E293B),
+                                              const SizedBox(width: 8),
+                                              Flexible(
+                                                child: Text(
+                                                  'remember_me'.tr,
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: GoogleFonts.kantumruyPro(
+                                                    fontSize: 13.5,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: const Color(0xFF1E293B),
+                                                  ),
+                                                ),
                                               ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
                                       ),
+                                      const SizedBox(width: 8),
 
                                       // Forgot Password Link
                                       GestureDetector(
@@ -693,24 +700,32 @@ class LoginView extends GetView<LoginController> {
                                   ],
 
                                   // 7. Support / Help Link
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
+                                  Wrap(
+                                    alignment: WrapAlignment.center,
+                                    crossAxisAlignment:
+                                        WrapCrossAlignment.center,
+                                    spacing: 4,
+                                    runSpacing: 4,
                                     children: [
-                                      const Icon(
-                                        Icons.headset_mic_outlined,
-                                        size: 17,
-                                        color: Color(0xFF64748B),
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(
+                                            Icons.headset_mic_outlined,
+                                            size: 17,
+                                            color: Color(0xFF64748B),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            'need_help_q'.tr,
+                                            style: GoogleFonts.kantumruyPro(
+                                              fontSize: 13,
+                                              color: const Color(0xFF64748B),
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        'need_help_q'.tr,
-                                        style: GoogleFonts.kantumruyPro(
-                                          fontSize: 13,
-                                          color: const Color(0xFF64748B),
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 4),
                                       GestureDetector(
                                         onTap: () =>
                                             _showContactSupportDialog(context),

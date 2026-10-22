@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:core_portal/core/api/api_config.dart';
 import 'package:core_portal/core/api/token_store.dart';
 import 'package:core_portal/core/api/auth_interceptor.dart';
+import 'package:core_portal/core/services/app_lock_service.dart';
 import 'package:core_portal/routes/page_route.dart';
 
 class ApiClient {
@@ -257,6 +258,11 @@ class ApiClient {
     currentRefreshToken = null;
     currentCpSession = null;
     await tokenStore.clear();
+
+    if (Get.isRegistered<AppLockService>()) {
+      Get.find<AppLockService>().isLocked.value = false;
+      Get.find<AppLockService>().isAuthenticating.value = false;
+    }
 
     try {
       final box = GetStorage();

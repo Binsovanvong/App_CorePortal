@@ -560,32 +560,38 @@ class HomeView extends GetView<HomeController> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (isPillAccent)
-                Container(
-                  width: 4,
-                  height: 18,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1D4ED8),
-                    borderRadius: BorderRadius.circular(2),
+          Expanded(
+            child: Row(
+              children: [
+                if (isPillAccent)
+                  Container(
+                    width: 4,
+                    height: 18,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1D4ED8),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  )
+                else if (icon != null)
+                  Icon(icon, color: const Color(0xFF1D4ED8), size: 22),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.kantumruyPro(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF0F172A),
+                    ),
                   ),
-                )
-              else if (icon != null)
-                Icon(icon, color: const Color(0xFF1D4ED8), size: 22),
-              const SizedBox(width: 8),
-              Text(
-                title,
-                style: GoogleFonts.kantumruyPro(
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF0F172A),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          if (onTapSeeAll != null)
+          if (onTapSeeAll != null) ...[
+            const SizedBox(width: 8),
             GestureDetector(
               onTap: onTapSeeAll,
               behavior: HitTestBehavior.opaque,
@@ -619,6 +625,7 @@ class HomeView extends GetView<HomeController> {
                 ),
               ),
             ),
+          ],
         ],
       ),
     );
@@ -984,35 +991,41 @@ class HomeView extends GetView<HomeController> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFEBF3FE),
-                  shape: BoxShape.circle,
-                ),
-                child: const Center(
-                  child: Icon(
-                    Icons.campaign_rounded,
-                    color: Color(0xFF1D4ED8),
-                    size: 24,
+          Expanded(
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFEBF3FE),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.campaign_rounded,
+                      color: Color(0xFF1D4ED8),
+                      size: 24,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                'recent_announcements'.tr,
-                style: GoogleFonts.kantumruyPro(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF0F172A),
+                const SizedBox(width: 12),
+                Flexible(
+                  child: Text(
+                    'recent_announcements'.tr,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.kantumruyPro(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF0F172A),
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
+          const SizedBox(width: 8),
           GestureDetector(
             onTap: () {
               if (Get.isRegistered<NavController>()) {
@@ -1024,8 +1037,8 @@ class HomeView extends GetView<HomeController> {
             behavior: HitTestBehavior.opaque,
             child: Container(
               padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
+                horizontal: 14,
+                vertical: 7,
               ),
               decoration: BoxDecoration(
                 color: const Color(0xFFEBF3FE),

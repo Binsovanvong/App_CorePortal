@@ -5,6 +5,7 @@ import 'package:core_portal/core/api/api_client.dart';
 import 'package:core_portal/core/api/services/auth_service.dart';
 import 'package:core_portal/core/api/services/biometric_service.dart';
 import 'package:core_portal/controllers/nav_controller.dart';
+import 'package:core_portal/core/services/app_lock_service.dart';
 import 'package:core_portal/routes/page_route.dart';
 import 'package:core_portal/widgets/custom_snackbar.dart';
 import 'dart:convert' show base64Url, json, utf8;
@@ -47,10 +48,29 @@ class LoginController extends GetxController {
     _unlockSavedSession();
   }
 
+  @override
+  void onInit() {
+    super.onInit();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.isRegistered<AppLockService>()) {
+        AppLockService.to.isLocked.value = false;
+      }
+    });
+  }
+
   Future<void> _unlockSavedSession() async {
     if (_sessionUnlockAttempted) return;
     _sessionUnlockAttempted = true;
     final box = GetStorage();
+
+    // Option C: If the user tapped Logout or has no active session, do NOT restore.
+    // They must explicitly log in with username and password.
+    final bool isLoggedIn = box.read('is_logged_in') == true;
+    if (!isLoggedIn) {
+      isBiometricLockMode.value = false;
+      return;
+    }
+
     final username = box.read('username')?.toString() ??
         box.read('cached_current_username')?.toString() ??
         '';

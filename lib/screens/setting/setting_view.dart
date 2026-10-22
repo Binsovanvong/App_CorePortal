@@ -10,6 +10,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:dio/dio.dart';
 import 'package:core_portal/core/api/api_client.dart';
+import 'package:core_portal/core/services/app_lock_service.dart';
 
 import '../../routes/page_route.dart';
 
@@ -534,8 +535,8 @@ class SettingView extends GetView<SettingViewController> {
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 13,
+                          horizontal: 10,
+                          vertical: 12,
                         ),
                         decoration: BoxDecoration(
                           color: isKh
@@ -552,23 +553,27 @@ class SettingView extends GetView<SettingViewController> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text('🇰🇭', style: TextStyle(fontSize: 18)),
-                            const SizedBox(width: 8),
-                            Text(
-                              'khmer'.tr,
-                              style: GoogleFonts.kantumruyPro(
-                                fontSize: 14.5,
-                                fontWeight: isKh
-                                    ? FontWeight.w700
-                                    : FontWeight.w600,
-                                color: const Color(0xFF0F172A),
+                            const Text('🇰🇭', style: TextStyle(fontSize: 17)),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                'khmer'.tr,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.kantumruyPro(
+                                  fontSize: 14,
+                                  fontWeight: isKh
+                                      ? FontWeight.w700
+                                      : FontWeight.w600,
+                                  color: const Color(0xFF0F172A),
+                                ),
                               ),
                             ),
                             if (isKh) ...[
-                              const Spacer(),
+                              const SizedBox(width: 4),
                               const Icon(
                                 Icons.check_circle_rounded,
-                                size: 18,
+                                size: 16,
                                 color: Color(0xFF2563EB),
                               ),
                             ],
@@ -578,7 +583,7 @@ class SettingView extends GetView<SettingViewController> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
 
                 // English Option
                 Expanded(
@@ -590,8 +595,8 @@ class SettingView extends GetView<SettingViewController> {
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 13,
+                          horizontal: 10,
+                          vertical: 12,
                         ),
                         decoration: BoxDecoration(
                           color: !isKh
@@ -608,23 +613,27 @@ class SettingView extends GetView<SettingViewController> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text('🇬🇧', style: TextStyle(fontSize: 18)),
-                            const SizedBox(width: 8),
-                            Text(
-                              'english'.tr,
-                              style: GoogleFonts.poppins(
-                                fontSize: 14,
-                                fontWeight: !isKh
-                                    ? FontWeight.w700
-                                    : FontWeight.w600,
-                                color: const Color(0xFF0F172A),
+                            const Text('🇬🇧', style: TextStyle(fontSize: 17)),
+                            const SizedBox(width: 6),
+                            Flexible(
+                              child: Text(
+                                'english'.tr,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 13.5,
+                                  fontWeight: !isKh
+                                      ? FontWeight.w700
+                                      : FontWeight.w600,
+                                  color: const Color(0xFF0F172A),
+                                ),
                               ),
                             ),
                             if (!isKh) ...[
-                              const Spacer(),
+                              const SizedBox(width: 4),
                               const Icon(
                                 Icons.check_circle_rounded,
-                                size: 18,
+                                size: 16,
                                 color: Color(0xFF2563EB),
                               ),
                             ],
@@ -719,10 +728,23 @@ class SettingView extends GetView<SettingViewController> {
             onTap: controller.changePassword,
           ),
 
+          const Divider(height: 1, color: Color(0xFFF1F5F9), thickness: 1),
+
+          // 2. Lock App Now Tile (Explicit UI lock without revoking session)
+          _buildSecurityTile(
+            icon: Icons.screen_lock_portrait_rounded,
+            title: 'lock_app_now'.tr,
+            onTap: () {
+              if (Get.isRegistered<AppLockService>()) {
+                AppLockService.to.lockNow();
+              }
+            },
+          ),
+
           if (showNotification) ...[
             const Divider(height: 1, color: Color(0xFFF1F5F9), thickness: 1),
 
-            // 2. Notifications Tile
+            // 3. Notifications Tile
             _buildSecurityTile(
               icon: Icons.notifications_none_rounded,
               title: 'notification'.tr,
@@ -732,7 +754,7 @@ class SettingView extends GetView<SettingViewController> {
 
           const Divider(height: 1, color: Color(0xFFF1F5F9), thickness: 1),
 
-          // 3. Privacy Tile
+          // 4. Privacy Tile
           _buildSecurityTile(
             icon: Icons.verified_user_outlined,
             title: 'privacy'.tr,
