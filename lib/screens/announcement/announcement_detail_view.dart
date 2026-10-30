@@ -152,6 +152,7 @@ class _AnnouncementDetailViewState extends State<AnnouncementDetailView> {
 
   /// Top Bar with left chevron in Royal Gold and title
   Widget _buildTopAppBar(BuildContext context) {
+    final bool isKh = LocalizationService.currentLanguageCode.value == 'km';
     return Container(
       width: double.infinity,
       height: 54,
@@ -188,11 +189,19 @@ class _AnnouncementDetailViewState extends State<AnnouncementDetailView> {
           const SizedBox(width: 12),
           Text(
             'announcement'.tr,
-            style: GoogleFonts.kantumruyPro(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFF0F172A),
-            ),
+            style: isKh
+                ? GoogleFonts.kantumruyPro(
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF0F172A),
+                    height: 1.3,
+                  )
+                : GoogleFonts.poppins(
+                    fontSize: 17.0,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF0F172A),
+                    height: 1.3,
+                  ),
           ),
         ],
       ),
@@ -257,12 +266,19 @@ class _AnnouncementDetailViewState extends State<AnnouncementDetailView> {
           // Row 2: Title
           Text(
             title,
-            style: GoogleFonts.kantumruyPro(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFF0F172A),
-              height: 1.45,
-            ),
+            style: isKh
+                ? GoogleFonts.kantumruyPro(
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF0F172A),
+                    height: 1.4,
+                  )
+                : GoogleFonts.poppins(
+                    fontSize: 17.0,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF0F172A),
+                    height: 1.35,
+                  ),
           ),
 
           const SizedBox(height: 12),
@@ -278,11 +294,19 @@ class _AnnouncementDetailViewState extends State<AnnouncementDetailView> {
               const SizedBox(width: 6),
               Text(
                 formattedDate,
-                style: GoogleFonts.kantumruyPro(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF64748B),
-                ),
+                style: isKh
+                    ? GoogleFonts.kantumruyPro(
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF64748B),
+                        height: 1.3,
+                      )
+                    : GoogleFonts.poppins(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF64748B),
+                        height: 1.3,
+                      ),
               ),
               if (department.isNotEmpty) ...[
                 const SizedBox(width: 8),
@@ -298,11 +322,19 @@ class _AnnouncementDetailViewState extends State<AnnouncementDetailView> {
                 Expanded(
                   child: Text(
                     department,
-                    style: GoogleFonts.kantumruyPro(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFF64748B),
-                    ),
+                    style: isKh
+                        ? GoogleFonts.kantumruyPro(
+                            fontSize: 12.0,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF64748B),
+                            height: 1.3,
+                          )
+                        : GoogleFonts.poppins(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF64748B),
+                            height: 1.3,
+                          ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -336,12 +368,19 @@ class _AnnouncementDetailViewState extends State<AnnouncementDetailView> {
                 padding: EdgeInsets.only(bottom: isLast ? 0 : 14),
                 child: SelectableText(
                   para,
-                  style: GoogleFonts.kantumruyPro(
-                    fontSize: 14.5,
-                    height: 1.75,
-                    fontWeight: FontWeight.w400,
-                    color: const Color(0xFF334155),
-                  ),
+                  style: isKh
+                      ? GoogleFonts.kantumruyPro(
+                          fontSize: 14.5,
+                          height: 1.65,
+                          fontWeight: FontWeight.w400,
+                          color: const Color(0xFF334155),
+                        )
+                      : GoogleFonts.poppins(
+                          fontSize: 14.0,
+                          height: 1.6,
+                          fontWeight: FontWeight.w400,
+                          color: const Color(0xFF334155),
+                        ),
                 ),
               );
             }),
@@ -390,11 +429,17 @@ class _AnnouncementDetailViewState extends State<AnnouncementDetailView> {
       ),
       child: Text(
         label,
-        style: GoogleFonts.kantumruyPro(
-          fontSize: 11.5,
-          fontWeight: FontWeight.w700,
-          color: text,
-        ),
+        style: isKh
+            ? GoogleFonts.kantumruyPro(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w600,
+                color: text,
+              )
+            : GoogleFonts.poppins(
+                fontSize: 11.0,
+                fontWeight: FontWeight.w600,
+                color: text,
+              ),
       ),
     );
   }

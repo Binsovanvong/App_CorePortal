@@ -1319,6 +1319,7 @@ class AdminView extends GetView<AdminController> {
             child: Obx(() {
               final list = controller.filteredUsers;
               final bool isLoading = controller.isLoading.value;
+              final bool isKh = LocalizationService.currentLanguageCode.value == 'km';
 
               return RefreshIndicator(
                 onRefresh: controller.fetchDashboardData,
@@ -1348,23 +1349,38 @@ class AdminView extends GetView<AdminController> {
                                 children: [
                                   Text(
                                     'users'.tr,
-                                    style: GoogleFonts.kantumruyPro(
-                                      fontSize: 18.5,
-                                      fontWeight: FontWeight.w700,
-                                      color: const Color(0xFF1E293B),
-                                      height: 1.3,
-                                    ),
+                                    style: isKh
+                                        ? GoogleFonts.kantumruyPro(
+                                            fontSize: 18.0,
+                                            fontWeight: FontWeight.w700,
+                                            color: const Color(0xFF1E293B),
+                                            height: 1.3,
+                                          )
+                                        : GoogleFonts.poppins(
+                                            fontSize: 17.0,
+                                            fontWeight: FontWeight.w600,
+                                            color: const Color(0xFF1E293B),
+                                            height: 1.3,
+                                          ),
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
                                     controller.isPortalAdministrator()
-                                        ? 'គ្រប់គ្រង និងចាត់ចែងអ្នកប្រើប្រាស់'
+                                        ? (isKh ? 'គ្រប់គ្រង និងចាត់ចែងអ្នកប្រើប្រាស់' : 'Manage and organize users')
                                         : controller.adminGeneralDepartmentNameKh,
-                                    style: GoogleFonts.kantumruyPro(
-                                      fontSize: 12.5,
-                                      fontWeight: FontWeight.w500,
-                                      color: const Color(0xFF64748B),
-                                    ),
+                                    style: isKh
+                                        ? GoogleFonts.kantumruyPro(
+                                            fontSize: 12.5,
+                                            fontWeight: FontWeight.w500,
+                                            color: const Color(0xFF64748B),
+                                            height: 1.3,
+                                          )
+                                        : GoogleFonts.poppins(
+                                            fontSize: 12.0,
+                                            fontWeight: FontWeight.w500,
+                                            color: const Color(0xFF64748B),
+                                            height: 1.3,
+                                          ),
                                   ),
                                 ],
                               ),

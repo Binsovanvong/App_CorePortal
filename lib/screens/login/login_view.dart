@@ -31,6 +31,7 @@ class LoginView extends GetView<LoginController> {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final bottomSafeArea = MediaQuery.of(context).padding.bottom;
     final isKeyboardOpen = bottomInset > 0;
+    final bool isKh = LocalizationService.currentLanguageCode.value == 'km';
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -196,22 +197,38 @@ class LoginView extends GetView<LoginController> {
                                   // Welcome Title
                                   Text(
                                     'welcome_title'.tr,
-                                    style: GoogleFonts.kantumruyPro(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.w700,
-                                      color: const Color(0xFF163774),
-                                    ),
+                                    style: isKh
+                                        ? GoogleFonts.kantumruyPro(
+                                            fontSize: 22,
+                                            fontWeight: FontWeight.w700,
+                                            color: const Color(0xFF163774),
+                                            height: 1.3,
+                                          )
+                                        : GoogleFonts.poppins(
+                                            fontSize: 21,
+                                            fontWeight: FontWeight.w600,
+                                            color: const Color(0xFF163774),
+                                            height: 1.3,
+                                          ),
                                   ),
                                   const SizedBox(height: 4),
 
                                   // Subtitle
                                   Text(
                                     'login_hint_subtitle'.tr,
-                                    style: GoogleFonts.kantumruyPro(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w400,
-                                      color: const Color(0xFF64748B),
-                                    ),
+                                    style: isKh
+                                        ? GoogleFonts.kantumruyPro(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w400,
+                                            color: const Color(0xFF64748B),
+                                            height: 1.3,
+                                          )
+                                        : GoogleFonts.poppins(
+                                            fontSize: 12.5,
+                                            fontWeight: FontWeight.w400,
+                                            color: const Color(0xFF64748B),
+                                            height: 1.3,
+                                          ),
                                   ),
                                   const SizedBox(height: 16),
 

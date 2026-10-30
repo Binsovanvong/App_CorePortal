@@ -808,13 +808,13 @@ class ApplicationView extends GetView<ApplicationViewController> {
             isKh ? 'កម្មវិធីទាំងអស់' : 'All Applications',
             style: isKh
                 ? GoogleFonts.kantumruyPro(
-                    fontSize: 18.5,
+                    fontSize: 18.0,
                     fontWeight: FontWeight.w700,
                     color: const Color(0xFF1E293B),
                     height: 1.3,
                   )
                 : GoogleFonts.poppins(
-                    fontSize: 17.5,
+                    fontSize: 17.0,
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF1E293B),
                     height: 1.3,
@@ -902,13 +902,15 @@ class ApplicationView extends GetView<ApplicationViewController> {
             style: isKh
                 ? GoogleFonts.kantumruyPro(
                     fontSize: 13.0,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                     color: isSelected ? AppColors.royalGold : const Color(0xFF64748B),
+                    height: 1.3,
                   )
                 : GoogleFonts.poppins(
                     fontSize: 12.5,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                     color: isSelected ? AppColors.royalGold : const Color(0xFF64748B),
+                    height: 1.3,
                   ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -968,11 +970,13 @@ class ApplicationView extends GetView<ApplicationViewController> {
                   hintStyle: isKh
                       ? GoogleFonts.kantumruyPro(
                           fontSize: 13.5,
-                          color: const Color(0xFF94A3B8),
+                          color: const Color(0xFF64748B),
+                          height: 1.3,
                         )
                       : GoogleFonts.poppins(
                           fontSize: 13.5,
-                          color: const Color(0xFF94A3B8),
+                          color: const Color(0xFF64748B),
+                          height: 1.3,
                         ),
                   border: InputBorder.none,
                   isDense: true,
@@ -995,13 +999,15 @@ class ApplicationView extends GetView<ApplicationViewController> {
                   style: isKh
                       ? GoogleFonts.kantumruyPro(
                           fontSize: 13.0,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
                           color: AppColors.royalGold,
+                          height: 1.3,
                         )
                       : GoogleFonts.poppins(
                           fontSize: 12.5,
                           fontWeight: FontWeight.w600,
                           color: AppColors.royalGold,
+                          height: 1.3,
                         ),
                 ),
               ),
@@ -1303,15 +1309,15 @@ class ApplicationView extends GetView<ApplicationViewController> {
                 style: isKh
                     ? GoogleFonts.kantumruyPro(
                         fontSize: 13.0,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                         color: const Color(0xFF1E293B),
-                        height: 1.25,
+                        height: 1.3,
                       )
                     : GoogleFonts.poppins(
                         fontSize: 12.5,
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF1E293B),
-                        height: 1.25,
+                        height: 1.3,
                       ),
               ),
             ),

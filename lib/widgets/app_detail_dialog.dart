@@ -203,26 +203,41 @@ class AppDetailDialog extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'ព័ត៌មានលម្អិតកម្មវិធី',
+                            isKh ? 'ព័ត៌មានលម្អិតកម្មវិធី' : 'Application Details',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.kantumruyPro(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.royalGold,
-                            ),
+                            style: isKh
+                                ? GoogleFonts.kantumruyPro(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.royalGold,
+                                    height: 1.3,
+                                  )
+                                : GoogleFonts.poppins(
+                                    fontSize: 12.0,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.royalGold,
+                                    height: 1.3,
+                                  ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             title,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.kantumruyPro(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF0F172A),
-                              letterSpacing: -0.2,
-                            ),
+                            style: isKh
+                                ? GoogleFonts.kantumruyPro(
+                                    fontSize: 18.0,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFF0F172A),
+                                    height: 1.3,
+                                  )
+                                : GoogleFonts.poppins(
+                                    fontSize: 17.0,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFF0F172A),
+                                    height: 1.3,
+                                  ),
                           ),
                         ],
                       ),
@@ -275,14 +290,23 @@ class AppDetailDialog extends StatelessWidget {
                           bgColor: const Color(0xFFF8FAFC),
                           iconColor: const Color(0xFF64748B),
                         ),
+                        isKh: isKh,
                         label: isKh ? 'កូដ' : 'Code',
                         valueWidget: Text(
                           code.isNotEmpty ? code : '—',
-                          style: GoogleFonts.kantumruyPro(
-                            fontSize: 14.5,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF0F172A),
-                          ),
+                          style: isKh
+                              ? GoogleFonts.kantumruyPro(
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF0F172A),
+                                  height: 1.3,
+                                )
+                              : GoogleFonts.poppins(
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF0F172A),
+                                  height: 1.3,
+                                ),
                         ),
                       ),
 
@@ -293,6 +317,7 @@ class AppDetailDialog extends StatelessWidget {
                           bgColor: const Color(0xFFF8FAFC),
                           iconColor: const Color(0xFF64748B),
                         ),
+                        isKh: isKh,
                         label: 'URL',
                         valueWidget: route.isNotEmpty
                             ? GestureDetector(
@@ -314,11 +339,19 @@ class AppDetailDialog extends StatelessWidget {
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         textAlign: TextAlign.end,
-                                        style: GoogleFonts.kantumruyPro(
-                                          fontSize: 13.5,
-                                          fontWeight: FontWeight.w600,
-                                          color: AppColors.royalGold,
-                                        ),
+                                        style: isKh
+                                            ? GoogleFonts.kantumruyPro(
+                                                fontSize: 13.0,
+                                                fontWeight: FontWeight.w600,
+                                                color: AppColors.royalGold,
+                                                height: 1.3,
+                                              )
+                                            : GoogleFonts.poppins(
+                                                fontSize: 12.5,
+                                                fontWeight: FontWeight.w600,
+                                                color: AppColors.royalGold,
+                                                height: 1.3,
+                                              ),
                                       ),
                                     ),
                                     const SizedBox(width: 4),
@@ -332,10 +365,17 @@ class AppDetailDialog extends StatelessWidget {
                               )
                             : Text(
                                 '—',
-                                style: GoogleFonts.kantumruyPro(
-                                  fontSize: 14,
-                                  color: const Color(0xFF94A3B8),
-                                ),
+                                style: isKh
+                                    ? GoogleFonts.kantumruyPro(
+                                        fontSize: 13.5,
+                                        color: const Color(0xFF64748B),
+                                        height: 1.3,
+                                      )
+                                    : GoogleFonts.poppins(
+                                        fontSize: 13.0,
+                                        color: const Color(0xFF64748B),
+                                        height: 1.3,
+                                      ),
                               ),
                       ),
 
@@ -346,14 +386,23 @@ class AppDetailDialog extends StatelessWidget {
                           bgColor: const Color(0xFFFFFBEB),
                           iconColor: const Color(0xFFD97706),
                         ),
+                        isKh: isKh,
                         label: isKh ? 'អង្គភាព' : 'Department',
                         valueWidget: Text(
                           dept,
-                          style: GoogleFonts.kantumruyPro(
-                            fontSize: 14.5,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF0F172A),
-                          ),
+                          style: isKh
+                              ? GoogleFonts.kantumruyPro(
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF0F172A),
+                                  height: 1.3,
+                                )
+                              : GoogleFonts.poppins(
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF0F172A),
+                                  height: 1.3,
+                                ),
                         ),
                       ),
 
@@ -364,6 +413,7 @@ class AppDetailDialog extends StatelessWidget {
                           bgColor: const Color(0xFFECFDF5),
                           iconColor: const Color(0xFF10B981),
                         ),
+                        isKh: isKh,
                         label: isKh ? 'ស្ថានភាព' : 'Status',
                         valueWidget: Container(
                           padding: const EdgeInsets.symmetric(
@@ -394,13 +444,23 @@ class AppDetailDialog extends StatelessWidget {
                                 isActive
                                     ? (isKh ? 'កំពុងដំណើរការ' : 'Active')
                                     : (isKh ? 'អសកម្ម' : 'Inactive'),
-                                style: GoogleFonts.kantumruyPro(
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: isActive
-                                      ? const Color(0xFF15803D)
-                                      : const Color(0xFFB91C1C),
-                                ),
+                                style: isKh
+                                    ? GoogleFonts.kantumruyPro(
+                                        fontSize: 12.0,
+                                        fontWeight: FontWeight.w600,
+                                        color: isActive
+                                            ? const Color(0xFF15803D)
+                                            : const Color(0xFFB91C1C),
+                                        height: 1.3,
+                                      )
+                                    : GoogleFonts.poppins(
+                                        fontSize: 11.5,
+                                        fontWeight: FontWeight.w600,
+                                        color: isActive
+                                            ? const Color(0xFF15803D)
+                                            : const Color(0xFFB91C1C),
+                                        height: 1.3,
+                                      ),
                               ),
                             ],
                           ),
@@ -414,14 +474,23 @@ class AppDetailDialog extends StatelessWidget {
                           bgColor: const Color(0xFFF5F3FF),
                           iconColor: const Color(0xFF8B5CF6),
                         ),
+                        isKh: isKh,
                         label: isKh ? 'កម្មវិធី' : 'Application',
                         valueWidget: Text(
                           title,
-                          style: GoogleFonts.kantumruyPro(
-                            fontSize: 14.5,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF0F172A),
-                          ),
+                          style: isKh
+                              ? GoogleFonts.kantumruyPro(
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF0F172A),
+                                  height: 1.3,
+                                )
+                              : GoogleFonts.poppins(
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF0F172A),
+                                  height: 1.3,
+                                ),
                         ),
                       ),
 
@@ -433,6 +502,7 @@ class AppDetailDialog extends StatelessWidget {
                           bgColor: const Color(0xFFF0F9FF),
                           iconColor: const Color(0xFF64748B),
                         ),
+                        isKh: isKh,
                         label: isKh ? 'ឯកសាររូបតំណាង' : 'Icon Asset',
                         valueWidget: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
@@ -482,18 +552,26 @@ class AppDetailDialog extends StatelessWidget {
                                     fileName,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.kantumruyPro(
-                                      fontSize: 13.5,
-                                      fontWeight: FontWeight.bold,
-                                      color: const Color(0xFF0F172A),
-                                    ),
+                                    style: isKh
+                                        ? GoogleFonts.kantumruyPro(
+                                            fontSize: 13.0,
+                                            fontWeight: FontWeight.w600,
+                                            color: const Color(0xFF0F172A),
+                                            height: 1.3,
+                                          )
+                                        : GoogleFonts.poppins(
+                                            fontSize: 12.5,
+                                            fontWeight: FontWeight.w600,
+                                            color: const Color(0xFF0F172A),
+                                            height: 1.3,
+                                          ),
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
                                     'JPG, PNG, GIF, WEBP',
-                                    style: GoogleFonts.kantumruyPro(
+                                    style: GoogleFonts.poppins(
                                       fontSize: 11,
-                                      color: const Color(0xFF94A3B8),
+                                      color: const Color(0xFF64748B),
                                     ),
                                   ),
                                 ],
@@ -535,10 +613,17 @@ class AppDetailDialog extends StatelessWidget {
                       icon: const Icon(Icons.open_in_new_rounded, size: 18),
                       label: Text(
                         isKh ? 'បើកដំណើរការកម្មវិធី' : 'Launch Application',
-                        style: GoogleFonts.kantumruyPro(
-                          fontSize: 14.5,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: isKh
+                            ? GoogleFonts.kantumruyPro(
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.w600,
+                                height: 1.3,
+                              )
+                            : GoogleFonts.poppins(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w600,
+                                height: 1.3,
+                              ),
                       ),
                     ),
                   ),
@@ -605,6 +690,7 @@ class AppDetailDialog extends StatelessWidget {
     required String label,
     required Widget valueWidget,
     bool showDivider = true,
+    bool isKh = true,
   }) {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -621,11 +707,19 @@ class AppDetailDialog extends StatelessWidget {
               // Left Label
               Text(
                 label,
-                style: GoogleFonts.kantumruyPro(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF64748B),
-                ),
+                style: isKh
+                    ? GoogleFonts.kantumruyPro(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF64748B),
+                        height: 1.3,
+                      )
+                    : GoogleFonts.poppins(
+                        fontSize: 13.0,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF64748B),
+                        height: 1.3,
+                      ),
               ),
               const SizedBox(width: 16),
 

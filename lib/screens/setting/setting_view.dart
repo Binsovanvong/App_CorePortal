@@ -123,13 +123,13 @@ class SettingView extends GetView<SettingViewController> {
           style: isKh
               ? GoogleFonts.kantumruyPro(
                   color: const Color(0xFF1E293B),
-                  fontSize: 18.5,
+                  fontSize: 18.0,
                   fontWeight: FontWeight.w700,
                   height: 1.3,
                 )
               : GoogleFonts.poppins(
                   color: const Color(0xFF1E293B),
-                  fontSize: 17.5,
+                  fontSize: 17.0,
                   fontWeight: FontWeight.w600,
                   height: 1.3,
                 ),
@@ -521,15 +521,24 @@ class SettingView extends GetView<SettingViewController> {
   // UI Helper Components
   // ---------------------------------------------------------------------------
   Widget _buildSectionHeader(String title) {
+    final bool isKh = LocalizationService.currentLanguageCode.value == 'km';
     return Padding(
       padding: const EdgeInsets.only(left: 4, bottom: 8),
       child: Text(
         title,
-        style: GoogleFonts.kantumruyPro(
-          fontSize: 15.5,
-          fontWeight: FontWeight.w700,
-          color: AppColors.royalGold,
-        ),
+        style: isKh
+            ? GoogleFonts.kantumruyPro(
+                fontSize: 15.0,
+                fontWeight: FontWeight.w700,
+                color: AppColors.royalGold,
+                height: 1.3,
+              )
+            : GoogleFonts.poppins(
+                fontSize: 14.5,
+                fontWeight: FontWeight.w600,
+                color: AppColors.royalGold,
+                height: 1.3,
+              ),
       ),
     );
   }
@@ -640,17 +649,26 @@ class SettingView extends GetView<SettingViewController> {
   }
 
   Widget _buildChevronTrailing({String? text}) {
+    final bool isKh = LocalizationService.currentLanguageCode.value == 'km';
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         if (text != null && text.isNotEmpty) ...[
           Text(
             text,
-            style: GoogleFonts.kantumruyPro(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF64748B),
-            ),
+            style: isKh
+                ? GoogleFonts.kantumruyPro(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF64748B),
+                    height: 1.3,
+                  )
+                : GoogleFonts.poppins(
+                    fontSize: 13.0,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF64748B),
+                    height: 1.3,
+                  ),
           ),
           const SizedBox(width: 8),
         ],

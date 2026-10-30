@@ -117,6 +117,7 @@ class MainpageView extends StatelessWidget {
     String? badge,
   }) {
     final isSelected = controller.currentIndex.value == index;
+    final bool isKh = LocalizationService.currentLanguageCode.value == 'km';
 
     return Expanded(
       child: GestureDetector(
@@ -174,14 +175,23 @@ class MainpageView extends StatelessWidget {
               const SizedBox(height: 3),
               Text(
                 label,
-                style: GoogleFonts.kantumruyPro(
-                  color: isSelected
-                      ? const Color(0xFF8C6615)
-                      : const Color(0xFF94A3B8),
-                  fontSize: 10.5,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  height: 1.25,
-                ),
+                style: isKh
+                    ? GoogleFonts.kantumruyPro(
+                        color: isSelected
+                            ? const Color(0xFF8C6615)
+                            : const Color(0xFF64748B),
+                        fontSize: 10.5,
+                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                        height: 1.3,
+                      )
+                    : GoogleFonts.poppins(
+                        color: isSelected
+                            ? const Color(0xFF8C6615)
+                            : const Color(0xFF64748B),
+                        fontSize: 10.0,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                        height: 1.3,
+                      ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),

@@ -115,13 +115,13 @@ class AnnouncementView extends GetView<AnnouncementController> {
           style: isKh
               ? GoogleFonts.kantumruyPro(
                   color: const Color(0xFF1E293B),
-                  fontSize: 18.5,
+                  fontSize: 18.0,
                   fontWeight: FontWeight.w700,
                   height: 1.3,
                 )
               : GoogleFonts.poppins(
                   color: const Color(0xFF1E293B),
-                  fontSize: 17.5,
+                  fontSize: 17.0,
                   fontWeight: FontWeight.w600,
                   height: 1.3,
                 ),
@@ -159,11 +159,19 @@ class AnnouncementView extends GetView<AnnouncementController> {
             ),
             child: Text(
               'all'.tr,
-              style: GoogleFonts.kantumruyPro(
-                fontSize: 13.5,
-                fontWeight: FontWeight.bold,
-                color: isAllSelected ? Colors.white : AppColors.royalGold,
-              ),
+              style: isKh
+                  ? GoogleFonts.kantumruyPro(
+                      fontSize: 13.0,
+                      fontWeight: FontWeight.w600,
+                      color: isAllSelected ? Colors.white : AppColors.royalGold,
+                      height: 1.3,
+                    )
+                  : GoogleFonts.poppins(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: isAllSelected ? Colors.white : AppColors.royalGold,
+                      height: 1.3,
+                    ),
             ),
           ),
         ),
@@ -290,23 +298,38 @@ class AnnouncementView extends GetView<AnnouncementController> {
                                     title,
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.kantumruyPro(
-                                      fontSize: 14.5,
-                                      fontWeight: FontWeight.w700,
-                                      color: const Color(0xFF1E293B),
-                                      height: 1.35,
-                                    ),
+                                    style: isKh
+                                        ? GoogleFonts.kantumruyPro(
+                                            fontSize: 14.0,
+                                            fontWeight: FontWeight.w600,
+                                            color: const Color(0xFF1E293B),
+                                            height: 1.35,
+                                          )
+                                        : GoogleFonts.poppins(
+                                            fontSize: 13.5,
+                                            fontWeight: FontWeight.w600,
+                                            color: const Color(0xFF1E293B),
+                                            height: 1.3,
+                                          ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
                                     formattedDate,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.kantumruyPro(
-                                      fontSize: 12.5,
-                                      fontWeight: FontWeight.w500,
-                                      color: const Color(0xFF64748B),
-                                    ),
+                                    style: isKh
+                                        ? GoogleFonts.kantumruyPro(
+                                            fontSize: 12.0,
+                                            fontWeight: FontWeight.w500,
+                                            color: const Color(0xFF64748B),
+                                            height: 1.3,
+                                          )
+                                        : GoogleFonts.poppins(
+                                            fontSize: 11.5,
+                                            fontWeight: FontWeight.w500,
+                                            color: const Color(0xFF64748B),
+                                            height: 1.3,
+                                          ),
                                   ),
                                 ],
                               ),
@@ -362,11 +385,19 @@ class AnnouncementView extends GetView<AnnouncementController> {
               controller.selectedFilterTab.value == 'unread'
                   ? 'no_unread_announcements'.tr
                   : 'no_announcements'.tr,
-              style: GoogleFonts.kantumruyPro(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF334155),
-              ),
+              style: isKh
+                  ? GoogleFonts.kantumruyPro(
+                      fontSize: 15.0,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF1E293B),
+                      height: 1.35,
+                    )
+                  : GoogleFonts.poppins(
+                      fontSize: 14.5,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF1E293B),
+                      height: 1.3,
+                    ),
               textAlign: TextAlign.center,
             ),
           ],
