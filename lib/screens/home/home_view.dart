@@ -126,7 +126,7 @@ class HomeView extends GetView<HomeController> {
               final String greetingText;
               if (isKh) {
                 final displayKhName = hasName ? rawName : 'ប៊ិន សុវណ្ណវង្ស';
-                greetingText = "អរុណសួស្ដី, លោក $displayKhName";
+                greetingText = "អរុណសួស្ដី លោក $displayKhName";
               } else {
                 final displayEnName = hasName ? rawName : 'Bin Sovanvong';
                 greetingText = "Good morning, Mr. $displayEnName";
@@ -136,13 +136,13 @@ class HomeView extends GetView<HomeController> {
                 greetingText,
                 style: isKh
                     ? GoogleFonts.kantumruyPro(
-                        fontSize: 17.5,
+                        fontSize: 18.0,
                         fontWeight: FontWeight.w700,
                         color: const Color(0xFF1E293B),
-                        height: 1.35,
+                        height: 1.3,
                       )
                     : GoogleFonts.poppins(
-                        fontSize: 16.5,
+                        fontSize: 17.0,
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF1E293B),
                         height: 1.3,
@@ -209,15 +209,15 @@ class HomeView extends GetView<HomeController> {
                       'general_applications'.tr,
                       style: isKh
                           ? GoogleFonts.kantumruyPro(
-                              fontSize: 15.5,
+                              fontSize: 16.0,
                               fontWeight: FontWeight.w700,
-                              color: const Color(0xFF1E293B),
+                              color: const Color(0xFF0F172A),
                               height: 1.3,
                             )
                           : GoogleFonts.poppins(
-                              fontSize: 14.5,
+                              fontSize: 15.0,
                               fontWeight: FontWeight.w600,
-                              color: const Color(0xFF1E293B),
+                              color: const Color(0xFF0F172A),
                               height: 1.3,
                             ),
                     ),
@@ -238,7 +238,7 @@ class HomeView extends GetView<HomeController> {
                       style: isKh
                           ? GoogleFonts.kantumruyPro(
                               fontSize: 12.5,
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w600,
                               color: AppColors.royalGold,
                               height: 1.3,
                             )
@@ -381,13 +381,13 @@ class HomeView extends GetView<HomeController> {
                 overflow: TextOverflow.ellipsis,
                 style: isKh
                     ? GoogleFonts.kantumruyPro(
-                        fontSize: 12.5,
+                        fontSize: 13.0,
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF1E293B),
-                        height: 1.35,
+                        height: 1.3,
                       )
                     : GoogleFonts.poppins(
-                        fontSize: 12.0,
+                        fontSize: 12.5,
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF1E293B),
                         height: 1.3,
@@ -506,7 +506,7 @@ class HomeView extends GetView<HomeController> {
                         style: isKh
                             ? GoogleFonts.kantumruyPro(
                                 fontSize: 12.5,
-                                fontWeight: FontWeight.w700,
+                                fontWeight: FontWeight.w600,
                                 color: AppColors.royalGold,
                                 height: 1.3,
                               )
@@ -718,10 +718,10 @@ class HomeView extends GetView<HomeController> {
                 overflow: TextOverflow.ellipsis,
                 style: isKh
                     ? GoogleFonts.kantumruyPro(
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 13.0,
+                        fontWeight: FontWeight.w600,
                         color: const Color(0xFF1E293B),
-                        height: 1.35,
+                        height: 1.3,
                       )
                     : GoogleFonts.poppins(
                         fontSize: 12.5,
@@ -787,7 +787,7 @@ class HomeView extends GetView<HomeController> {
                         style: isKh
                             ? GoogleFonts.kantumruyPro(
                                 fontSize: 12.5,
-                                fontWeight: FontWeight.w700,
+                                fontWeight: FontWeight.w600,
                                 color: AppColors.royalGold,
                                 height: 1.3,
                               )
@@ -904,14 +904,12 @@ class HomeView extends GetView<HomeController> {
                                     a['title']?.toString() ?? 'announcement'.tr;
                                 final String content =
                                     a['content']?.toString() ?? '';
-                                final String rawDate =
-                                    a['date']?.toString() ?? '';
                                 final String cleanContent = content
                                     .replaceAll(RegExp(r'<[^>]*>|&nbsp;'), ' ')
                                     .replaceAll(RegExp(r'\s+'), ' ')
                                     .trim();
                                 final String formattedDate =
-                                    _formatKhmerDate(rawDate);
+                                    _formatAnnouncementDate(a, isKh);
 
                                 return Material(
                                   color: Colors.transparent,
@@ -973,7 +971,7 @@ class HomeView extends GetView<HomeController> {
                                                               .kantumruyPro(
                                                             fontSize: 12.0,
                                                             color: const Color(
-                                                                0xFF94A3B8),
+                                                                0xFF64748B),
                                                             fontWeight:
                                                                 FontWeight.w400,
                                                             height: 1.35,
@@ -981,7 +979,7 @@ class HomeView extends GetView<HomeController> {
                                                           : GoogleFonts.poppins(
                                                             fontSize: 11.5,
                                                             color: const Color(
-                                                                0xFF94A3B8),
+                                                                0xFF64748B),
                                                             fontWeight:
                                                                 FontWeight.w400,
                                                             height: 1.3,
@@ -1001,14 +999,14 @@ class HomeView extends GetView<HomeController> {
                                                           .kantumruyPro(
                                                         fontSize: 11.5,
                                                         color: const Color(
-                                                            0xFF94A3B8),
+                                                            0xFF64748B),
                                                         fontWeight:
                                                             FontWeight.w500,
                                                       )
                                                       : GoogleFonts.poppins(
                                                         fontSize: 11.0,
                                                         color: const Color(
-                                                            0xFF94A3B8),
+                                                            0xFF64748B),
                                                         fontWeight:
                                                             FontWeight.w500,
                                                       ),
@@ -1108,44 +1106,80 @@ class HomeView extends GetView<HomeController> {
     showAnnouncementDetailDialog(context, announcement);
   }
 
-  String _formatKhmerDate(String? dateStr) {
-    if (dateStr == null || dateStr.isEmpty) return '';
-    try {
-      final dateTime = DateTime.tryParse(dateStr);
-      if (dateTime == null) return dateStr;
+  String _formatAnnouncementDate(Map<String, dynamic> a, bool isKh) {
+    if (isKh && a['displayDateKh'] != null && a['displayDateKh'].toString().trim().isNotEmpty) {
+      final s = a['displayDateKh'].toString().trim();
+      return s.contains('·') ? s.split('·')[0].trim() : s;
+    }
+    if (!isKh && a['displayDateEn'] != null && a['displayDateEn'].toString().trim().isNotEmpty) {
+      final s = a['displayDateEn'].toString().trim();
+      return s.contains('·') ? s.split('·')[0].trim() : s;
+    }
 
-      const khmerMonths = [
-        'មករា',
-        'កុម្ភៈ',
-        'មីនា',
-        'មេសា',
-        'ឧសភា',
-        'មិថុនា',
-        'កក្កដា',
-        'សីហា',
-        'កញ្ញា',
-        'តុលា',
-        'វិច្ឆិកា',
-        'ធ្នូ',
-      ];
+    final String rawDate = (a['createdAt'] ??
+            a['created_at'] ??
+            a['date'] ??
+            a['time'] ??
+            '')
+        .toString();
+    if (rawDate.isEmpty) return '';
+    try {
+      final dateTime = DateTime.tryParse(rawDate);
+      if (dateTime == null) return rawDate;
 
       final day = dateTime.day.toString();
-      final month = khmerMonths[dateTime.month - 1];
       final year = dateTime.year.toString();
 
-      String toKhmer(String input) {
-        const english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-        const khmer = ['០', '១', '២', '៣', '៤', '៥', '៦', '៧', '៨', '៩'];
-        String res = input;
-        for (int i = 0; i < english.length; i++) {
-          res = res.replaceAll(english[i], khmer[i]);
-        }
-        return res;
-      }
+      if (isKh) {
+        const khmerMonths = [
+          'មករា',
+          'កុម្ភៈ',
+          'មីនា',
+          'មេសា',
+          'ឧសភា',
+          'មិថុនា',
+          'កក្កដា',
+          'សីហា',
+          'កញ្ញា',
+          'តុលា',
+          'វិច្ឆិកា',
+          'ធ្នូ',
+        ];
 
-      return '$day $month ${toKhmer(year)}';
+        String toKhmer(String input) {
+          const english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+          const khmer = ['០', '១', '២', '៣', '៤', '៥', '៦', '៧', '៨', '៩'];
+          String res = input;
+          for (int i = 0; i < english.length; i++) {
+            res = res.replaceAll(english[i], khmer[i]);
+          }
+          return res;
+        }
+
+        final khDay = toKhmer(day);
+        final khMonth = khmerMonths[dateTime.month - 1];
+        final khYear = toKhmer(year);
+        return '$khDay $khMonth $khYear';
+      } else {
+        const englishMonths = [
+          'Jan',
+          'Feb',
+          'Mar',
+          'Apr',
+          'May',
+          'Jun',
+          'Jul',
+          'Aug',
+          'Sep',
+          'Oct',
+          'Nov',
+          'Dec',
+        ];
+        final enMonth = englishMonths[dateTime.month - 1];
+        return '$day $enMonth $year';
+      }
     } catch (_) {
-      return dateStr;
+      return rawDate;
     }
   }
 }
