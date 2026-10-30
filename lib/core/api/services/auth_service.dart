@@ -75,7 +75,8 @@ class AuthService {
       options: Options(
         headers: {'Content-Type': 'application/json'},
         validateStatus: (status) =>
-            status != null && ((status >= 200 && status < 300) || status == 409),
+            status != null &&
+            ((status >= 200 && status < 300) || status == 409),
       ),
     );
 
@@ -152,9 +153,7 @@ class AuthService {
           'redirect_uri': redirectUri,
           'code_verifier': codeVerifier,
         },
-        options: Options(
-          contentType: Headers.formUrlEncodedContentType,
-        ),
+        options: Options(contentType: Headers.formUrlEncodedContentType),
       );
       return Map<String, dynamic>.from(response.data as Map);
     } catch (_) {
@@ -213,11 +212,13 @@ class AuthService {
     );
 
     final data = Map<String, dynamic>.from(response.data as Map);
-    final accessToken = data['access_token']?.toString() ??
+    final accessToken =
+        data['access_token']?.toString() ??
         data['token']?.toString() ??
         data['data']?['access_token']?.toString() ??
         data['data']?['token']?.toString();
-    final refreshToken = data['refresh_token']?.toString() ??
+    final refreshToken =
+        data['refresh_token']?.toString() ??
         data['data']?['refresh_token']?.toString();
 
     String? cpSession;
@@ -273,7 +274,8 @@ class AuthService {
       data: {'username': username, 'password': password},
       options: Options(
         validateStatus: (status) =>
-            status != null && ((status >= 200 && status < 300) || status == 409),
+            status != null &&
+            ((status >= 200 && status < 300) || status == 409),
       ),
     );
 
@@ -305,18 +307,20 @@ class AuthService {
       final refreshToken = await ApiClient.getRefreshToken();
       final String deviceId = await BiometricService.getDeviceId();
       if (token != null || refreshToken != null) {
-        await ApiClient.api.post(
-          '/api/mobile/auth/logout',
-          data: {
-            if (refreshToken != null) 'refresh_token': refreshToken,
-            'device_id': deviceId,
-          },
-          options: Options(
-            headers: {
-              if (token != null) 'Authorization': 'Bearer $token',
-            },
-          ),
-        ).catchError((_) => Response(requestOptions: RequestOptions(path: '')));
+        await ApiClient.api
+            .post(
+              '/api/mobile/auth/logout',
+              data: {
+                if (refreshToken != null) 'refresh_token': refreshToken,
+                'device_id': deviceId,
+              },
+              options: Options(
+                headers: {if (token != null) 'Authorization': 'Bearer $token'},
+              ),
+            )
+            .catchError(
+              (_) => Response(requestOptions: RequestOptions(path: '')),
+            );
       }
     } catch (_) {}
     await ApiClient.logout();
@@ -377,7 +381,9 @@ class AuthService {
       );
       return response.data;
     } on DioException catch (e) {
-      debugPrint("RESET PASSWORD API ERROR: ${e.response?.statusCode} - ${e.response?.data}");
+      debugPrint(
+        "RESET PASSWORD API ERROR: ${e.response?.statusCode} - ${e.response?.data}",
+      );
       if (e.response?.statusCode == 404) {
         // Fallback to /accounts/$cleanUsername/reset-password
         try {
@@ -414,7 +420,9 @@ class AuthService {
       );
       return response.data;
     } on DioException catch (e) {
-      debugPrint("CHANGE PASSWORD STATUS: ${e.response?.statusCode} - DATA: ${e.response?.data}");
+      debugPrint(
+        "CHANGE PASSWORD STATUS: ${e.response?.statusCode} - DATA: ${e.response?.data}",
+      );
       rethrow;
     }
   }
@@ -444,6 +452,32 @@ class AuthService {
       return response.data;
     } on DioException catch (e) {
       debugPrint("PORTAL ANN STATUS: ${e.response?.statusCode}");
+      rethrow;
+    }
+  }
+
+  /// Fetch a single announcement detail by ID from API
+  Future<dynamic> fetchAnnouncementDetail(
+    String id, {
+    bool isAdmin = false,
+  }) async {
+    try {
+      final endpoint = isAdmin
+          ? '/admin/announcements/$id'
+          : '/portals/announcements/$id';
+      final response = await ApiClient.dio.get(endpoint);
+      return response.data;
+    } on DioException catch (e) {
+      debugPrint("FETCH ANN DETAIL STATUS: ${e.response?.statusCode}");
+      // If 404 on portals endpoint, try admin endpoint as fallback
+      if (e.response?.statusCode == 404 && !isAdmin) {
+        try {
+          final fallbackRes = await ApiClient.dio.get(
+            '/admin/announcements/$id',
+          );
+          return fallbackRes.data;
+        } catch (_) {}
+      }
       rethrow;
     }
   }
@@ -749,10 +783,7 @@ class AuthService {
 
       dynamic lastResult;
       for (final code in codesList) {
-        final body = {
-          'keycloakUserId': keycloakUserId,
-          'groupCode': code,
-        };
+        final body = {'keycloakUserId': keycloakUserId, 'groupCode': code};
         try {
           final r = await ApiClient.dio.post(
             '/admin/portal-groups/user-groups',
@@ -805,7 +836,8 @@ class AuthService {
       if (assignments is List) {
         items = assignments;
       } else if (assignments is Map) {
-        items = assignments['data'] ??
+        items =
+            assignments['data'] ??
             assignments['items'] ??
             assignments['value'] ??
             [];
@@ -829,11 +861,12 @@ class AuthService {
         }
       }
       if (match != null) {
-        final String foundId = (match['id'] ??
-                match['assignmentId'] ??
-                match['assignment_id'] ??
-                '')
-            .toString();
+        final String foundId =
+            (match['id'] ??
+                    match['assignmentId'] ??
+                    match['assignment_id'] ??
+                    '')
+                .toString();
         if (foundId.isNotEmpty) {
           final r = await ApiClient.dio.delete(
             '/admin/portal-groups/user-groups/$foundId',
@@ -872,7 +905,9 @@ class AuthService {
       );
       if (r.data != null) return r.data;
     } on DioException catch (e) {
-      debugPrint("FETCH USER GROUPS WITH QUERY STATUS: ${e.response?.statusCode}");
+      debugPrint(
+        "FETCH USER GROUPS WITH QUERY STATUS: ${e.response?.statusCode}",
+      );
     } catch (_) {}
 
     // 2. Fallback to GET without query parameters
@@ -1096,9 +1131,7 @@ class AuthService {
     }
   }
 
-  Future<List<dynamic>> listUserDevicesService({
-    String? accessToken,
-  }) async {
+  Future<List<dynamic>> listUserDevicesService({String? accessToken}) async {
     try {
       final response = await ApiClient.api.get(
         '/api/mobile/auth/device',
@@ -1221,7 +1254,8 @@ class AuthService {
       if (targetUserId == null || targetUserId.isEmpty) {
         try {
           final box = GetStorage();
-          targetUserId = box.read('userProfileUserId')?.toString() ??
+          targetUserId =
+              box.read('userProfileUserId')?.toString() ??
               box.read('userId')?.toString() ??
               box.read('sub')?.toString();
         } catch (_) {}

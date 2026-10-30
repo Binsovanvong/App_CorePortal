@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:core_portal/widgets/password_requirements_card.dart';
 import 'first_login_change_password_controller.dart';
 
 class FirstLoginChangePasswordView
@@ -89,7 +90,7 @@ class FirstLoginChangePasswordView
                                         textAlign: TextAlign.center,
                                         style: GoogleFonts.kantumruyPro(
                                           fontSize: 22,
-                                          fontWeight: FontWeight.w800,
+                                          fontWeight: FontWeight.w700,
                                           color: const Color(0xFFD4AF37),
                                           letterSpacing: 0.2,
                                         ),
@@ -147,7 +148,7 @@ class FirstLoginChangePasswordView
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.kantumruyPro(
                                       fontSize: 19,
-                                      fontWeight: FontWeight.w800,
+                                      fontWeight: FontWeight.w700,
                                       color: const Color(0xFF111827),
                                     ),
                                   ),
@@ -191,12 +192,14 @@ class FirstLoginChangePasswordView
                                         width: 22,
                                         height: 22,
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFFFDE047)
-                                              .withValues(alpha: 0.75),
+                                          color: const Color(
+                                            0xFFFDE047,
+                                          ).withValues(alpha: 0.75),
                                           shape: BoxShape.circle,
                                           border: Border.all(
-                                            color: const Color(0xFFF59E0B)
-                                                .withValues(alpha: 0.45),
+                                            color: const Color(
+                                              0xFFF59E0B,
+                                            ).withValues(alpha: 0.45),
                                             width: 1.0,
                                           ),
                                         ),
@@ -206,7 +209,7 @@ class FirstLoginChangePasswordView
                                           style: TextStyle(
                                             color: Color(0xFF92400E),
                                             fontSize: 13,
-                                            fontWeight: FontWeight.w900,
+                                            fontWeight: FontWeight.w700,
                                             height: 1.0,
                                           ),
                                         ),
@@ -277,7 +280,8 @@ class FirstLoginChangePasswordView
                                 const SizedBox(height: 10),
 
                                 // Current Password Label & Field (when not passed in route arguments and not in ticket flow)
-                                if (controller.ticket == null && controller.tempPassword.isEmpty) ...[
+                                if (controller.ticket == null &&
+                                    controller.tempPassword.isEmpty) ...[
                                   Text(
                                     'current_password'.tr,
                                     style: GoogleFonts.kantumruyPro(
@@ -292,7 +296,8 @@ class FirstLoginChangePasswordView
                                       controller:
                                           controller.currentPasswordController,
                                       obscureText: controller
-                                          .obscureCurrentPassword.value,
+                                          .obscureCurrentPassword
+                                          .value,
                                       textInputAction: TextInputAction.next,
                                       style: GoogleFonts.kantumruyPro(
                                         fontSize: 14.5,
@@ -313,7 +318,8 @@ class FirstLoginChangePasswordView
                                         ),
                                         suffixIcon: IconButton(
                                           icon: Icon(
-                                            controller.obscureCurrentPassword
+                                            controller
+                                                    .obscureCurrentPassword
                                                     .value
                                                 ? Icons.visibility_off_outlined
                                                 : Icons.visibility_outlined,
@@ -329,28 +335,31 @@ class FirstLoginChangePasswordView
                                         fillColor: const Color(0xFFF8FAFC),
                                         contentPadding:
                                             const EdgeInsets.symmetric(
-                                          horizontal: 16,
-                                          vertical: 16,
-                                        ),
+                                              horizontal: 16,
+                                              vertical: 16,
+                                            ),
                                         enabledBorder: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(14),
+                                          borderRadius: BorderRadius.circular(
+                                            14,
+                                          ),
                                           borderSide: const BorderSide(
                                             color: Color(0xFFE2E8F0),
                                             width: 1.5,
                                           ),
                                         ),
                                         focusedBorder: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(14),
+                                          borderRadius: BorderRadius.circular(
+                                            14,
+                                          ),
                                           borderSide: const BorderSide(
                                             color: Color(0xFF163774),
                                             width: 2.0,
                                           ),
                                         ),
                                         border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(14),
+                                          borderRadius: BorderRadius.circular(
+                                            14,
+                                          ),
                                           borderSide: const BorderSide(
                                             color: Color(0xFFE2E8F0),
                                             width: 1.5,
@@ -374,8 +383,10 @@ class FirstLoginChangePasswordView
                                 const SizedBox(height: 8),
                                 Obx(
                                   () => TextField(
-                                    controller: controller.newPasswordController,
-                                    obscureText: controller.obscureNewPassword.value,
+                                    controller:
+                                        controller.newPasswordController,
+                                    obscureText:
+                                        controller.obscureNewPassword.value,
                                     textInputAction: TextInputAction.next,
                                     style: GoogleFonts.kantumruyPro(
                                       fontSize: 14.5,
@@ -402,15 +413,17 @@ class FirstLoginChangePasswordView
                                           size: 20,
                                         ),
                                         onPressed: () {
-                                          controller.obscureNewPassword.toggle();
+                                          controller.obscureNewPassword
+                                              .toggle();
                                         },
                                       ),
                                       filled: true,
                                       fillColor: const Color(0xFFF8FAFC),
-                                      contentPadding: const EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: 16,
-                                      ),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 16,
+                                          ),
                                       enabledBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(14),
                                         borderSide: const BorderSide(
@@ -450,7 +463,8 @@ class FirstLoginChangePasswordView
                                 const SizedBox(height: 8),
                                 Obx(
                                   () => TextField(
-                                    controller: controller.confirmPasswordController,
+                                    controller:
+                                        controller.confirmPasswordController,
                                     obscureText:
                                         controller.obscureConfirmPassword.value,
                                     textInputAction: TextInputAction.done,
@@ -477,22 +491,26 @@ class FirstLoginChangePasswordView
                                       ),
                                       suffixIcon: IconButton(
                                         icon: Icon(
-                                          controller.obscureConfirmPassword.value
+                                          controller
+                                                  .obscureConfirmPassword
+                                                  .value
                                               ? Icons.visibility_off_outlined
                                               : Icons.visibility_outlined,
                                           color: const Color(0xFF94A3B8),
                                           size: 20,
                                         ),
                                         onPressed: () {
-                                          controller.obscureConfirmPassword.toggle();
+                                          controller.obscureConfirmPassword
+                                              .toggle();
                                         },
                                       ),
                                       filled: true,
                                       fillColor: const Color(0xFFF8FAFC),
-                                      contentPadding: const EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: 16,
-                                      ),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 16,
+                                          ),
                                       enabledBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(14),
                                         borderSide: const BorderSide(
@@ -518,7 +536,15 @@ class FirstLoginChangePasswordView
                                   ),
                                 ),
 
-                                const SizedBox(height: 28),
+                                const SizedBox(height: 18),
+                                Obx(
+                                  () => PasswordRequirementsCard(
+                                    password: controller.newPasswordInput.value,
+                                    confirmPassword:
+                                        controller.confirmPasswordInput.value,
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
 
                                 // Submit Button (Ministry Navy)
                                 SizedBox(
@@ -530,13 +556,17 @@ class FirstLoginChangePasswordView
                                           ? null
                                           : controller.submitPasswordChange,
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFF163774),
+                                        backgroundColor: const Color(
+                                          0xFF163774,
+                                        ),
                                         disabledBackgroundColor: const Color(
                                           0xFF163774,
                                         ).withValues(alpha: 0.65),
                                         foregroundColor: Colors.white,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
                                         ),
                                         elevation: 2,
                                         shadowColor: const Color(
@@ -558,11 +588,13 @@ class FirstLoginChangePasswordView
                                               children: [
                                                 Text(
                                                   '${'save'.tr} ${'password'.tr}',
-                                                  style: GoogleFonts.kantumruyPro(
-                                                    fontSize: 15.5,
-                                                    fontWeight: FontWeight.w700,
-                                                    color: Colors.white,
-                                                  ),
+                                                  style:
+                                                      GoogleFonts.kantumruyPro(
+                                                        fontSize: 15.5,
+                                                        fontWeight:
+                                                            FontWeight.w700,
+                                                        color: Colors.white,
+                                                      ),
                                                 ),
                                                 const SizedBox(width: 8),
                                                 const Icon(

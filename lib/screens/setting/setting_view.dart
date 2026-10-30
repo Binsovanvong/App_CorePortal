@@ -4,6 +4,8 @@ import 'package:core_portal/core/localization/app_translations.dart';
 import 'package:core_portal/controllers/nav_controller.dart';
 import 'package:core_portal/widgets/custom_snackbar.dart';
 import 'package:core_portal/widgets/logout_dialog.dart';
+import 'package:core_portal/widgets/password_requirements_card.dart';
+import 'package:core_portal/widgets/portal_top_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -11,6 +13,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:dio/dio.dart';
 import 'package:core_portal/core/api/api_client.dart';
 import 'package:core_portal/core/services/app_lock_service.dart';
+import 'package:core_portal/theme/app_colors.dart';
 
 import '../../routes/page_route.dart';
 
@@ -20,169 +23,125 @@ part 'setting_controller.dart';
 class SettingView extends GetView<SettingViewController> {
   const SettingView({super.key});
 
-  static const bool showNotification = false;
+  static const bool showConnectedDevices = false;
+  static const bool showNotifications = false;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Stack(
-        children: [
-          // Background Gradient
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0xFFF8FAFC),
-                    Color(0xFFF1F5F9),
-                    Color(0xFFEFF4FB),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          // Subtle soft bottom curve wave matching concept
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            height: 240,
-            child: IgnorePointer(
-              child: CustomPaint(
-                painter: _SubtleBackgroundWavePainter(),
-              ),
-            ),
-          ),
-
-          // Main Content
-          SafeArea(
-            bottom: false,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(context),
-                Expanded(
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 14,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // 1. Profile Hero Card
-                        _buildProfileHeroCard(),
-                        const SizedBox(height: 14),
-
-                        // 2. My Account Card ("គណនីរបស់ខ្ញុំ")
-                        _buildMyAccountCard(),
-                        const SizedBox(height: 14),
-
-                        // 3. Language Selection Card ("ភាសា")
-                        _buildLanguageSelectionCard(),
-                        const SizedBox(height: 14),
-
-                        // 4. Security & Privacy Card ("សុវត្ថិភាព និងភាពឯកជន")
-                        _buildSecurityActionsCard(context),
-                        const SizedBox(height: 14),
-
-                        // 5. Standalone Logout Card ("ចាកចេញពីគណនី")
-                        _buildLogoutCard(context),
-                        const SizedBox(height: 24),
-
-                        // 6. Version info footer
-                        _buildAppFooter(),
-                        const SizedBox(height: 100),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Clean, modern open header with title & subtitle
-  Widget _buildHeader(BuildContext context) {
     final bool canPop = Navigator.of(context).canPop();
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 14, 20, 10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          if (canPop) ...[
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: const Color(0xFFE2E8F0),
-                  width: 1,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+    return Scaffold(
+      backgroundColor: const Color(0xFFFAF9F6),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        color: const Color(0xFFFAF9F6),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 1. Top Government Portal Header
+            PortalTopAppBar(canPop: canPop),
+
+              // Scrollable Body
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics(),
                   ),
-                ],
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Obx(() {
+                      final bool isKh =
+                          LocalizationService.currentLanguageCode.value == 'km';
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 16),
+
+                          // 2. Screen Title: | ការកំណត់
+                          _buildScreenTitle(isKh),
+                          const SizedBox(height: 16),
+
+                          // 3. Profile Card (Avatar with double gold ring, Name, Role, Department)
+                          _buildProfileHeroCard(isKh),
+                          const SizedBox(height: 20),
+
+                          // 4. Section 1: គណនី (Account)
+                          _buildAccountSection(isKh),
+                          const SizedBox(height: 20),
+
+                          // 5. Section 2: ការជូនដំណឹង (Notifications) - Hidden
+                          if (showNotifications) ...[
+                            _buildNotificationSection(isKh),
+                            const SizedBox(height: 20),
+                          ],
+
+                          // 6. Section 3: សុវត្ថិភាព និងភាពឯកជន (Security & Privacy)
+                          _buildSecuritySection(context, isKh),
+                          const SizedBox(height: 20),
+
+                          // 7. Logout Card (ចាកចេញពីគណនី)
+                          _buildLogoutCard(context, isKh),
+                          const SizedBox(height: 24),
+
+                          // 8. Version Info Footer
+                          _buildAppFooter(),
+
+                          // Bottom padding to clear floating nav bar
+                          const SizedBox(height: 120),
+                        ],
+                      );
+                    }),
+                  ),
+                ),
               ),
-              child: IconButton(
-                onPressed: () => Get.back(),
-                icon: const Icon(
-                  Icons.arrow_back_ios_new_rounded,
-                  size: 16,
-                  color: Color(0xFF0F172A),
-                ),
-                padding: EdgeInsets.zero,
-              ),
-            ),
-            const SizedBox(width: 14),
-          ],
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'settings'.tr,
-                  style: GoogleFonts.kantumruyPro(
-                    fontSize: 27,
-                    fontWeight: FontWeight.w800,
-                    color: const Color(0xFF0F172A),
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  'settings_subtitle'.tr,
-                  style: GoogleFonts.kantumruyPro(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF64748B),
-                  ),
-                ),
-              ],
-            ),
+            ],
           ),
-        ],
-      ),
+        ),
     );
   }
 
-  /// 1. Profile Hero Card (Concept Vibrant Blue)
-  Widget _buildProfileHeroCard() {
+  // ---------------------------------------------------------------------------
+  // Screen Title: | ការកំណត់
+  // ---------------------------------------------------------------------------
+  Widget _buildScreenTitle(bool isKh) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Container(
+          width: 3.5,
+          height: 22,
+          decoration: BoxDecoration(
+            color: AppColors.royalGold,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          isKh ? 'ការកំណត់' : 'Settings',
+          style: isKh
+              ? GoogleFonts.kantumruyPro(
+                  color: const Color(0xFF1E293B),
+                  fontSize: 18.5,
+                  fontWeight: FontWeight.w700,
+                  height: 1.3,
+                )
+              : GoogleFonts.poppins(
+                  color: const Color(0xFF1E293B),
+                  fontSize: 17.5,
+                  fontWeight: FontWeight.w600,
+                  height: 1.3,
+                ),
+        ),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Profile Hero Card (Double-ring Avatar, Name, Position, Department)
+  // ---------------------------------------------------------------------------
+  Widget _buildProfileHeroCard(bool isKh) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -194,9 +153,9 @@ class SettingView extends GetView<SettingViewController> {
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF1E293B).withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 16,
-            offset: const Offset(0, 5),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -210,132 +169,140 @@ class SettingView extends GetView<SettingViewController> {
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
             child: Row(
               children: [
-                // Solid/Gradient Blue Circle Avatar with initials
+                // Avatar with outer gold ring and inner solid gold circle
                 Obx(() {
                   final photo = controller.userPhoto.value;
-                  final name = controller.userName.value;
-                  final initials = _getInitials(name);
+                  String initial = 'B';
+                  final name = controller.userName.value.trim();
+                  if (name.isNotEmpty &&
+                      name != "Loading..." &&
+                      name != "No Name") {
+                    initial = name.startsWith('លោក ')
+                        ? (name.length > 5
+                            ? name.substring(4, 5).toUpperCase()
+                            : 'B')
+                        : name.substring(0, 1).toUpperCase();
+                  } else if (controller.username.value.isNotEmpty) {
+                    initial =
+                        controller.username.value.substring(0, 1).toUpperCase();
+                  }
 
                   return Container(
                     width: 66,
                     height: 66,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF3B82F6), Color(0xFF2563EB)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                      border: Border.all(
+                        color: AppColors.royalGold,
+                        width: 2.2,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF2563EB).withOpacity(0.28),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
                     ),
-                    child: ClipOval(
-                      child: photo.isNotEmpty
-                          ? Image.network(
-                              photo,
-                              fit: BoxFit.cover,
-                              errorBuilder: (c, e, s) =>
-                                  _buildInitialsAvatar(initials),
-                            )
-                          : _buildInitialsAvatar(initials),
+                    padding: const EdgeInsets.all(3.5),
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.royalGold,
+                      ),
+                      child: ClipOval(
+                        child: photo.isNotEmpty
+                            ? Image.network(
+                                photo,
+                                fit: BoxFit.cover,
+                                errorBuilder: (c, e, s) => Center(
+                                  child: Text(
+                                    initial,
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : Center(
+                                child: Text(
+                                  initial,
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                      ),
                     ),
                   );
                 }),
                 const SizedBox(width: 16),
 
-                // Name, Email, and Verified Role Badge
+                // Name, Role, Department
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Obx(
-                        () => Text(
-                          controller.userName.value,
-                          style: GoogleFonts.kantumruyPro(
-                            fontSize: 17.5,
+                      Obx(() {
+                        String displayName = controller.userName.value.trim();
+                        if (displayName.isEmpty ||
+                            displayName == "Loading..." ||
+                            displayName == "No Name") {
+                          displayName = controller.username.value.isNotEmpty
+                              ? controller.username.value
+                              : "bin sovanvong";
+                        }
+                        return Text(
+                          displayName,
+                          style: GoogleFonts.poppins(
+                            fontSize: 17,
                             fontWeight: FontWeight.w700,
-                            color: const Color(0xFF0F172A),
+                            color: const Color(0xFF1E293B),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
+                        );
+                      }),
                       const SizedBox(height: 3),
-                      Obx(
-                        () {
-                          final uname = controller.username.value;
-                          return Text(
-                            uname.isNotEmpty ? uname : "—",
-                            style: GoogleFonts.poppins(
-                              fontSize: 13,
-                              color: const Color(0xFF64748B),
-                              fontWeight: FontWeight.w500,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 7),
-
-                      // Role Pill Badge (Concept Blue)
                       Obx(() {
-                        final String roleKey = controller.userRoleDisplay.value;
-                        final String roleLabel = roleKey.tr;
-
-                        return Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 3.5,
+                        String role = controller.userRoleDisplay.value;
+                        String roleText = role == 'portal_user'
+                            ? (isKh ? 'មន្ត្រីរដ្ឋបាល' : 'Administrative Officer')
+                            : role.tr;
+                        return Text(
+                          roleText,
+                          style: GoogleFonts.kantumruyPro(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF64748B),
                           ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEFF6FF),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: const Color(0xFFBFDBFE).withOpacity(0.7),
-                              width: 0.8,
-                            ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        );
+                      }),
+                      const SizedBox(height: 2),
+                      Obx(() {
+                        String dept = controller.userInstitution.value.trim();
+                        if (dept.isEmpty || dept == "—") {
+                          dept = controller.userDepartment.value.trim();
+                        }
+                        if (dept.isEmpty || dept == "—") {
+                          dept = isKh
+                              ? 'អគ្គនាយកដ្ឋានរដ្ឋបាល'
+                              : 'General Department of Administration';
+                        }
+                        return Text(
+                          dept,
+                          style: GoogleFonts.kantumruyPro(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF64748B),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.check_circle_rounded,
-                                size: 13.5,
-                                color: Color(0xFF2563EB),
-                              ),
-                              const SizedBox(width: 4.5),
-                              Flexible(
-                                child: Text(
-                                  roleLabel,
-                                  style: GoogleFonts.kantumruyPro(
-                                    fontSize: 11.5,
-                                    fontWeight: FontWeight.w700,
-                                    color: const Color(0xFF1D4ED8),
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         );
                       }),
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
-                const Icon(
-                  Icons.chevron_right_rounded,
-                  color: Color(0xFF94A3B8),
-                  size: 22,
-                ),
               ],
             ),
           ),
@@ -344,466 +311,327 @@ class SettingView extends GetView<SettingViewController> {
     );
   }
 
-  Widget _buildInitialsAvatar(String initials) {
-    return Center(
-      child: Text(
-        initials,
-        style: GoogleFonts.poppins(
-          fontSize: 22,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-      ),
-    );
-  }
-
-  String _getInitials(String name) {
-    if (name.trim().isEmpty || name == "Loading...") return "U";
-    final parts = name.trim().split(RegExp(r'\s+'));
-    if (parts.length >= 2) {
-      final f = parts[0].isNotEmpty ? parts[0].characters.first : '';
-      final s = parts[1].isNotEmpty ? parts[1].characters.first : '';
-      return '$f$s'.toUpperCase();
-    }
-    return name.trim().characters.take(2).toString().toUpperCase();
-  }
-
-  /// 2. My Account Card ("គណនីរបស់ខ្ញុំ")
-  Widget _buildMyAccountCard() {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: const Color(0xFFF1F5F9),
-          width: 1.2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF1E293B).withOpacity(0.04),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(22),
-        child: InkWell(
-          onTap: _showPersonalInfoDialog,
-          borderRadius: BorderRadius.circular(22),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-            child: Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFEFF6FF),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.person_rounded,
-                    color: Color(0xFF2563EB),
-                    size: 22,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'my_account'.tr,
-                        style: GoogleFonts.kantumruyPro(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF0F172A),
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        'my_account_subtitle'.tr,
-                        style: GoogleFonts.kantumruyPro(
-                          fontSize: 12.5,
-                          color: const Color(0xFF64748B),
-                          fontWeight: FontWeight.w500,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(
-                  Icons.chevron_right_rounded,
-                  color: Color(0xFF94A3B8),
-                  size: 22,
-                ),
-              ],
+  // ---------------------------------------------------------------------------
+  // Section 1: គណនី (Account)
+  // ---------------------------------------------------------------------------
+  Widget _buildAccountSection(bool isKh) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(isKh ? 'គណនី' : 'account'.tr),
+        _buildSectionCard(
+          children: [
+            // Personal Info
+            _buildSettingTile(
+              iconWidget: _buildSquircleIcon(icon: Icons.person_outline_rounded),
+              title: 'personal_info'.tr,
+              trailing: _buildChevronTrailing(),
+              onTap: _showPersonalInfoDialog,
             ),
-          ),
+            if (showConnectedDevices) ...[
+              const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9)),
+              // Logged-in Devices
+              _buildSettingTile(
+                iconWidget: _buildSquircleIcon(icon: Icons.phone_iphone_rounded),
+                title: isKh ? 'ឧបករណ៍ដែលបានចូល' : 'connected_devices'.tr,
+                trailing: _buildChevronTrailing(text: isKh ? '២' : '2'),
+                onTap: () => _showConnectedDevicesDialog(isKh),
+              ),
+            ],
+          ],
         ),
-      ),
+      ],
     );
   }
 
-  /// 3. Language Selection Card ("ភាសា")
-  Widget _buildLanguageSelectionCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: const Color(0xFFF1F5F9),
-          width: 1.2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF1E293B).withOpacity(0.04),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFEFF6FF),
-                  shape: BoxShape.circle,
+  // ---------------------------------------------------------------------------
+  // Section 2: ការជូនដំណឹង (Notifications)
+  // ---------------------------------------------------------------------------
+  Widget _buildNotificationSection(bool isKh) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(isKh ? 'ការជូនដំណឹង' : 'notification'.tr),
+        _buildSectionCard(
+          children: [
+            // Receive Notifications
+            Obx(
+              () => _buildSettingTile(
+                iconWidget: _buildSquircleIcon(
+                  icon: Icons.notifications_none_rounded,
                 ),
-                child: const Icon(
-                  Icons.language_rounded,
-                  color: Color(0xFF2563EB),
-                  size: 22,
+                title: isKh ? 'ទទួលការជូនដំណឹង' : 'receive_notifications'.tr,
+                subtitle: isKh
+                    ? 'ពីកម្មវិធី និងអង្គភាព'
+                    : 'receive_notifications_desc'.tr,
+                trailing: _buildCustomSwitch(
+                  value: controller.receiveNotifications.value,
+                  onChanged: controller.toggleReceiveNotifications,
                 ),
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'language'.tr,
-                      style: GoogleFonts.kantumruyPro(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF0F172A),
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      'choose_language_desc'.tr,
-                      style: GoogleFonts.kantumruyPro(
-                        fontSize: 12.5,
-                        color: const Color(0xFF64748B),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
+            ),
+            const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9)),
+            // Notification Sound
+            Obx(
+              () => _buildSettingTile(
+                iconWidget: _buildSquircleIcon(
+                  icon: Icons.volume_up_outlined,
+                ),
+                title: isKh ? 'សំឡេងជូនដំណឹង' : 'notification_sound'.tr,
+                subtitle: isKh
+                    ? 'បន្លឺសំឡេងពេលមានដំណឹងថ្មី'
+                    : 'notification_sound_desc'.tr,
+                trailing: _buildCustomSwitch(
+                  value: controller.notificationSound.value,
+                  onChanged: controller.toggleNotificationSound,
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 16),
-
-          // Two Language Options
-          Obx(() {
-            final currentLang = LocalizationService.currentLanguageCode.value;
-            final isKh = currentLang == 'km';
-
-            return Row(
-              children: [
-                // Khmer Option
-                Expanded(
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () => LocalizationService.changeLanguage('km'),
-                      borderRadius: BorderRadius.circular(16),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isKh
-                              ? const Color(0xFFEFF6FF)
-                              : const Color(0xFFF8FAFC),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: isKh
-                                ? const Color(0xFF2563EB)
-                                : const Color(0xFFE2E8F0),
-                            width: isKh ? 1.5 : 1,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text('🇰🇭', style: TextStyle(fontSize: 17)),
-                            const SizedBox(width: 6),
-                            Flexible(
-                              child: Text(
-                                'khmer'.tr,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.kantumruyPro(
-                                  fontSize: 14,
-                                  fontWeight: isKh
-                                      ? FontWeight.w700
-                                      : FontWeight.w600,
-                                  color: const Color(0xFF0F172A),
-                                ),
-                              ),
-                            ),
-                            if (isKh) ...[
-                              const SizedBox(width: 4),
-                              const Icon(
-                                Icons.check_circle_rounded,
-                                size: 16,
-                                color: Color(0xFF2563EB),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-
-                // English Option
-                Expanded(
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () => LocalizationService.changeLanguage('en'),
-                      borderRadius: BorderRadius.circular(16),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          color: !isKh
-                              ? const Color(0xFFEFF6FF)
-                              : const Color(0xFFF8FAFC),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: !isKh
-                                ? const Color(0xFF2563EB)
-                                : const Color(0xFFE2E8F0),
-                            width: !isKh ? 1.5 : 1,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text('🇬🇧', style: TextStyle(fontSize: 17)),
-                            const SizedBox(width: 6),
-                            Flexible(
-                              child: Text(
-                                'english'.tr,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 13.5,
-                                  fontWeight: !isKh
-                                      ? FontWeight.w700
-                                      : FontWeight.w600,
-                                  color: const Color(0xFF0F172A),
-                                ),
-                              ),
-                            ),
-                            if (!isKh) ...[
-                              const SizedBox(width: 4),
-                              const Icon(
-                                Icons.check_circle_rounded,
-                                size: 16,
-                                color: Color(0xFF2563EB),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            );
-          }),
-        ],
-      ),
-    );
-  }
-
-  /// 4. Security & Privacy Card ("សុវត្ថិភាព និងភាពឯកជន")
-  Widget _buildSecurityActionsCard(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: const Color(0xFFF1F5F9),
-          width: 1.2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF1E293B).withOpacity(0.04),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFEFF6FF),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.shield_outlined,
-                  color: Color(0xFF2563EB),
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'security_and_privacy'.tr,
-                      style: GoogleFonts.kantumruyPro(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF0F172A),
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      'security_and_privacy_desc'.tr,
-                      style: GoogleFonts.kantumruyPro(
-                        fontSize: 12.5,
-                        color: const Color(0xFF64748B),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          const Divider(height: 1, color: Color(0xFFF1F5F9), thickness: 1),
-          const SizedBox(height: 4),
-
-          // 1. Change Password Tile
-          _buildSecurityTile(
-            icon: Icons.lock_outline_rounded,
-            title: 'change_password'.tr,
-            onTap: controller.changePassword,
-          ),
-
-          const Divider(height: 1, color: Color(0xFFF1F5F9), thickness: 1),
-
-          // 2. Lock App Now Tile (Explicit UI lock without revoking session)
-          _buildSecurityTile(
-            icon: Icons.screen_lock_portrait_rounded,
-            title: 'lock_app_now'.tr,
-            onTap: () {
-              if (Get.isRegistered<AppLockService>()) {
-                AppLockService.to.lockNow();
-              }
-            },
-          ),
-
-          if (showNotification) ...[
-            const Divider(height: 1, color: Color(0xFFF1F5F9), thickness: 1),
-
-            // 3. Notifications Tile
-            _buildSecurityTile(
-              icon: Icons.notifications_none_rounded,
-              title: 'notification'.tr,
-              onTap: () => Get.toNamed(AppRoutes.notification),
             ),
           ],
+        ),
+      ],
+    );
+  }
 
-          const Divider(height: 1, color: Color(0xFFF1F5F9), thickness: 1),
+  // ---------------------------------------------------------------------------
+  // Section 3: សុវត្ថិភាព និងភាពឯកជន (Security & Privacy)
+  // ---------------------------------------------------------------------------
+  Widget _buildSecuritySection(BuildContext context, bool isKh) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(
+          isKh ? 'សុវត្ថិភាព និងភាពឯកជន' : 'security_and_privacy'.tr,
+        ),
+        _buildSectionCard(
+          children: [
+            // Change Password
+            _buildSettingTile(
+              iconWidget: _buildSquircleIcon(
+                icon: Icons.lock_outline_rounded,
+              ),
+              title: 'change_password'.tr,
+              trailing: _buildChevronTrailing(),
+              onTap: controller.changePassword,
+            ),
+            const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9)),
+            // Lock App Now
+            _buildSettingTile(
+              iconWidget: _buildSquircleIcon(
+                icon: Icons.screen_lock_portrait_rounded,
+              ),
+              title: 'lock_app_now'.tr,
+              trailing: _buildChevronTrailing(),
+              onTap: () {
+                if (Get.isRegistered<AppLockService>()) {
+                  AppLockService.to.lockNow();
+                }
+              },
+            ),
+            const Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9)),
+            // Privacy Policy
+            _buildSettingTile(
+              iconWidget: _buildSquircleIcon(
+                icon: Icons.verified_user_outlined,
+              ),
+              title: 'privacy'.tr,
+              trailing: _buildChevronTrailing(),
+              onTap: () => _showPrivacyDialog(context),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
 
-          // 4. Privacy Tile
-          _buildSecurityTile(
-            icon: Icons.verified_user_outlined,
-            title: 'privacy'.tr,
-            onTap: () => _showPrivacyDialog(context),
+  // ---------------------------------------------------------------------------
+  // Standalone Logout Card (ចាកចេញពីគណនី)
+  // ---------------------------------------------------------------------------
+  Widget _buildLogoutCard(BuildContext context, bool isKh) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFFF1F5F9),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
           ),
         ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => showLogoutConfirmDialog(
+              context,
+              onConfirm: controller.logout,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFEE2E2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    alignment: Alignment.center,
+                    child: const Icon(
+                      Icons.logout_rounded,
+                      color: Color(0xFFDC2626),
+                      size: 21,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Text(
+                      'logout'.tr,
+                      style: GoogleFonts.kantumruyPro(
+                        fontSize: 15.5,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFFDC2626),
+                      ),
+                    ),
+                  ),
+                  const Icon(
+                    Icons.chevron_right_rounded,
+                    color: Color(0xFFDC2626),
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildSecurityTile({
-    required IconData icon,
+  // ---------------------------------------------------------------------------
+  // UI Helper Components
+  // ---------------------------------------------------------------------------
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 8),
+      child: Text(
+        title,
+        style: GoogleFonts.kantumruyPro(
+          fontSize: 15.5,
+          fontWeight: FontWeight.w700,
+          color: AppColors.royalGold,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionCard({required List<Widget> children}) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFFF1F5F9),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Column(
+          children: children,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSquircleIcon({
+    IconData? icon,
+    Widget? child,
+    Color bgColor = const Color(0xFFF6EEDB),
+    Color iconColor = AppColors.royalGold,
+    double size = 40,
+  }) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      alignment: Alignment.center,
+      child: child ??
+          Icon(
+            icon,
+            color: iconColor,
+            size: 21,
+          ),
+    );
+  }
+
+  Widget _buildSettingTile({
+    required Widget iconWidget,
     required String title,
-    required VoidCallback onTap,
+    String? subtitle,
+    Widget? trailing,
+    VoidCallback? onTap,
   }) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
             children: [
-              Container(
-                width: 38,
-                height: 38,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFEFF6FF),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icon, color: const Color(0xFF2563EB), size: 19),
-              ),
+              iconWidget,
               const SizedBox(width: 14),
               Expanded(
-                child: Text(
-                  title,
-                  style: GoogleFonts.kantumruyPro(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF0F172A),
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      title,
+                      style: GoogleFonts.kantumruyPro(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF1E293B),
+                      ),
+                    ),
+                    if (subtitle != null && subtitle.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: GoogleFonts.kantumruyPro(
+                          fontSize: 12,
+                          color: const Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-              const Icon(
-                Icons.chevron_right_rounded,
-                color: Color(0xFF94A3B8),
-                size: 20,
-              ),
+              if (trailing != null) ...[
+                const SizedBox(width: 10),
+                trailing,
+              ],
             ],
           ),
         ),
@@ -811,69 +639,289 @@ class SettingView extends GetView<SettingViewController> {
     );
   }
 
-  /// 5. Standalone Logout Card ("ចាកចេញពីគណនី")
-  Widget _buildLogoutCard(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: const Color(0xFFF1F5F9),
-          width: 1.2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF1E293B).withOpacity(0.04),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
+  Widget _buildChevronTrailing({String? text}) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (text != null && text.isNotEmpty) ...[
+          Text(
+            text,
+            style: GoogleFonts.kantumruyPro(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF64748B),
+            ),
           ),
+          const SizedBox(width: 8),
         ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(22),
-        child: InkWell(
-          onTap: () => showLogoutConfirmDialog(
-            context,
-            onConfirm: controller.logout,
-          ),
-          borderRadius: BorderRadius.circular(22),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-            child: Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFFEE2E2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.logout_rounded,
-                    color: Color(0xFFDC2626),
-                    size: 22,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Text(
-                    'logout'.tr,
-                    style: GoogleFonts.kantumruyPro(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFFDC2626),
-                    ),
-                  ),
-                ),
-                const Icon(
-                  Icons.chevron_right_rounded,
-                  color: Color(0xFF94A3B8),
-                  size: 22,
+        const Icon(
+          Icons.chevron_right_rounded,
+          color: Color(0xFF64748B),
+          size: 20,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCustomSwitch({
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return GestureDetector(
+      onTap: () => onChanged(!value),
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        width: 48,
+        height: 28,
+        padding: const EdgeInsets.all(3),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: value ? AppColors.royalGold : const Color(0xFFCBD5E1),
+        ),
+        child: AnimatedAlign(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+          alignment: value ? Alignment.centerRight : Alignment.centerLeft,
+          child: Container(
+            width: 22,
+            height: 22,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 3,
+                  offset: Offset(0, 1),
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Modal Dialogs (Connected Devices, Language)
+  // ---------------------------------------------------------------------------
+  void _showConnectedDevicesDialog(bool isKh) {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        child: Padding(
+          padding: const EdgeInsets.all(22),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF6EEDB),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: const Color(0xFFEDE3CE),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.devices_rounded,
+                          color: AppColors.royalGold,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        isKh ? 'ឧបករណ៍ដែលបានចូល' : 'connected_devices'.tr,
+                        style: GoogleFonts.kantumruyPro(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF1E293B),
+                        ),
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    onPressed: () => Get.back(),
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      color: Color(0xFF64748B),
+                      size: 20,
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              const Divider(height: 1, color: Color(0xFFF1F5F9), thickness: 1),
+              const SizedBox(height: 14),
+
+              // Device 1: Current Mobile Device
+              Row(
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFDCFCE7),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.phone_iphone_rounded,
+                      color: Color(0xFF16A34A),
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          isKh
+                              ? 'ស្មាតហ្វូន (ឧបករណ៍នេះ)'
+                              : 'Smartphone (This Device)',
+                          style: GoogleFonts.kantumruyPro(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF1E293B),
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Core Portal Mobile App',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: const Color(0xFF64748B),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF0FDF4),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: const Color(0xFF86EFAC),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: Text(
+                      isKh ? 'កំពុងសកម្ម' : 'Active now',
+                      style: GoogleFonts.kantumruyPro(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF16A34A),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 10),
+                child: Divider(
+                  height: 1,
+                  color: Color(0xFFF8FAFC),
+                  thickness: 1,
+                ),
+              ),
+
+              // Device 2: Web Session
+              Row(
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.laptop_mac_rounded,
+                      color: Color(0xFF64748B),
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          isKh
+                              ? 'កុំព្យូទ័រ (Web Portal)'
+                              : 'Workstation (Web Portal)',
+                          style: GoogleFonts.kantumruyPro(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF1E293B),
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Chrome on Windows',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: const Color(0xFF64748B),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    isKh ? 'ម្សិលមិញ' : 'Yesterday',
+                    style: GoogleFonts.kantumruyPro(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF94A3B8),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // Close Button
+              SizedBox(
+                width: double.infinity,
+                height: 46,
+                child: ElevatedButton(
+                  onPressed: () => Get.back(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.royalGold,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    'close'.tr,
+                    style: GoogleFonts.kantumruyPro(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -896,13 +944,17 @@ class SettingView extends GetView<SettingViewController> {
               Container(
                 width: 52,
                 height: 52,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFEFF6FF),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF6EEDB),
                   shape: BoxShape.circle,
+                  border: Border.all(
+                    color: const Color(0xFFEDE3CE),
+                    width: 0.8,
+                  ),
                 ),
                 child: const Icon(
                   Icons.verified_user_outlined,
-                  color: Color(0xFF2563EB),
+                  color: AppColors.royalGold,
                   size: 26,
                 ),
               ),
@@ -912,7 +964,7 @@ class SettingView extends GetView<SettingViewController> {
                 style: GoogleFonts.kantumruyPro(
                   fontSize: 17,
                   fontWeight: FontWeight.bold,
-                  color: const Color(0xFF0F172A),
+                  color: const Color(0xFF1E293B),
                 ),
               ),
               const SizedBox(height: 10),
@@ -928,11 +980,11 @@ class SettingView extends GetView<SettingViewController> {
               const SizedBox(height: 22),
               SizedBox(
                 width: double.infinity,
-                height: 44,
+                height: 46,
                 child: ElevatedButton(
                   onPressed: () => Get.back(),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1D4ED8),
+                    backgroundColor: AppColors.royalGold,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -978,12 +1030,16 @@ class SettingView extends GetView<SettingViewController> {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFEFF6FF),
+                          color: const Color(0xFFF6EEDB),
                           borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: const Color(0xFFEDE3CE),
+                            width: 0.8,
+                          ),
                         ),
                         child: const Icon(
                           Icons.badge_outlined,
-                          color: Color(0xFF2563EB),
+                          color: AppColors.royalGold,
                           size: 20,
                         ),
                       ),
@@ -993,7 +1049,7 @@ class SettingView extends GetView<SettingViewController> {
                         style: GoogleFonts.kantumruyPro(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xff1E293B),
+                          color: const Color(0xFF1E293B),
                         ),
                       ),
                     ],
@@ -1011,15 +1067,15 @@ class SettingView extends GetView<SettingViewController> {
                 ],
               ),
               const SizedBox(height: 14),
-              const Divider(height: 1, color: Color(0xffF1F5F9), thickness: 1),
+              const Divider(height: 1, color: Color(0xFFF1F5F9), thickness: 1),
               const SizedBox(height: 14),
 
               // Institution Row
               Obx(
                 () => _buildInfoTile(
                   icon: Icons.account_balance_outlined,
-                  iconBgColor: const Color(0xffE0F2FE),
-                  iconColor: const Color(0xff0284C7),
+                  iconBgColor: const Color(0xFFF6EEDB),
+                  iconColor: AppColors.royalGold,
                   label: 'institution'.tr,
                   value: controller.userInstitution.value,
                 ),
@@ -1027,15 +1083,15 @@ class SettingView extends GetView<SettingViewController> {
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 8),
                 child:
-                    Divider(height: 1, color: Color(0xffF8FAFC), thickness: 1),
+                    Divider(height: 1, color: Color(0xFFF8FAFC), thickness: 1),
               ),
 
               // Department Row
               Obx(
                 () => _buildInfoTile(
                   icon: Icons.domain_rounded,
-                  iconBgColor: const Color(0xffFEF3C7),
-                  iconColor: const Color(0xffD97706),
+                  iconBgColor: const Color(0xFFFEF3C7),
+                  iconColor: const Color(0xFFD97706),
                   label: 'department'.tr,
                   value: controller.userDepartment.value,
                 ),
@@ -1043,7 +1099,7 @@ class SettingView extends GetView<SettingViewController> {
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 8),
                 child:
-                    Divider(height: 1, color: Color(0xffF8FAFC), thickness: 1),
+                    Divider(height: 1, color: Color(0xFFF8FAFC), thickness: 1),
               ),
 
               // Bureau Row
@@ -1051,8 +1107,8 @@ class SettingView extends GetView<SettingViewController> {
                 final bureau = controller.bureauName.value;
                 return _buildInfoTile(
                   icon: Icons.apartment_rounded,
-                  iconBgColor: const Color(0xffDCFCE7),
-                  iconColor: const Color(0xff16A34A),
+                  iconBgColor: const Color(0xFFDCFCE7),
+                  iconColor: const Color(0xFF16A34A),
                   label: 'bureau'.tr,
                   value: bureau.isNotEmpty ? bureau : "—",
                 );
@@ -1060,7 +1116,7 @@ class SettingView extends GetView<SettingViewController> {
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 8),
                 child:
-                    Divider(height: 1, color: Color(0xffF8FAFC), thickness: 1),
+                    Divider(height: 1, color: Color(0xFFF8FAFC), thickness: 1),
               ),
 
               // Employment Status Row
@@ -1077,8 +1133,8 @@ class SettingView extends GetView<SettingViewController> {
                       height: 36,
                       decoration: BoxDecoration(
                         color: isSuspended
-                            ? const Color(0xffFEE2E2)
-                            : const Color(0xffDCFCE7),
+                            ? const Color(0xFFFEE2E2)
+                            : const Color(0xFFDCFCE7),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -1086,8 +1142,8 @@ class SettingView extends GetView<SettingViewController> {
                             ? Icons.pause_circle_outline_rounded
                             : Icons.check_circle_outline_rounded,
                         color: isSuspended
-                            ? const Color(0xffDC2626)
-                            : const Color(0xff16A34A),
+                            ? const Color(0xFFDC2626)
+                            : const Color(0xFF16A34A),
                         size: 18,
                       ),
                     ),
@@ -1100,7 +1156,7 @@ class SettingView extends GetView<SettingViewController> {
                             'employment_status'.tr,
                             style: GoogleFonts.kantumruyPro(
                               fontSize: 12,
-                              color: const Color(0xff64748B),
+                              color: const Color(0xFF64748B),
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -1111,8 +1167,8 @@ class SettingView extends GetView<SettingViewController> {
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
                               color: isSuspended
-                                  ? const Color(0xffDC2626)
-                                  : const Color(0xff16A34A),
+                                  ? const Color(0xFFDC2626)
+                                  : const Color(0xFF16A34A),
                             ),
                           ),
                         ],
@@ -1125,13 +1181,13 @@ class SettingView extends GetView<SettingViewController> {
                       ),
                       decoration: BoxDecoration(
                         color: isSuspended
-                            ? const Color(0xffFEF2F2)
-                            : const Color(0xffF0FDF4),
+                            ? const Color(0xFFFEF2F2)
+                            : const Color(0xFFF0FDF4),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           color: isSuspended
-                              ? const Color(0xffF87171)
-                              : const Color(0xff86EFAC),
+                              ? const Color(0xFFF87171)
+                              : const Color(0xFF86EFAC),
                           width: 0.8,
                         ),
                       ),
@@ -1141,8 +1197,8 @@ class SettingView extends GetView<SettingViewController> {
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
                           color: isSuspended
-                              ? const Color(0xffDC2626)
-                              : const Color(0xff16A34A),
+                              ? const Color(0xFFDC2626)
+                              : const Color(0xFF16A34A),
                         ),
                       ),
                     ),
@@ -1154,14 +1210,14 @@ class SettingView extends GetView<SettingViewController> {
               // Close Button
               SizedBox(
                 width: double.infinity,
-                height: 44,
+                height: 46,
                 child: ElevatedButton(
                   onPressed: () => Get.back(),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1D4ED8),
+                    backgroundColor: AppColors.royalGold,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(14),
                     ),
                     elevation: 0,
                   ),
@@ -1209,7 +1265,7 @@ class SettingView extends GetView<SettingViewController> {
                 label,
                 style: GoogleFonts.kantumruyPro(
                   fontSize: 12,
-                  color: const Color(0xff64748B),
+                  color: const Color(0xFF64748B),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -1219,7 +1275,7 @@ class SettingView extends GetView<SettingViewController> {
                 style: GoogleFonts.kantumruyPro(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xff1E293B),
+                  color: const Color(0xFF1E293B),
                 ),
               ),
             ],
@@ -1238,7 +1294,7 @@ class SettingView extends GetView<SettingViewController> {
             style: GoogleFonts.kantumruyPro(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: const Color(0xff475569),
+              color: const Color(0xFF475569),
             ),
           ),
           const SizedBox(height: 4),
@@ -1254,51 +1310,4 @@ class SettingView extends GetView<SettingViewController> {
       ),
     );
   }
-}
-
-/// Subtle soft background wave painter matching corporate mobile portal design
-class _SubtleBackgroundWavePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint1 = Paint()
-      ..color = const Color(0xFFE2EDFB).withOpacity(0.65)
-      ..style = PaintingStyle.fill;
-
-    final path1 = Path();
-    path1.moveTo(0, size.height * 0.45);
-    path1.cubicTo(
-      size.width * 0.35,
-      size.height * 0.55,
-      size.width * 0.65,
-      size.height * 0.25,
-      size.width,
-      size.height * 0.45,
-    );
-    path1.lineTo(size.width, size.height);
-    path1.lineTo(0, size.height);
-    path1.close();
-    canvas.drawPath(path1, paint1);
-
-    final paint2 = Paint()
-      ..color = const Color(0xFFE8F1FC).withOpacity(0.55)
-      ..style = PaintingStyle.fill;
-
-    final path2 = Path();
-    path2.moveTo(0, size.height * 0.65);
-    path2.cubicTo(
-      size.width * 0.4,
-      size.height * 0.45,
-      size.width * 0.7,
-      size.height * 0.75,
-      size.width,
-      size.height * 0.55,
-    );
-    path2.lineTo(size.width, size.height);
-    path2.lineTo(0, size.height);
-    path2.close();
-    canvas.drawPath(path2, paint2);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

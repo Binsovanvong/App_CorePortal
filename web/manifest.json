@@ -1,6 +1,6 @@
 {
-    "name": "core_portal",
-    "short_name": "core_portal",
+    "name": "MOI Portal",
+    "short_name": "MOI Portal",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#ffffff",

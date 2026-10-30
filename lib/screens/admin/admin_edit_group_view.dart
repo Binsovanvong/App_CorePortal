@@ -1243,16 +1243,13 @@ class _AdminEditGroupViewState extends State<AdminEditGroupView> {
       child: Center(
         child: ClipRRect(
           borderRadius: BorderRadius.circular(10),
-          child: Padding(
-            padding: const EdgeInsets.all(3.5),
-            child: AppIconWidget(
-              iconUrl: iconUrl,
-              localAsset: localAsset.isNotEmpty
-                  ? localAsset
-                  : 'assets/img/about-moi-logo.png',
-              size: 30,
-              fit: BoxFit.contain,
-            ),
+          child: AppIconWidget(
+            iconUrl: iconUrl,
+            localAsset: localAsset.isNotEmpty
+                ? localAsset
+                : 'assets/img/about-moi-logo.png',
+            size: 42,
+            fit: BoxFit.contain,
           ),
         ),
       ),

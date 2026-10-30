@@ -16,6 +16,32 @@ class AppColors {
   static const Color warning = Color(0xffF9A825);
   static const Color danger = Color(0xffE53935);
 
+  // Typography & Text Colors
+  static const Color textPrimary = Color(0xFF0F172A);
+  static const Color textSecondary = Color(0xFF64748B);
+  static const Color textMuted = Color(0xFF94A3B8);
+  static const Color textNavy = Color(0xFF163774);
+
+  // Concept Design Royal Khmer Bronze Gold & Warm Ivory Palette
+  static const Color royalGold = Color(0xFF8C6615);
+  static const Color royalGoldLight = Color(0xFFF6EEDB);
+  static const Color warmCream = Color(0xFFFBF8F2);
+  static const Color warmCreamBorder = Color(0xFFF1E8DA);
+  static const Color warmIvory = warmCream;
+  static const Color warmIvoryBorder = warmCreamBorder;
+  static const Color iconBeige = Color(0xFFF7EEDF);
+
+  // Royal Navy Gradient (HomeView App Bar, Action Buttons, and Brand Badges)
+  static const LinearGradient royalNavyGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0xFF0F3278),
+      Color(0xFF163774),
+      Color(0xFF194498),
+    ],
+  );
+
   static const LinearGradient warmBackgroundGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,

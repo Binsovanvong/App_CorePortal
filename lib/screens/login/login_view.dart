@@ -125,7 +125,7 @@ class LoginView extends GetView<LoginController> {
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.kantumruyPro(
                                       fontSize: 24,
-                                      fontWeight: FontWeight.w800,
+                                      fontWeight: FontWeight.w700,
                                       color: const Color(0xFFD4AF37),
                                       letterSpacing: 0.2,
                                     ),
@@ -198,7 +198,7 @@ class LoginView extends GetView<LoginController> {
                                     'welcome_title'.tr,
                                     style: GoogleFonts.kantumruyPro(
                                       fontSize: 22,
-                                      fontWeight: FontWeight.w800,
+                                      fontWeight: FontWeight.w700,
                                       color: const Color(0xFF163774),
                                     ),
                                   ),
@@ -849,7 +849,7 @@ class LoginView extends GetView<LoginController> {
                         textAlign: TextAlign.center,
                         style: GoogleFonts.kantumruyPro(
                           fontSize: 24,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           color: const Color(0xFFD4AF37),
                           letterSpacing: 0.2,
                         ),

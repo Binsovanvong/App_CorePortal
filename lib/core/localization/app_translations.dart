@@ -33,8 +33,28 @@ class AppTranslations extends Translations {
       'portal_user': 'អ្នកប្រើប្រាស់',
       'home': 'ទំព័រដើម',
       'announcement': 'សេចក្តីជូនដំណឹង',
+      'nav_announcement': 'ជូនដំណឹង',
+      'attachment': 'ឯកសារភ្ជាប់',
+      'general_admin_dept': 'អគ្គនាយកដ្ឋានរដ្ឋបាល',
+      'download_success': 'ទាញយកឯកសារជោគជ័យ',
       'notification': 'ការជូនដំណឹង',
+      'unread': 'មិនទាន់អាន',
+      'no_unread_announcements': 'មិនមានសេចក្តីជូនដំណឹងមិនទាន់អានទេ',
       'application': 'កម្មវិធី',
+      'applications': 'កម្មវិធី',
+      'by_department': 'តាមអង្គភាព',
+      'general_applications': 'កម្មវិធីប្រើប្រាស់ទូទៅ',
+      'department_applications': 'កម្មវិធីសម្រាប់ប្រើប្រាស់តាមអង្គភាព',
+      'total': 'សរុប',
+      'search_apps_placeholder': 'ស្វែងរកកម្មវិធី',
+      'latest_announcements': 'សេចក្តីជូនដំណឹងថ្មី',
+      'online_complaints_title': 'ប្រព័ន្ធទទួលពាក្យ\nបណ្តឹងអនឡាញ',
+      'single_window_title': 'ប្រព័ន្ធច្រកចេញ\nចូលតែមួយ',
+      'personnel_system_title': 'ប្រព័ន្ធគ្រប់គ្រងបុគ្គលិក',
+      'doc_system_title': 'ប្រព័ន្ធគ្រប់គ្រងឯកសារ',
+      'stats_system_title': 'ប្រព័ន្ធស្ថិតិ',
+      'finance_system_title': 'ប្រព័ន្ធហិរញ្ញវត្ថុ',
+      'good_morning_prefix': 'អរុណសួស្ដី, លោក',
       'success': 'ជោគជ័យ',
       'error': 'បរាជ័យ',
       'info': 'ព័ត៌មាន',
@@ -63,8 +83,10 @@ class AppTranslations extends Translations {
       'announcement_subtitle': 'តាមដានសេចក្តីជូនដំណឹង និងព័ត៌មានសំខាន់ៗ',
       'no_applications_found': 'រកមិនឃើញកម្មវិធីឡើយ',
       'no_applications_yet': 'អត់ទាន់មានកម្មវិធី',
-      'no_applications_yet_desc': 'មិនទាន់មានកម្មវិធីត្រូវបានដាក់ឱ្យប្រើប្រាស់នៅឡើយទេ',
-      'no_search_results_desc': 'សូមព្យាយាមស្វែងរកជាមួយពាក្យគន្លឹះ ឬអង្គភាពផ្សេងទៀត',
+      'no_applications_yet_desc':
+          'មិនទាន់មានកម្មវិធីត្រូវបានដាក់ឱ្យប្រើប្រាស់នៅឡើយទេ',
+      'no_search_results_desc':
+          'សូមព្យាយាមស្វែងរកជាមួយពាក្យគន្លឹះ ឬអង្គភាពផ្សេងទៀត',
       'refresh': 'ផ្ទុកឡើងវិញ',
       'all_announcements_list': 'បញ្ជីសេចក្តីប្រកាសទាំងអស់',
       'create_new': 'បង្កើតថ្មី',
@@ -90,11 +112,13 @@ class AppTranslations extends Translations {
       'enter_username': 'បញ្ចូលឈ្មោះអ្នកប្រើប្រាស់',
       'enter_password': 'បញ្ចូលលេខសម្ងាត់',
       'register_device_title': 'ចុះឈ្មោះឧបករណ៍នេះ?',
-      'register_device_content': 'តើអ្នកចង់ចុះឈ្មោះ Face ID / Touch ID ឬស្នាមម្រាមដៃ លើឧបករណ៍នេះ សម្រាប់ការចូលប្រើប្រាស់លើកក្រោយដែរឬទេ?',
+      'register_device_content':
+          'តើអ្នកចង់ចុះឈ្មោះ Face ID / Touch ID ឬស្នាមម្រាមដៃ លើឧបករណ៍នេះ សម្រាប់ការចូលប្រើប្រាស់លើកក្រោយដែរឬទេ?',
       'not_now': 'ពេលក្រោយ',
       'register': 'ចុះឈ្មោះ',
       'device_reg_cancelled': 'ការចុះឈ្មោះឧបករណ៍ត្រូវបានបោះបង់',
-      'biometric_reason': 'សូមផ្ទៀងផ្ទាត់ Face ID ឬស្នាមម្រាមដៃ ដើម្បីចូលប្រើប្រាស់',
+      'biometric_reason':
+          'សូមផ្ទៀងផ្ទាត់ Face ID ឬស្នាមម្រាមដៃ ដើម្បីចូលប្រើប្រាស់',
       'biometric_title': 'ការផ្ទៀងផ្ទាត់ជីវមាត្រ',
       'biometric_hint': 'ប្រើស្នាមម្រាមដៃ ឬ Face ID',
       'biometric_auth_success': 'ការផ្ទៀងផ្ទាត់ជីវមាត្រទទួលបានជោគជ័យ',
@@ -103,7 +127,8 @@ class AppTranslations extends Translations {
       'app_locked': 'កម្មវិធីត្រូវបានចាក់សោ',
       'unlock_with_biometrics': 'ដោះសោដោយជីវមាត្រ',
       'switch_to_password_login': 'ចូលដោយប្រើឈ្មោះគណនី និងពាក្យសម្ងាត់',
-      'biometric_not_supported': 'ឧបករណ៍នេះមិនគាំទ្រ Face ID / Touch ID ទេ ឬមិនទាន់ចុះឈ្មោះ',
+      'biometric_not_supported':
+          'ឧបករណ៍នេះមិនគាំទ្រ Face ID / Touch ID ទេ ឬមិនទាន់ចុះឈ្មោះ',
       'biometric_failed': 'ការផ្ទៀងផ្ទាត់ជីវមាត្របរាជ័យ',
       'biometric_cancelled': 'ការផ្ទៀងផ្ទាត់ត្រូវបានបោះបង់',
       'biometric_unavailable': 'Face ID / Touch ID មិនអាចប្រើបាន',
@@ -111,7 +136,8 @@ class AppTranslations extends Translations {
       'logging_in': 'កំពុងចូល...',
       'logout_confirm_title': 'ចាកចេញពីគណនី',
       'logout_confirm_message': 'តើអ្នកពិតជាចង់ចាកចេញពីគណនីនេះមែនទេ?',
-      'logout_confirm_admin_message': 'តើអ្នកពិតជាចង់ចាកចេញពីគណនី Admin នេះមែនទេ?',
+      'logout_confirm_admin_message':
+          'តើអ្នកពិតជាចង់ចាកចេញពីគណនី Admin នេះមែនទេ?',
       'all_units': 'អង្គភាពទាំងអស់',
       'sub_category': 'ប្រភេទរង',
       'all_applications_list': 'បញ្ជីកម្មវិធីទាំងអស់',
@@ -194,7 +220,8 @@ class AppTranslations extends Translations {
       'cannot_save_groups': 'មិនអាចរក្សាទុកក្រុមបានទេ',
       'device_verification_failed': 'ការផ្ទៀងផ្ទាត់ឧបករណ៍បរាជ័យ',
       'device_registration_failed': 'ការចុះឈ្មោះឧបករណ៍បរាជ័យ',
-      'no_internet_error': 'មិនមានការតភ្ជាប់អ៊ីនធឺណិតទេ សូមពិនិត្យមើលបណ្តាញរបស់អ្នក',
+      'no_internet_error':
+          'មិនមានការតភ្ជាប់អ៊ីនធឺណិតទេ សូមពិនិត្យមើលបណ្តាញរបស់អ្នក',
       'timeout_error': 'ការតភ្ជាប់បានផុតកំណត់ សូមព្យាយាមម្តងទៀត',
       'server_error': 'មានបញ្ហាក្នុងការតភ្ជាប់ម៉ាស៊ីនមេ សូមព្យាយាមម្តងទៀត',
       'network_error': 'មានបញ្ហាបណ្តាញ សូមព្យាយាមម្តងទៀត',
@@ -220,13 +247,18 @@ class AppTranslations extends Translations {
       'first_login_title': 'សូមប្តូរលេខសម្ងាត់សម្រាប់ការចូលប្រើប្រាស់លើកដំបូង',
       'first_login_subtitle': 'ដើម្បីសុវត្ថិភាពគណនី សូមកំណត់លេខសម្ងាត់ថ្មី',
       'password_length_error': 'លេខសម្ងាត់ត្រូវមានយ៉ាងតិច ៨ តួអក្សរ',
-      'password_uppercase_error': 'ពាក្យសម្ងាត់ត្រូវមានអក្សរធំ (A-Z) យ៉ាងហោចណាស់មួយតួ',
-      'password_lowercase_error': 'ពាក្យសម្ងាត់ត្រូវមានអក្សរតូច (a-z) យ៉ាងហោចណាស់មួយតួ',
+      'password_uppercase_error':
+          'ពាក្យសម្ងាត់ត្រូវមានអក្សរធំ (A-Z) យ៉ាងហោចណាស់មួយតួ',
+      'password_lowercase_error':
+          'ពាក្យសម្ងាត់ត្រូវមានអក្សរតូច (a-z) យ៉ាងហោចណាស់មួយតួ',
       'password_number_error': 'ពាក្យសម្ងាត់ត្រូវមានលេខ (0-9) យ៉ាងហោចណាស់មួយតួ',
-      'password_special_error': 'ពាក្យសម្ងាត់ត្រូវមានសញ្ញាពិសេស (ឧទាហរណ៍: @, #, \$, *, !) យ៉ាងហោចណាស់មួយ',
+      'password_special_error':
+          'ពាក្យសម្ងាត់ត្រូវមានសញ្ញាពិសេស (ឧទាហរណ៍: @, #, \$, *, !) យ៉ាងហោចណាស់មួយ',
       'password_username_error': 'ពាក្យសម្ងាត់មិនត្រូវមានឈ្មោះគណនីរបស់អ្នកឡើយ',
-      'password_same_as_old_error': 'ពាក្យសម្ងាត់ថ្មីមិនអាចដូចគ្នានឹងពាក្យសម្ងាត់ចាស់បានទេ',
-      'password_change_failed': 'ការផ្លាស់ប្តូរលេខសម្ងាត់បរាជ័យ សូមពិនិត្យលេខសម្ងាត់បច្ចុប្បន្នឡើងវិញ',
+      'password_same_as_old_error':
+          'ពាក្យសម្ងាត់ថ្មីមិនអាចដូចគ្នានឹងពាក្យសម្ងាត់ចាស់បានទេ',
+      'password_change_failed':
+          'ការផ្លាស់ប្តូរលេខសម្ងាត់បរាជ័យ សូមពិនិត្យលេខសម្ងាត់បច្ចុប្បន្នឡើងវិញ',
       'request': 'សំណើ',
       'request_list': 'បញ្ជីសំណើ',
       'create_request': 'បង្កើតសំណើ',
@@ -251,7 +283,8 @@ class AppTranslations extends Translations {
       'please_fill_required': 'សូមបំពេញព័ត៌មានអោយបានគ្រប់គ្រាន់',
       'delete_app_confirm': 'តើអ្នកពិតជាចង់លុបកម្មវិធីនេះចេញពីប្រព័ន្ធមែនទេ?',
       'delete_user_confirm': 'តើអ្នកប្រាកដជាចង់លុបគណនីអ្នកប្រើប្រាស់នេះមែនទេ?',
-      'delete_announcement_confirm': 'តើអ្នកពិតជាចង់លុបសេចក្តីប្រកាសនេះមែនទេ? សកម្មភាពនេះមិនអាចត្រឡប់ក្រោយបានឡើយ។',
+      'delete_announcement_confirm':
+          'តើអ្នកពិតជាចង់លុបសេចក្តីប្រកាសនេះមែនទេ? សកម្មភាពនេះមិនអាចត្រឡប់ក្រោយបានឡើយ។',
       'no_data_user': 'មិនមានទិន្នន័យអ្នកប្រើប្រាស់ឡើយ',
       'user_info': 'ព័ត៌មានអ្នកប្រើប្រាស់',
       'account_name': 'ឈ្មោះគណនី',
@@ -268,7 +301,8 @@ class AppTranslations extends Translations {
       'page_of': 'ទំព័រ',
       'of': 'នៃ',
       'welcome_admin': 'សួស្តី, អភិបាលប្រព័ន្ធ!',
-      'welcome_admin_subtitle': 'សូមស្វាគមន៍មកកាន់ប្រព័ន្ធគ្រប់គ្រងសេវាព័ត៌មានវិទ្យា ក្រសួងមហាផ្ទៃ។',
+      'welcome_admin_subtitle':
+          'សូមស្វាគមន៍មកកាន់ប្រព័ន្ធគ្រប់គ្រងសេវាព័ត៌មានវិទ្យា ក្រសួងមហាផ្ទៃ។',
       'recent_activities': 'សកម្មភាពថ្មីៗនៃប្រព័ន្ធ',
       'no_recent_activities': 'មិនទាន់មានសកម្មភាពនៅឡើយទេ',
       'quick_access': 'ចូលប្រើប្រាស់រហ័ស',
@@ -283,7 +317,8 @@ class AppTranslations extends Translations {
       'draft_saved': 'បានរក្សាទុកជាព្រាង',
       'public_viewable': 'អាចមើលបានដោយអ្នកប្រើប្រាស់',
       'verify_biometrics': 'ផ្ទៀងផ្ទាត់ Face ID / Touch ID',
-      'biometrics_prompt': 'សូមប្រើប្រាស់ Face ID ឬ Touch ID ដើម្បីចូលប្រើប្រាស់កម្មវិធី',
+      'biometrics_prompt':
+          'សូមប្រើប្រាស់ Face ID ឬ Touch ID ដើម្បីចូលប្រើប្រាស់កម្មវិធី',
       'verify_again': 'ផ្ទៀងផ្ទាត់ម្ដងទៀត',
       'exit_app': 'ចាកចេញពីកម្មវិធី',
       'copyright': '© 2026 ក្រសួងមហាផ្ទៃ - ព្រះរាជាណាចក្រកម្ពុជា',
@@ -295,8 +330,10 @@ class AppTranslations extends Translations {
       'update_password': 'ធ្វើបច្ចុប្បន្នភាពលេខសម្ងាត់',
       'fill_all_fields': 'សូមបំពេញព័ត៌មានគ្រប់ប្រអប់',
       'for_first_login': 'សម្រាប់គណនីចូលប្រើប្រាស់លើកដំបូង',
-      'must_change_password': 'លោកអ្នកត្រូវផ្លាស់ប្តូរពាក្យសម្ងាត់ ដើម្បីដំណើរការគណនីរបស់អ្នក',
-      'password_guideline': 'ពាក្យសម្ងាត់ថ្មីត្រូវមានយ៉ាងតិច ៨ តួអក្សរ អក្សរធំ ១ និងសញ្ញាពិសេស ១។',
+      'must_change_password':
+          'លោកអ្នកត្រូវផ្លាស់ប្តូរពាក្យសម្ងាត់ ដើម្បីដំណើរការគណនីរបស់អ្នក',
+      'password_guideline':
+          'ពាក្យសម្ងាត់ថ្មីត្រូវមានយ៉ាងតិច ៨ តួអក្សរ អក្សរធំ ១ និងសញ្ញាពិសេស ១។',
       'accommodation_system': 'ប្រព័ន្ធគ្រប់គ្រងការស្នាក់នៅ',
       'new_record': 'កត់ត្រាថ្មី',
       'view_list': 'មើលបញ្ជី',
@@ -319,15 +356,19 @@ class AppTranslations extends Translations {
       'record_deleted_success': 'បានលុបកំណត់ត្រាដោយជោគជ័យ',
       'request_approved_success': 'បានអនុម័តសំណើដោយជោគជ័យ',
       'how_to_search_users': 'របៀបស្វែងរកអ្នកប្រើប្រាស់',
-      'search_users_guide_desc': 'ប្រើប្រអប់ស្វែងរកដើម្បីស្វែងរកអ្នកប្រើប្រាស់ក្នុងប្រព័ន្ធយ៉ាងឆាប់រហ័ស។',
+      'search_users_guide_desc':
+          'ប្រើប្រអប់ស្វែងរកដើម្បីស្វែងរកអ្នកប្រើប្រាស់ក្នុងប្រព័ន្ធយ៉ាងឆាប់រហ័ស។',
       'what_you_can_search': 'អ្វីដែលអ្នកអាចស្វែងរកបាន',
       'what_you_can_search_desc': 'ឈ្មោះពេញ ឈ្មោះគណនី ឬអាសយដ្ឋានអ៊ីមែល។',
       'search_tips': 'គន្លឹះស្វែងរក',
-      'search_tips_desc': 'បញ្ចូលយ៉ាងតិច ២-៣ តួអក្សរដើម្បីទទួលបានលទ្ធផលល្អប្រសើរ។ ការស្វែងរកមិនប្រកាន់តួអក្សរតូចធំឡើយ។',
+      'search_tips_desc':
+          'បញ្ចូលយ៉ាងតិច ២-៣ តួអក្សរដើម្បីទទួលបានលទ្ធផលល្អប្រសើរ។ ការស្វែងរកមិនប្រកាន់តួអក្សរតូចធំឡើយ។',
       'examples': 'ឧទាហរណ៍',
-      'examples_desc': 'ស្វែងរក "admin" ឬ "@moi.com" ដើម្បីស្វែងរកអ្នកប្រើប្រាស់។',
+      'examples_desc':
+          'ស្វែងរក "admin" ឬ "@moi.com" ដើម្បីស្វែងរកអ្នកប្រើប្រាស់។',
       'note': 'សម្គាល់',
-      'search_guide_note_desc': 'ប្រសិនបើអ្នករកមិនឃើញអ្នកប្រើប្រាស់ដែលអ្នកកំពុងស្វែងរក សូមសាកល្បងប្រើពាក្យគន្លឹះផ្សេង ឬទាក់ទងអ្នកគ្រប់គ្រងប្រព័ន្ធរបស់អ្នក។',
+      'search_guide_note_desc':
+          'ប្រសិនបើអ្នករកមិនឃើញអ្នកប្រើប្រាស់ដែលអ្នកកំពុងស្វែងរក សូមសាកល្បងប្រើពាក្យគន្លឹះផ្សេង ឬទាក់ទងអ្នកគ្រប់គ្រងប្រព័ន្ធរបស់អ្នក។',
       'settings_subtitle': 'គ្រប់គ្រងគណនី និងការកំណត់ប្រព័ន្ធ',
       'my_account': 'គណនីរបស់ខ្ញុំ',
       'my_account_subtitle': 'គ្រប់គ្រងព័ត៌មានផ្ទាល់ខ្លួនរបស់អ្នក',
@@ -336,10 +377,12 @@ class AppTranslations extends Translations {
       'security_and_privacy_desc': 'គ្រប់គ្រងសុវត្ថិភាពគណនី និងទិន្នន័យ',
       'privacy': 'ភាពឯកជន',
       'privacy_policy': 'គោលការណ៍ភាពឯកជន',
-      'privacy_desc': 'ទិន្នន័យ និងព័ត៌មានផ្ទាល់ខ្លួនរបស់អ្នកត្រូវបានការពារស្របតាមបទប្បញ្ញត្តិសុវត្ថិភាព និងច្បាប់ស្តីពីការការពារទិន្នន័យ។',
+      'privacy_desc':
+          'ទិន្នន័យ និងព័ត៌មានផ្ទាល់ខ្លួនរបស់អ្នកត្រូវបានការពារស្របតាមបទប្បញ្ញត្តិសុវត្ថិភាព និងច្បាប់ស្តីពីការការពារទិន្នន័យ។',
       'moi_service_app': 'កម្មវិធីសេវាក្រសួងមហាផ្ទៃ',
       'welcome_title': 'សូមស្វាគមន៍!',
-      'login_hint_subtitle': 'សូមបំពេញព័ត៌មានរបស់អ្នក ដើម្បីចូលប្រើប្រាស់ប្រព័ន្ធ',
+      'login_hint_subtitle':
+          'សូមបំពេញព័ត៌មានរបស់អ្នក ដើម្បីចូលប្រើប្រាស់ប្រព័ន្ធ',
       'enter_email_hint': 'បញ្ចូលអ៊ីមែលរបស់អ្នក',
       'enter_password_hint': 'បញ្ចូលពាក្យសម្ងាត់',
       'remember_me': 'ចងចាំខ្ញុំ',
@@ -352,9 +395,11 @@ class AppTranslations extends Translations {
       'ministry_title': 'ក្រសួងមហាផ្ទៃ',
       'gateway_subtitle': 'ច្រកទ្វាររាជរដ្ឋាភិបាល',
       'login_motto': '« ដើម្បីសុវត្ថិភាព និងសេវាសាធារណៈប្រសើរ »',
-      'change_password_desc': 'សូមបញ្ចូលលេខសម្ងាត់ថ្មី ដើម្បីការពារគណនីរបស់អ្នក',
+      'change_password_desc':
+          'សូមបញ្ចូលលេខសម្ងាត់ថ្មី ដើម្បីការពារគណនីរបស់អ្នក',
       'security_level': 'កម្រិតសុវត្ថិភាព',
-      'password_rule_desc': 'លេខសម្ងាត់ត្រូវមានយ៉ាងតិច ៨ តួអក្សរ អក្សរធំ អក្សរតូច លេខ និងនិមិត្តសញ្ញា (!@#...)',
+      'password_rule_desc':
+          'លេខសម្ងាត់ត្រូវមានយ៉ាងតិច ៨ តួអក្សរ អក្សរធំ អក្សរតូច លេខ និងនិមិត្តសញ្ញា (!@#...)',
       'enter_current_password_hint': 'បញ្ចូលលេខសម្ងាត់បច្ចុប្បន្ន',
       'enter_new_password_hint': 'បញ្ចូលលេខសម្ងាត់ថ្មី',
       'enter_confirm_password_hint': 'បញ្ចូលលេខសម្ងាត់ថ្មីម្តងទៀត',
@@ -396,7 +441,8 @@ class AppTranslations extends Translations {
       'unit_group': 'អង្គភាព (ក្រុម)',
       'app_access_permission': 'សិទ្ធិចូលកម្មវិធី',
       'backing_up_data': 'កំពុងបម្រុងទុកទិន្នន័យ...',
-      'enter_app_info_desc': 'បញ្ចូលព័ត៌មានកម្មវិធី URL រូបតំណាង និងស្ថានភាពប្រើប្រាស់',
+      'enter_app_info_desc':
+          'បញ្ចូលព័ត៌មានកម្មវិធី URL រូបតំណាង និងស្ថានភាពប្រើប្រាស់',
       'enter_app_name_kh_hint': 'បញ្ចូលឈ្មោះកម្មវិធីជាភាសាខ្មែរ',
       'enter_app_name_en_hint': 'បញ្ចូលឈ្មោះកម្មវិធីជាភាសាអង់គ្លេស',
       'enter_app_url_hint': 'បញ្ចូល URL (ឧ. https://example.moi.gov.kh)',
@@ -410,13 +456,16 @@ class AppTranslations extends Translations {
       'rule': 'ច្បាប់',
       'stay_management_cambodia': 'គ្រប់គ្រងស្នាក់នៅប្រទេសកម្ពុជា',
       'stay_records_list': 'បញ្ជីកំណត់ត្រាស្នាក់នៅ',
-      'stay_records_desc': 'ស្វែងរក កែប្រែ និងគ្រប់គ្រងកំណត់ត្រាស្នាក់នៅរបស់ជនបរទេស',
-      'search_records_hint': 'ស្វែងរកតាមរយៈ ឈ្មោះ អត្តសញ្ញាណប័ណ្ណ លេខលិខិតឆ្លងដែន',
+      'stay_records_desc':
+          'ស្វែងរក កែប្រែ និងគ្រប់គ្រងកំណត់ត្រាស្នាក់នៅរបស់ជនបរទេស',
+      'search_records_hint':
+          'ស្វែងរកតាមរយៈ ឈ្មោះ អត្តសញ្ញាណប័ណ្ណ លេខលិខិតឆ្លងដែន',
       'total_records': 'កត់ត្រាសរុប',
       'new_stay_today': 'អ្នកស្នាក់ថ្មីថ្ងៃនេះ',
       'managed_in_cambodia': 'គ្រប់គ្រងក្នុងប្រទេសកម្ពុជា',
       'stay_management_system': 'ប្រព័ន្ធគ្រប់គ្រង\nការស្នាក់នៅ',
-      'stay_system_desc': 'បញ្ចូលព័ត៌មានស្នាក់នៅសម្រាប់ជនបរទេស និងជនជាតិខ្មែរគ្រប់ខេត្តក្រុង ដើម្បីធានានូវសុវត្ថិភាព និងស្ថេរភាពសង្គម។',
+      'stay_system_desc':
+          'បញ្ចូលព័ត៌មានស្នាក់នៅសម្រាប់ជនបរទេស និងជនជាតិខ្មែរគ្រប់ខេត្តក្រុង ដើម្បីធានានូវសុវត្ថិភាព និងស្ថេរភាពសង្គម។',
       'monthly_statistics': 'ស្ថិតិប្រចាំខែ',
       'create_group_unit_title': 'បង្កើតក្រុម (អង្គភាព) ថ្មី',
       'edit_group_unit_title': 'កែប្រែក្រុម (អង្គភាព)',
@@ -430,14 +479,18 @@ class AppTranslations extends Translations {
       'please_enter_group_name': 'សូមបញ្ចូលឈ្មោះក្រុម (អង្គភាព)!',
       'create_success': 'បង្កើតបានជោគជ័យ',
       'edit_success': 'កែប្រែបានជោគជ័យ',
-      'unit_created_success_desc': 'បានបន្ថែមអង្គភាពថ្មីទៅក្នុងប្រព័ន្ធដោយជោគជ័យ',
-      'unit_updated_success_desc': 'ព័ត៌មានក្រុម (អង្គភាព) ត្រូវបានធ្វើបច្ចុប្បន្នភាពដោយជោគជ័យ',
+      'unit_created_success_desc':
+          'បានបន្ថែមអង្គភាពថ្មីទៅក្នុងប្រព័ន្ធដោយជោគជ័យ',
+      'unit_updated_success_desc':
+          'ព័ត៌មានក្រុម (អង្គភាព) ត្រូវបានធ្វើបច្ចុប្បន្នភាពដោយជោគជ័យ',
       'usable_groups': 'ក្រុមដែលអាចប្រើ',
-      'select_apps_for_unit_desc': 'ជ្រើសរើសកម្មវិធីដែលអាចប្រើនៅក្នុងអង្គភាពនេះ',
+      'select_apps_for_unit_desc':
+          'ជ្រើសរើសកម្មវិធីដែលអាចប្រើនៅក្នុងអង្គភាពនេះ',
       'no_apps_found': 'រកមិនឃើញកម្មវិធី',
       'no_matching_apps': 'មិនមានកម្មវិធីដែលត្រូវគ្នាទេ',
       'group_users': 'អ្នកប្រើប្រាស់ក្នុងក្រុម',
-      'select_users_for_group_desc': 'ជ្រើសរើសអ្នកប្រើប្រាស់ដែលត្រូវចូលក្នុងក្រុមនេះ',
+      'select_users_for_group_desc':
+          'ជ្រើសរើសអ្នកប្រើប្រាស់ដែលត្រូវចូលក្នុងក្រុមនេះ',
       'search_users_hint': 'ស្វែងរកអ្នកប្រើប្រាស់...',
       'search_user_name_or_username': 'វាយបញ្ចូលឈ្មោះ ឬ Username...',
       'close_list': 'បិទបញ្ជី',
@@ -452,30 +505,45 @@ class AppTranslations extends Translations {
       'pwd_rule_upper': 'ពាក្យសម្ងាត់ត្រូវមានអក្សរធំ (A-Z) យ៉ាងហោចណាស់មួយតួ',
       'pwd_rule_lower': 'ពាក្យសម្ងាត់ត្រូវមានអក្សរតូច (a-z) យ៉ាងហោចណាស់មួយតួ',
       'pwd_rule_number': 'ពាក្យសម្ងាត់ត្រូវមានលេខ (0-9) យ៉ាងហោចណាស់មួយតួ',
-      'pwd_rule_special': 'ពាក្យសម្ងាត់ត្រូវមានសញ្ញាពិសេស (ឧទាហរណ៍: @, #, \$, *, !) យ៉ាងហោចណាស់មួយ',
+      'pwd_rule_special':
+          'ពាក្យសម្ងាត់ត្រូវមានសញ្ញាពិសេស (ឧទាហរណ៍: @, #, \$, *, !) យ៉ាងហោចណាស់មួយ',
       'pwd_rule_no_username': 'ពាក្យសម្ងាត់មិនត្រូវមានឈ្មោះគណនីរបស់អ្នកឡើយ',
       'pwd_rule_empty': 'សូមបញ្ចូលពាក្យសម្ងាត់ថ្មី និងបញ្ជាក់ពាក្យសម្ងាត់ថ្មី',
-      'pwd_rule_mismatch': 'ពាក្យសម្ងាត់ថ្មី និងពាក្យសម្ងាត់បញ្ជាក់មិនផ្ទៀងផ្ទាត់គ្នាឡើយ',
-      'contact_admin_reset_pwd': 'សូមទាក់ទងអ្នកគ្រប់គ្រងប្រព័ន្ធដើម្បីកំណត់លេខសម្ងាត់ឡើងវិញ',
+      'pwd_rule_mismatch':
+          'ពាក្យសម្ងាត់ថ្មី និងពាក្យសម្ងាត់បញ្ជាក់មិនផ្ទៀងផ្ទាត់គ្នាឡើយ',
+      'contact_admin_reset_pwd':
+          'សូមទាក់ទងអ្នកគ្រប់គ្រងប្រព័ន្ធដើម្បីកំណត់លេខសម្ងាត់ឡើងវិញ',
       'khmer_lang_label': 'ភាសាខ្មែរ (KH)',
-      'contact_help_desk_desc': 'ប្រសិនបើលោកអ្នកជួបបញ្ហាក្នុងការចូលប្រើប្រាស់ សូមទាក់ទងមកកាន់លេខទូរសព្ទជំនួយការបច្ចេកទេស៖',
+      'contact_help_desk_desc':
+          'ប្រសិនបើលោកអ្នកជួបបញ្ហាក្នុងការចូលប្រើប្រាស់ សូមទាក់ទងមកកាន់លេខទូរសព្ទជំនួយការបច្ចេកទេស៖',
       'no_notifications_desc': 'រកមិនឃើញការជូនដំណឹងនៅឡើយទេ',
-      'first_login_biometric_bind_msg': 'សូមបញ្ចូលឈ្មោះគណនី និងលេខសម្ងាត់ជាលើកដំបូង ដើម្បីភ្ជាប់ជាមួយជីវមាត្រ',
+      'first_login_biometric_bind_msg':
+          'សូមបញ្ចូលឈ្មោះគណនី និងលេខសម្ងាត់ជាលើកដំបូង ដើម្បីភ្ជាប់ជាមួយជីវមាត្រ',
       // Reset Password screen
       'reset_password_title': 'កំណត់ពាក្យសម្ងាត់ថ្មី',
-      'reset_password_subtitle': 'សូមបញ្ចូលពាក្យសម្ងាត់ថ្មី និងបញ្ជាក់ពាក្យសម្ងាត់\nដើម្បីកំណត់ឡើងវិញ',
-      'account_security_tip': 'គណនីរបស់អ្នកនឹងកាន់តែស្រេចបាច់\nប្រសិនបើអ្នកប្រើពាក្យសម្ងាត់ដែលមានសុពលភាព',
+      'reset_password_subtitle':
+          'សូមបញ្ចូលពាក្យសម្ងាត់ថ្មី និងបញ្ជាក់ពាក្យសម្ងាត់\nដើម្បីកំណត់ឡើងវិញ',
+      'account_security_tip':
+          'គណនីរបស់អ្នកនឹងកាន់តែស្រេចបាច់\nប្រសិនបើអ្នកប្រើពាក្យសម្ងាត់ដែលមានសុពលភាព',
       'new_password_label': 'ពាក្យសម្ងាត់ថ្មី',
       'confirm_new_password_label': 'បញ្ជាក់ពាក្យសម្ងាត់ថ្មី',
       'password_characteristics': 'លក្ខណៈពាក្យសម្ងាត់',
-      'password_characteristics_desc': 'សូមប្រើកត្តាខាងក្រោមដើម្បីពាក្យសម្ងាត់ដែលមានសុវត្ថិភាព',
+      'password_characteristics_desc':
+          'សូមប្រើកត្តាខាងក្រោមដើម្បីពាក្យសម្ងាត់ដែលមានសុវត្ថិភាព',
+      'password_requirements_title': 'លក្ខខណ្ឌពាក្យសម្ងាត់',
+      'req_min_8_chars_short': 'យ៉ាងតិច ៨ តួអក្សរ',
+      'req_uppercase': 'មានអក្សរធំ (A–Z)',
+      'req_lowercase': 'មានអក្សរតូច (a–z)',
+      'req_number': 'មានលេខ (0–9)',
+      'req_passwords_match': 'ពាក្យសម្ងាត់ថ្មីដូចគ្នាទាំងពីរ',
       'req_min_8_chars': 'យ៉ាងហោចណាស់ 8 តួអក្សរ',
       'req_both_cases': 'មានអក្សរតូច និងអក្សរធំ (A-Z, a-z)',
       'req_numbers': 'មានលេខ (0-9)',
       'req_special_chars': 'មានតួអក្សរពិសេស (ឧ. !@#...)',
       'btn_reset_password': 'កំណត់ពាក្យសម្ងាត់ថ្មី',
       'strength_good': 'ល្អ',
-      'username_missing_err': 'មិនមានឈ្មោះអ្នកប្រើប្រាស់សម្រាប់កំណត់ពាក្យសម្ងាត់ទេ',
+      'username_missing_err':
+          'មិនមានឈ្មោះអ្នកប្រើប្រាស់សម្រាប់កំណត់ពាក្យសម្ងាត់ទេ',
       'please_enter_new_pwd': 'សូមបញ្ចូលពាក្យសម្ងាត់ថ្មី',
       'pwd_must_be_8_chars': 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងហោចណាស់ ៨ តួអក្សរ',
       'please_confirm_pwd': 'សូមបញ្ចូលការបញ្ជាក់ពាក្យសម្ងាត់',
@@ -488,28 +556,50 @@ class AppTranslations extends Translations {
       'warning_title': 'ការព្រមាន',
       'error_title': 'កំហុស',
       'logout_dialog_title': 'ចាកចេញពីគណនី?',
-      'logout_dialog_message': 'តើអ្នកពិតជាចង់ចាកចេញពីគណនីនេះមែនទេ?\nអ្នកនឹងត្រូវចូលម្តងទៀតដើម្បីប្រើគណនីនេះ!',
+      'logout_dialog_message':
+          'តើអ្នកពិតជាចង់ចាកចេញពីគណនីនេះមែនទេ?\nអ្នកនឹងត្រូវចូលម្តងទៀតដើម្បីប្រើគណនីនេះ!',
       'logout_data_safe_notice': 'ទិន្នន័យរបស់អ្នកនឹងនៅតែមានសុវត្ថិភាព',
       'device_security_alert': 'ការព្រមានសុវត្ថិភាពឧបករណ៍',
-      'device_compromised_msg': 'ឧបករណ៍នេះត្រូវបានរកឃើញថាត្រូវបាន Root ឬ Jailbreak។ ដើម្បីការពារសុវត្ថិភាពទិន្នន័យរដ្ឋបាល កម្មវិធីមិនអាចដំណើរការលើឧបករណ៍នេះបានទេ។',
+      'device_compromised_msg':
+          'ឧបករណ៍នេះត្រូវបានរកឃើញថាត្រូវបាន Root ឬ Jailbreak។ ដើម្បីការពារសុវត្ថិភាពទិន្នន័យរដ្ឋបាល កម្មវិធីមិនអាចដំណើរការលើឧបករណ៍នេះបានទេ។',
       // Update Password & Guidelines
       'update_your_password': 'ប្ដូរពាក្យសម្ងាត់របស់អ្នក',
-      'password_expired_or_must_change': 'ពាក្យសម្ងាត់របស់អ្នកបានផុតកំណត់ ឬត្រូវតែផ្លាស់ប្ដូរមុនពេលអ្នកអាចបន្ត។',
+      'password_expired_or_must_change':
+          'ពាក្យសម្ងាត់របស់អ្នកបានផុតកំណត់ ឬត្រូវតែផ្លាស់ប្ដូរមុនពេលអ្នកអាចបន្ត។',
       'btn_change_password': 'ប្តូរលេខសម្ងាត់',
       'reenter_new_password': 'បញ្ចូលលេខសម្ងាត់ថ្មីម្តងទៀត',
       'password_guideline_rule1': '- ពាក្យសម្ងាត់ថ្មីត្រូវមានយ៉ាងតិច ៨ តួអក្សរ',
-      'password_guideline_rule2': '- ត្រូវរួមមានអក្សរធំ អក្សរតូច លេខ និងសញ្ញាពិសេស',
-      'password_guideline_rule3': '- ជៀសវាងការប្រើឈ្មោះគណនី ថ្ងៃខែឆ្នាំកំណើត ឬពាក្យសម្ងាត់ចាស់។',
+      'password_guideline_rule2':
+          '- ត្រូវរួមមានអក្សរធំ អក្សរតូច លេខ និងសញ្ញាពិសេស',
+      'password_guideline_rule3':
+          '- ជៀសវាងការប្រើឈ្មោះគណនី ថ្ងៃខែឆ្នាំកំណើត ឬពាក្យសម្ងាត់ចាស់។',
       'password_guideline_example': '- ឧទាហរណ៍: Moigddtm@2030!',
-      'pwd_updated_login_again': 'លេខសម្ងាត់ត្រូវបានផ្លាស់ប្តូរដោយជោគជ័យ។ សូមចូលប្រើប្រាស់ឡើងវិញជាមួយលេខសម្ងាត់ថ្មីរបស់អ្នក។',
-      'pwd_update_timeout': 'ការផ្លាស់ប្តូរមិនអាចបញ្ជាក់បានទេ។ សូមសាកល្បងចូលប្រើដោយប្រើលេខសម្ងាត់ថ្មីរបស់អ្នក។',
-      'pwd_policy_failed': 'លេខសម្ងាត់មិនស្របតាមគោលការណ៍សុវត្ថិភាពទេ។ សូមចូលប្រើឡើងវិញដើម្បីព្យាយាមម្តងទៀត។',
-      'pwd_session_expired': 'សម័យកាលប្តូរលេខសម្ងាត់បានផុតកំណត់ ឬមិនត្រឹមត្រូវ។ សូមចូលប្រើម្តងទៀត។',
+      'pwd_updated_login_again':
+          'លេខសម្ងាត់ត្រូវបានផ្លាស់ប្តូរដោយជោគជ័យ។ សូមចូលប្រើប្រាស់ឡើងវិញជាមួយលេខសម្ងាត់ថ្មីរបស់អ្នក។',
+      'pwd_update_timeout':
+          'ការផ្លាស់ប្តូរមិនអាចបញ្ជាក់បានទេ។ សូមសាកល្បងចូលប្រើដោយប្រើលេខសម្ងាត់ថ្មីរបស់អ្នក។',
+      'pwd_policy_failed':
+          'លេខសម្ងាត់មិនស្របតាមគោលការណ៍សុវត្ថិភាពទេ។ សូមចូលប្រើឡើងវិញដើម្បីព្យាយាមម្តងទៀត។',
+      'pwd_session_expired':
+          'សម័យកាលប្តូរលេខសម្ងាត់បានផុតកំណត់ ឬមិនត្រឹមត្រូវ។ សូមចូលប្រើម្តងទៀត។',
       'too_many_attempts': 'ការព្យាយាមច្រើនដងពេក។ សូមរង់ចាំ ហើយព្យាយាមម្តងទៀត។',
-      'account_requires_action': 'គណនីនេះទាមទារសកម្មភាពបន្ថែមដែលមិនអាចបំពេញក្នុងកម្មវិធីបានទេ។',
+      'account_requires_action':
+          'គណនីនេះទាមទារសកម្មភាពបន្ថែមដែលមិនអាចបំពេញក្នុងកម្មវិធីបានទេ។',
       'generic_safe_error': 'មានបញ្ហាមិនប្រក្រតីបានកើតឡើង។ សូមព្យាយាមម្តងទៀត។',
-      'account_action_unsupported': 'គណនីនេះទាមទារសកម្មភាពបន្ថែមដែលមិនអាចបំពេញក្នុងកម្មវិធីបានទេ។',
-      'pwd_service_not_configured': 'សេវាប្តូរលេខសម្ងាត់នៅលើ Server មិនទាន់ត្រូវបានកំណត់រចនាសម្ព័ន្ធត្រឹមត្រូវទេ។',
+      'account_action_unsupported':
+          'គណនីនេះទាមទារសកម្មភាពបន្ថែមដែលមិនអាចបំពេញក្នុងកម្មវិធីបានទេ។',
+      'pwd_service_not_configured':
+          'សេវាប្តូរលេខសម្ងាត់នៅលើ Server មិនទាន់ត្រូវបានកំណត់រចនាសម្ព័ន្ធត្រឹមត្រូវទេ។',
+      // Settings Screen Layout Keys
+      'account': 'គណនី',
+      'connected_devices': 'ឧបករណ៍ដែលបានចូល',
+      'receive_notifications': 'ទទួលការជូនដំណឹង',
+      'receive_notifications_desc': 'ពីកម្មវិធី និងអង្គភាព',
+      'notification_sound': 'សំឡេងជូនដំណឹង',
+      'notification_sound_desc': 'បន្លឺសំឡេងពេលមានដំណឹងថ្មី',
+      'current_device': 'ឧបករណ៍បច្ចុប្បន្ន',
+      'active_now': 'កំពុងសកម្ម',
+      'device_count_format': '@count ឧបករណ៍',
     },
     'en_US': {
       'app_title': 'Core Portal System',
@@ -539,8 +629,28 @@ class AppTranslations extends Translations {
       'portal_user': 'Portal User',
       'home': 'Home',
       'announcement': 'Announcements',
+      'nav_announcement': 'Notices',
+      'attachment': 'Attachments',
+      'general_admin_dept': 'General Administration Department',
+      'download_success': 'File downloaded successfully',
       'notification': 'Notifications',
+      'unread': 'Unread',
+      'no_unread_announcements': 'No unread announcements',
       'application': 'Applications',
+      'applications': 'Applications',
+      'by_department': 'By Department',
+      'general_applications': 'General Applications',
+      'department_applications': 'Department Applications',
+      'total': 'Total',
+      'search_apps_placeholder': 'Search applications',
+      'latest_announcements': 'Latest Announcements',
+      'online_complaints_title': 'Online Complaint\nSystem',
+      'single_window_title': 'Single Window\nPortal',
+      'personnel_system_title': 'Personnel Management',
+      'doc_system_title': 'Document Management',
+      'stats_system_title': 'Statistics System',
+      'finance_system_title': 'Financial System',
+      'good_morning_prefix': 'Good morning, Mr.',
       'success': 'Success',
       'error': 'Error',
       'info': 'Information',
@@ -569,8 +679,10 @@ class AppTranslations extends Translations {
       'announcement_subtitle': 'Track announcements and important updates',
       'no_applications_found': 'No applications found',
       'no_applications_yet': 'No Applications Yet',
-      'no_applications_yet_desc': 'There are no applications available or assigned yet.',
-      'no_search_results_desc': 'Try searching with different keywords or department filters.',
+      'no_applications_yet_desc':
+          'There are no applications available or assigned yet.',
+      'no_search_results_desc':
+          'Try searching with different keywords or department filters.',
       'refresh': 'Refresh',
       'all_announcements_list': 'List of All Announcements',
       'create_new': 'Create New',
@@ -596,20 +708,24 @@ class AppTranslations extends Translations {
       'enter_username': 'Enter username',
       'enter_password': 'Enter password',
       'register_device_title': 'Register this device?',
-      'register_device_content': 'Would you like to register Face ID / Touch ID or Fingerprint on this device for future sign-in?',
+      'register_device_content':
+          'Would you like to register Face ID / Touch ID or Fingerprint on this device for future sign-in?',
       'not_now': 'Not now',
       'register': 'Register',
       'device_reg_cancelled': 'Device registration was cancelled.',
-      'biometric_reason': 'Verify with Face ID / Touch ID or Fingerprint to sign in',
+      'biometric_reason':
+          'Verify with Face ID / Touch ID or Fingerprint to sign in',
       'biometric_title': 'Biometric verification',
       'biometric_hint': 'Use fingerprint or Face ID',
       'biometric_auth_success': 'Biometric verification successful',
       'lock_app_now': 'Lock App Now',
-      'lock_app_desc': 'Lock screen immediately and require Face ID or fingerprint',
+      'lock_app_desc':
+          'Lock screen immediately and require Face ID or fingerprint',
       'app_locked': 'App Locked',
       'unlock_with_biometrics': 'Unlock with Biometrics',
       'switch_to_password_login': 'Log In with Username and Password',
-      'biometric_not_supported': 'This device does not support Face ID / Touch ID or is not enrolled',
+      'biometric_not_supported':
+          'This device does not support Face ID / Touch ID or is not enrolled',
       'biometric_failed': 'Biometric authentication failed',
       'biometric_cancelled': 'Authentication was cancelled',
       'biometric_unavailable': 'Face ID / Touch ID unavailable',
@@ -617,7 +733,8 @@ class AppTranslations extends Translations {
       'logging_in': 'Logging in...',
       'logout_confirm_title': 'Log Out',
       'logout_confirm_message': 'Are you sure you want to log out?',
-      'logout_confirm_admin_message': 'Are you sure you want to log out from this Admin account?',
+      'logout_confirm_admin_message':
+          'Are you sure you want to log out from this Admin account?',
       'all_units': 'All Units',
       'sub_category': 'Subcategory',
       'all_applications_list': 'All Applications',
@@ -700,7 +817,8 @@ class AppTranslations extends Translations {
       'cannot_save_groups': 'Cannot save groups',
       'device_verification_failed': 'Device verification failed',
       'device_registration_failed': 'Device registration failed',
-      'no_internet_error': 'No internet connection. Please check your network connection.',
+      'no_internet_error':
+          'No internet connection. Please check your network connection.',
       'timeout_error': 'Connection timed out. Please try again.',
       'server_error': 'Server connection error. Please try again later.',
       'network_error': 'Network error. Please try again.',
@@ -726,13 +844,19 @@ class AppTranslations extends Translations {
       'first_login_title': 'Please change your password for first-time login',
       'first_login_subtitle': 'For account security, please set a new password',
       'password_length_error': 'Password must be at least 8 characters',
-      'password_uppercase_error': 'Password must contain at least one uppercase letter (A-Z)',
-      'password_lowercase_error': 'Password must contain at least one lowercase letter (a-z)',
-      'password_number_error': 'Password must contain at least one number (0-9)',
-      'password_special_error': 'Password must contain at least one special character (@, #, \$, *, !)',
+      'password_uppercase_error':
+          'Password must contain at least one uppercase letter (A-Z)',
+      'password_lowercase_error':
+          'Password must contain at least one lowercase letter (a-z)',
+      'password_number_error':
+          'Password must contain at least one number (0-9)',
+      'password_special_error':
+          'Password must contain at least one special character (@, #, \$, *, !)',
       'password_username_error': 'Password must not contain your username',
-      'password_same_as_old_error': 'New password cannot be the same as current password',
-      'password_change_failed': 'Password change failed. Please verify your current password.',
+      'password_same_as_old_error':
+          'New password cannot be the same as current password',
+      'password_change_failed':
+          'Password change failed. Please verify your current password.',
       'request': 'Request',
       'request_list': 'Request List',
       'create_request': 'Create Request',
@@ -755,9 +879,12 @@ class AppTranslations extends Translations {
       'app_info': 'Application Info',
       'app_url_link': 'URL Link',
       'please_fill_required': 'Please fill in all required information',
-      'delete_app_confirm': 'Are you sure you want to delete this application from the system?',
-      'delete_user_confirm': 'Are you sure you want to delete this user account?',
-      'delete_announcement_confirm': 'Are you sure you want to delete this announcement? This action cannot be undone.',
+      'delete_app_confirm':
+          'Are you sure you want to delete this application from the system?',
+      'delete_user_confirm':
+          'Are you sure you want to delete this user account?',
+      'delete_announcement_confirm':
+          'Are you sure you want to delete this announcement? This action cannot be undone.',
       'no_data_user': 'No user data available',
       'user_info': 'User Information',
       'account_name': 'Account Name',
@@ -774,7 +901,8 @@ class AppTranslations extends Translations {
       'page_of': 'Page',
       'of': 'of',
       'welcome_admin': 'Hello, System Administrator!',
-      'welcome_admin_subtitle': 'Welcome to Ministry of Interior IT Service Management System.',
+      'welcome_admin_subtitle':
+          'Welcome to Ministry of Interior IT Service Management System.',
       'recent_activities': 'Recent System Activities',
       'no_recent_activities': 'No recent activities yet',
       'quick_access': 'Quick Access',
@@ -801,8 +929,10 @@ class AppTranslations extends Translations {
       'update_password': 'Update Password',
       'fill_all_fields': 'Please fill in all fields',
       'for_first_login': 'For first-time login',
-      'must_change_password': 'You must change your password to activate your account',
-      'password_guideline': 'New password must contain at least 8 characters, 1 uppercase letter, and 1 special character.',
+      'must_change_password':
+          'You must change your password to activate your account',
+      'password_guideline':
+          'New password must contain at least 8 characters, 1 uppercase letter, and 1 special character.',
       'accommodation_system': 'Stay Management System',
       'new_record': 'New Record',
       'view_list': 'View List',
@@ -825,15 +955,18 @@ class AppTranslations extends Translations {
       'record_deleted_success': 'Record deleted successfully',
       'request_approved_success': 'Request approved successfully',
       'how_to_search_users': 'How to search users',
-      'search_users_guide_desc': 'Use the search box to quickly find users in the system.',
+      'search_users_guide_desc':
+          'Use the search box to quickly find users in the system.',
       'what_you_can_search': 'What you can search',
       'what_you_can_search_desc': 'Full name, username, or email address.',
       'search_tips': 'Search tips',
-      'search_tips_desc': 'Type at least 2–3 characters for better results.\\nSearch is not case-sensitive.',
+      'search_tips_desc':
+          'Type at least 2–3 characters for better results.\\nSearch is not case-sensitive.',
       'examples': 'Examples',
       'examples_desc': 'Search "admin" or "@moi.com" to find users.',
       'note': 'Note',
-      'search_guide_note_desc': 'If you can\'t find the user you\'re looking for, try using different keywords or check with your administrator.',
+      'search_guide_note_desc':
+          'If you can\'t find the user you\'re looking for, try using different keywords or check with your administrator.',
       'settings_subtitle': 'Manage account and system settings',
       'my_account': 'My Account',
       'my_account_subtitle': 'Manage your personal information',
@@ -842,10 +975,12 @@ class AppTranslations extends Translations {
       'security_and_privacy_desc': 'Manage account security and data',
       'privacy': 'Privacy',
       'privacy_policy': 'Privacy Policy',
-      'privacy_desc': 'Your personal data and privacy are safeguarded in compliance with security standards and data protection guidelines.',
+      'privacy_desc':
+          'Your personal data and privacy are safeguarded in compliance with security standards and data protection guidelines.',
       'moi_service_app': 'Ministry of Interior Service App',
       'welcome_title': 'Welcome!',
-      'login_hint_subtitle': 'Please fill in your information to access the system',
+      'login_hint_subtitle':
+          'Please fill in your information to access the system',
       'enter_email_hint': 'Enter your email',
       'enter_password_hint': 'Enter password',
       'remember_me': 'Remember me',
@@ -858,9 +993,11 @@ class AppTranslations extends Translations {
       'ministry_title': 'Ministry of Interior',
       'gateway_subtitle': 'Government Gateway',
       'login_motto': '« For Safety and Better Public Service »',
-      'change_password_desc': 'Please enter a new password to secure your account',
+      'change_password_desc':
+          'Please enter a new password to secure your account',
       'security_level': 'Security Requirement',
-      'password_rule_desc': 'Password must be at least 8 characters with uppercase, lowercase, numbers, and symbols (!@#...)',
+      'password_rule_desc':
+          'Password must be at least 8 characters with uppercase, lowercase, numbers, and symbols (!@#...)',
       'enter_current_password_hint': 'Enter current password',
       'enter_new_password_hint': 'Enter new password',
       'enter_confirm_password_hint': 'Enter new password again',
@@ -902,7 +1039,8 @@ class AppTranslations extends Translations {
       'unit_group': 'Unit (Group)',
       'app_access_permission': 'Application Access Permission',
       'backing_up_data': 'Backing up data...',
-      'enter_app_info_desc': 'Enter application details, URL, icon, and active status',
+      'enter_app_info_desc':
+          'Enter application details, URL, icon, and active status',
       'enter_app_name_kh_hint': 'Enter application name in Khmer',
       'enter_app_name_en_hint': 'Enter application name in English',
       'enter_app_url_hint': 'Enter URL (e.g. https://example.moi.gov.kh)',
@@ -922,7 +1060,8 @@ class AppTranslations extends Translations {
       'new_stay_today': 'New Stay Today',
       'managed_in_cambodia': 'Managed in Cambodia',
       'stay_management_system': 'Residence\nManagement System',
-      'stay_system_desc': 'Enter residence information for foreign nationals and Cambodian citizens across all provinces to ensure social safety and stability.',
+      'stay_system_desc':
+          'Enter residence information for foreign nationals and Cambodian citizens across all provinces to ensure social safety and stability.',
       'monthly_statistics': 'Monthly Statistics',
       'create_group_unit_title': 'Create New Group (Unit)',
       'edit_group_unit_title': 'Edit Group (Unit)',
@@ -937,9 +1076,11 @@ class AppTranslations extends Translations {
       'create_success': 'Created Successfully',
       'edit_success': 'Updated Successfully',
       'unit_created_success_desc': 'New unit added to the system successfully',
-      'unit_updated_success_desc': 'Group (unit) information updated successfully',
+      'unit_updated_success_desc':
+          'Group (unit) information updated successfully',
       'usable_groups': 'Assigned Applications',
-      'select_apps_for_unit_desc': 'Select applications available for this unit',
+      'select_apps_for_unit_desc':
+          'Select applications available for this unit',
       'no_apps_found': 'No applications found',
       'no_matching_apps': 'No matching applications',
       'group_users': 'Group Users',
@@ -955,26 +1096,41 @@ class AppTranslations extends Translations {
       'processing_dot': 'Processing...',
       'portal_subtitle': 'Central Service Portal',
       'pwd_rule_length': 'New password must be at least 8 characters long',
-      'pwd_rule_upper': 'Password must contain at least one uppercase letter (A-Z)',
-      'pwd_rule_lower': 'Password must contain at least one lowercase letter (a-z)',
+      'pwd_rule_upper':
+          'Password must contain at least one uppercase letter (A-Z)',
+      'pwd_rule_lower':
+          'Password must contain at least one lowercase letter (a-z)',
       'pwd_rule_number': 'Password must contain at least one number (0-9)',
-      'pwd_rule_special': 'Password must contain at least one special character (@, #, \$, *, !)',
+      'pwd_rule_special':
+          'Password must contain at least one special character (@, #, \$, *, !)',
       'pwd_rule_no_username': 'Password cannot contain your username',
       'pwd_rule_empty': 'Please enter and confirm your new password',
       'pwd_rule_mismatch': 'New password and confirm password do not match',
-      'contact_admin_reset_pwd': 'Please contact system administrator to reset password',
+      'contact_admin_reset_pwd':
+          'Please contact system administrator to reset password',
       'khmer_lang_label': 'Khmer (KH)',
-      'contact_help_desk_desc': 'If you encounter any issues logging in, please contact technical support:',
+      'contact_help_desk_desc':
+          'If you encounter any issues logging in, please contact technical support:',
       'no_notifications_desc': 'No notifications found yet',
-      'first_login_biometric_bind_msg': 'Please enter your username and password for the first time to bind biometrics',
+      'first_login_biometric_bind_msg':
+          'Please enter your username and password for the first time to bind biometrics',
       // Reset Password screen
       'reset_password_title': 'Set New Password',
-      'reset_password_subtitle': 'Please enter a new password and confirm it\nto reset',
-      'account_security_tip': 'Your account will be more secure\nif you use a valid password',
+      'reset_password_subtitle':
+          'Please enter a new password and confirm it\nto reset',
+      'account_security_tip':
+          'Your account will be more secure\nif you use a valid password',
       'new_password_label': 'New Password',
       'confirm_new_password_label': 'Confirm New Password',
-      'password_characteristics': 'Password Requirements',
-      'password_characteristics_desc': 'Please use the factors below for a secure password',
+      'password_characteristics': 'Password Characteristics',
+      'password_characteristics_desc':
+          'Please use the factors below for a secure password',
+      'password_requirements_title': 'Password Requirements',
+      'req_min_8_chars_short': 'At least 8 characters',
+      'req_uppercase': 'Contains uppercase (A–Z)',
+      'req_lowercase': 'Contains lowercase (a–z)',
+      'req_number': 'Contains numbers (0–9)',
+      'req_passwords_match': 'Both new passwords match',
       'req_min_8_chars': 'At least 8 characters',
       'req_both_cases': 'Contains uppercase and lowercase (A-Z, a-z)',
       'req_numbers': 'Contains numbers (0-9)',
@@ -994,28 +1150,51 @@ class AppTranslations extends Translations {
       'warning_title': 'Warning',
       'error_title': 'Error',
       'logout_dialog_title': 'Log out of account?',
-      'logout_dialog_message': 'Are you sure you want to log out of this account?\nYou will need to log in again to use this account!',
+      'logout_dialog_message':
+          'Are you sure you want to log out of this account?\nYou will need to log in again to use this account!',
       'logout_data_safe_notice': 'Your data will remain secure',
       'device_security_alert': 'Device Security Alert',
-      'device_compromised_msg': 'This device appears to be rooted or jailbroken. To protect sensitive portal data, this application cannot run on a compromised device.',
+      'device_compromised_msg':
+          'This device appears to be rooted or jailbroken. To protect sensitive portal data, this application cannot run on a compromised device.',
       // Update Password & Guidelines
       'update_your_password': 'Update your password',
-      'password_expired_or_must_change': 'Your password has expired or must be changed before you can continue.',
+      'password_expired_or_must_change':
+          'Your password has expired or must be changed before you can continue.',
       'btn_change_password': 'Change Password',
       'reenter_new_password': 'Re-enter new password',
-      'password_guideline_rule1': '- New password must be at least 8 characters long',
-      'password_guideline_rule2': '- Must include uppercase, lowercase, numbers, and special characters',
-      'password_guideline_rule3': '- Avoid using account name, date of birth, or old passwords.',
+      'password_guideline_rule1':
+          '- New password must be at least 8 characters long',
+      'password_guideline_rule2':
+          '- Must include uppercase, lowercase, numbers, and special characters',
+      'password_guideline_rule3':
+          '- Avoid using account name, date of birth, or old passwords.',
       'password_guideline_example': '- Example: Moigddtm@2030!',
-      'pwd_updated_login_again': 'Password updated successfully. Please sign in with your new password.',
-      'pwd_update_timeout': 'The update could not be confirmed. Try signing in with your new password.',
-      'pwd_policy_failed': 'Password does not meet the account password policy. Sign in again to retry.',
-      'pwd_session_expired': 'Your password-change session has expired. Please sign in again.',
+      'pwd_updated_login_again':
+          'Password updated successfully. Please sign in with your new password.',
+      'pwd_update_timeout':
+          'The update could not be confirmed. Try signing in with your new password.',
+      'pwd_policy_failed':
+          'Password does not meet the account password policy. Sign in again to retry.',
+      'pwd_session_expired':
+          'Your password-change session has expired. Please sign in again.',
       'too_many_attempts': 'Too many attempts. Please wait and try again.',
-      'account_requires_action': 'This account requires another action. Please contact support or sign in again.',
+      'account_requires_action':
+          'This account requires another action. Please contact support or sign in again.',
       'generic_safe_error': 'An unexpected error occurred. Please try again.',
-      'account_action_unsupported': 'This account requires an action that cannot be completed in the app.',
-      'pwd_service_not_configured': 'Native password-change service is not configured on the server. Please contact administrator.',
+      'account_action_unsupported':
+          'This account requires an action that cannot be completed in the app.',
+      'pwd_service_not_configured':
+          'Native password-change service is not configured on the server. Please contact administrator.',
+      // Settings Screen Layout Keys
+      'account': 'Account',
+      'connected_devices': 'Connected Devices',
+      'receive_notifications': 'Receive Notifications',
+      'receive_notifications_desc': 'From applications and units',
+      'notification_sound': 'Notification Sound',
+      'notification_sound_desc': 'Play sound on new announcement',
+      'current_device': 'Current Device',
+      'active_now': 'Active now',
+      'device_count_format': '@count Devices',
     },
   };
 }
@@ -1035,10 +1214,10 @@ class LocalizationService {
   static void changeLanguage(String langCode) {
     final box = GetStorage();
     box.write(_storageKey, langCode);
-    currentLanguageCode.value = langCode;
     final locale = langCode == 'en'
         ? const Locale('en', 'US')
         : const Locale('km', 'KH');
     Get.updateLocale(locale);
+    currentLanguageCode.value = langCode;
   }
 }

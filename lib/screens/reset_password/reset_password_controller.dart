@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import 'package:core_portal/core/api/services/auth_service.dart';
+import 'package:core_portal/theme/app_colors.dart';
 import 'package:core_portal/widgets/custom_snackbar.dart';
 
 class ResetPasswordController extends GetxController {
@@ -72,9 +73,9 @@ class ResetPasswordController extends GetxController {
 
   Color get passwordStrengthColor {
     final score = passwordStrengthScore;
-    if (newPassword.value.isEmpty || score == 1) return const Color(0xFF2563EB);
+    if (newPassword.value.isEmpty || score == 1) return const Color(0xFFEF4444);
     if (score == 2) return const Color(0xFFF59E0B);
-    if (score == 3) return const Color(0xFF3B82F6);
+    if (score == 3) return AppColors.royalGold;
     return const Color(0xFF10B981);
   }
 

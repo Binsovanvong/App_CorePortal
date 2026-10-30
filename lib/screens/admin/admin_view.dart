@@ -14,7 +14,9 @@ import 'package:core_portal/core/localization/app_translations.dart';
 import 'package:core_portal/widgets/app_icon.dart';
 import 'package:core_portal/widgets/empty_apps_widget.dart';
 import 'package:core_portal/widgets/logout_dialog.dart';
+import 'package:core_portal/widgets/portal_top_app_bar.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:core_portal/theme/app_colors.dart';
 
 class AdminView extends GetView<AdminController> {
   const AdminView({super.key});
@@ -1306,27 +1308,70 @@ class AdminView extends GetView<AdminController> {
   /// ==========================================
 
   Widget buildUsersTab(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            _buildUsersHeader(context),
-            Expanded(
-              child: Obx(() {
-                final list = controller.filteredUsers;
-                final bool isLoading = controller.isLoading.value;
+    final bool canPop = Navigator.of(context).canPop();
 
-                return RefreshIndicator(
-                  onRefresh: controller.fetchDashboardData,
-                  color: const Color(0xFF1D4ED8),
-                  child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const SizedBox(height: 8),
+    return Scaffold(
+      backgroundColor: const Color(0xFFFAF9F6),
+      body: Column(
+        children: [
+          PortalTopAppBar(canPop: canPop),
+          Expanded(
+            child: Obx(() {
+              final list = controller.filteredUsers;
+              final bool isLoading = controller.isLoading.value;
+
+              return RefreshIndicator(
+                onRefresh: controller.fetchDashboardData,
+                color: AppColors.royalGold,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 14, 20, 8),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 3.5,
+                              height: 22,
+                              decoration: BoxDecoration(
+                                color: AppColors.royalGold,
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'users'.tr,
+                                    style: GoogleFonts.kantumruyPro(
+                                      fontSize: 18.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xFF1E293B),
+                                      height: 1.3,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    controller.isPortalAdministrator()
+                                        ? 'គ្រប់គ្រង និងចាត់ចែងអ្នកប្រើប្រាស់'
+                                        : controller.adminGeneralDepartmentNameKh,
+                                    style: GoogleFonts.kantumruyPro(
+                                      fontSize: 12.5,
+                                      fontWeight: FontWeight.w500,
+                                      color: const Color(0xFF64748B),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
 
                         /// Search Bar Section matching reference mockup
                         Padding(
@@ -1470,8 +1515,7 @@ class AdminView extends GetView<AdminController> {
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildSearchUsersGuide(BuildContext context) {
@@ -1694,82 +1738,7 @@ class AdminView extends GetView<AdminController> {
     );
   }
 
-  Widget _buildUsersHeader(BuildContext context) {
-    final bool canPop = Navigator.of(context).canPop();
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 14, 20, 10),
-      child: Row(
-        children: [
-          if (canPop) ...[
-            Container(
-              width: 46,
-              height: 46,
-              decoration: const BoxDecoration(
-                color: Color(0xFFEFF6FF),
-                shape: BoxShape.circle,
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(23),
-                  onTap: () => Get.back(),
-                  child: const Center(
-                    child: Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      color: Color(0xFF1D4ED8),
-                      size: 21,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 14),
-          ],
-
-          // Center: Title + Subtitle matching mockup
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'ប្រើប្រាស់ប្រព័ន្ធ',
-                  style: GoogleFonts.kantumruyPro(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    color: const Color(0xFF0F265C),
-                    height: 1.15,
-                    letterSpacing: -0.4,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  controller.isPortalAdministrator()
-                      ? 'គ្រប់គ្រង និងចាត់ចែងអ្នកប្រើប្រាស់'
-                      : controller.adminGeneralDepartmentNameKh,
-                  style: GoogleFonts.kantumruyPro(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF64748B),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            icon: const Icon(
-              Icons.refresh_rounded,
-              color: Color(0xFF1D4ED8),
-              size: 24,
-            ),
-            tooltip: 'refresh'.tr,
-            onPressed: () => controller.fetchDashboardData(),
-          ),
-        ],
-      ),
-    );
-  }
 
   static String _formatKhmerUnit(dynamic unit) {
     return AdminController.formatDepartmentToKhmer(unit);

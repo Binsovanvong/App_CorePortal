@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 
+import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
 class AppTheme {
 
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
+
+    fontFamily: GoogleFonts.kantumruyPro().fontFamily,
+    textTheme: GoogleFonts.kantumruyProTextTheme().apply(
+      bodyColor: const Color(0xFF0F172A),
+      displayColor: const Color(0xFF0F172A),
+    ),
 
     scaffoldBackgroundColor: AppColors.background,
     cardColor: Colors.white,

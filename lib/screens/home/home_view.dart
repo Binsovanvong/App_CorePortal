@@ -1,4 +1,4 @@
-import 'package:core_portal/screens/notification/notification_controller.dart';
+import 'package:core_portal/screens/application/application_view.dart';
 import 'package:core_portal/screens/home/home_controller.dart';
 import 'package:core_portal/controllers/nav_controller.dart';
 import 'package:core_portal/core/localization/app_translations.dart';
@@ -8,73 +8,53 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:core_portal/widgets/app_icon.dart';
-import 'package:core_portal/widgets/empty_apps_widget.dart';
 import 'package:core_portal/widgets/announcement_detail_dialog.dart';
+import 'package:core_portal/widgets/portal_top_app_bar.dart';
 import 'package:core_portal/core/api/api_client.dart';
+import 'package:core_portal/theme/app_colors.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
 
-  static const bool showNotification = false;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: const Color(0xFFFAF9F6),
       body: Container(
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFF8FAFC),
-              Color(0xFFF1F5F9),
-              Color(0xFFEFF4FB),
-              Color(0xFFE8EEF8),
-            ],
-            stops: [0.0, 0.35, 0.7, 1.0],
-          ),
+          color: Color(0xFFFAF9F6),
         ),
         child: Stack(
           children: [
-            // Background Traditional Khmer Floral / Kbach Watermarks
+            // Background Subtle Khmer Kbach Watermarks
             Positioned(
               right: -30,
               top: 320,
               child: IgnorePointer(
                 child: Opacity(
-                  opacity: 0.13,
+                  opacity: 0.05,
                   child: CustomPaint(
                     size: const Size(220, 220),
-                    painter: _KhmerLotusKbachPainter(),
+                    painter: _KhmerLotusKbachPainter(
+                      color: AppColors.royalGold,
+                    ),
                   ),
                 ),
               ),
             ),
             Positioned(
               left: -40,
-              bottom: 60,
+              bottom: 80,
               child: IgnorePointer(
                 child: Opacity(
-                  opacity: 0.12,
+                  opacity: 0.05,
                   child: CustomPaint(
                     size: const Size(240, 240),
-                    painter: _KhmerLotusKbachPainter(),
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              right: -20,
-              bottom: 110,
-              child: IgnorePointer(
-                child: Opacity(
-                  opacity: 0.14,
-                  child: CustomPaint(
-                    size: const Size(200, 200),
-                    painter: _KhmerLotusKbachPainter(),
+                    painter: _KhmerLotusKbachPainter(
+                      color: AppColors.royalGold,
+                    ),
                   ),
                 ),
               ),
@@ -89,14 +69,15 @@ class HomeView extends GetView<HomeController> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildTopAppBarCard(),
-                    const SizedBox(height: 14),
-                    _buildUserGreetingCard(),
-                    const SizedBox(height: 18),
-                    _buildPopularServicesSection(context),
-                    _buildAnnouncementsSectionHeader(),
+                    _buildTopAppBar(context),
                     const SizedBox(height: 12),
-                    _buildNoticeSectionList(context),
+                    _buildUserGreeting(),
+                    const SizedBox(height: 16),
+                    _buildGeneralApplicationsSection(context),
+                    const SizedBox(height: 20),
+                    _buildDepartmentApplicationsSection(context),
+                    const SizedBox(height: 20),
+                    _buildLatestAnnouncementsSection(context),
                     const SizedBox(height: 110),
                   ],
                 ),
@@ -108,873 +89,326 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  Widget _buildTopAppBarCard() {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF0F3278), Color(0xFF163774), Color(0xFF194498)],
-        ),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(28),
-          bottomRight: Radius.circular(28),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF163774).withOpacity(0.28),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Stack(
+  // =========================================================================
+  // 1. TOP APP BAR
+  // =========================================================================
+  Widget _buildTopAppBar(BuildContext context) {
+    return const PortalTopAppBar();
+  }
+
+  // =========================================================================
+  // 2. USER GREETING SECTION
+  // =========================================================================
+  Widget _buildUserGreeting() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Bottom-right Khmer Lotus Kbach watermark in app bar
-          Positioned(
-            right: -20,
-            bottom: -30,
-            child: IgnorePointer(
-              child: Opacity(
-                opacity: 0.22,
-                child: CustomPaint(
-                  size: const Size(180, 180),
-                  painter: const _KhmerLotusKbachPainter(
-                    color: Colors.white,
-                    strokeWidth: 1.2,
-                    opacity: 0.24,
-                  ),
-                ),
-              ),
+          // Vertical Gold Bar
+          Container(
+            width: 3.5,
+            height: 24,
+            decoration: BoxDecoration(
+              color: AppColors.royalGold,
+              borderRadius: BorderRadius.circular(2),
             ),
           ),
+          const SizedBox(width: 10),
 
-          SafeArea(
-            bottom: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    children: [
-                      // Ministry Emblem Logo
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
-                          border: Border.all(
-                            color: const Color(0xFFD4AF37),
-                            width: 2.2,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.22),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        padding: const EdgeInsets.all(2),
-                        child: ClipOval(
-                          child: Image.asset(
-                            "assets/img/about-moi-logo.png",
-                            fit: BoxFit.contain,
-                          ),
-                        ),
+          // Greeting Text
+          Expanded(
+            child: Obx(() {
+              final isKh = LocalizationService.currentLanguageCode.value == 'km';
+              final rawName = controller.userDisplayName.value.trim();
+              final hasName = rawName.isNotEmpty && rawName != 'guest'.tr && rawName != 'officer'.tr;
+
+              final String greetingText;
+              if (isKh) {
+                final displayKhName = hasName ? rawName : 'ប៊ិន សុវណ្ណវង្ស';
+                greetingText = "អរុណសួស្ដី, លោក $displayKhName";
+              } else {
+                final displayEnName = hasName ? rawName : 'Bin Sovanvong';
+                greetingText = "Good morning, Mr. $displayEnName";
+              }
+
+              return Text(
+                greetingText,
+                style: isKh
+                    ? GoogleFonts.kantumruyPro(
+                        fontSize: 17.5,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF1E293B),
+                        height: 1.35,
+                      )
+                    : GoogleFonts.poppins(
+                        fontSize: 16.5,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF1E293B),
+                        height: 1.3,
                       ),
-                      const SizedBox(width: 10),
-
-                      // Titles
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              "ក្រសួងមហាផ្ទៃ",
-                              style: GoogleFonts.kantumruyPro(
-                                color: Colors.white,
-                                fontSize: 20.0,
-                                fontWeight: FontWeight.bold,
-                                height: 1.2,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              "Ministry of Interior",
-                              style: GoogleFonts.poppins(
-                                color: Colors.white.withOpacity(0.92),
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-
-                      // Language Dropdown
-                      _buildLanguageDropdown(),
-
-                      // Notification Button (Hidden)
-                      if (showNotification) ...[
-                        const SizedBox(width: 8),
-                        _buildNotificationButton(),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-
-                  // Line 3: Full-width Motto text
-                  Padding(
-                    padding: const EdgeInsets.only(left: 62),
-                    child: Text(
-                      "moi_motto".tr,
-                      style: GoogleFonts.kantumruyPro(
-                        color: Colors.white.withOpacity(0.85),
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w400,
-                        letterSpacing: -0.15,
-                        height: 1.2,
-                      ),
-                      softWrap: true,
-                      maxLines: 2,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              );
+            }),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildNotificationButton() {
-    final notifCtrl = Get.isRegistered<NotificationController>()
-        ? Get.find<NotificationController>()
-        : Get.put(NotificationController());
-
+  // =========================================================================
+  // 3. GENERAL APPLICATIONS SECTION (Horizontal Scroll in Warm Cream Card)
+  // =========================================================================
+  Widget _buildGeneralApplicationsSection(BuildContext context) {
     return Obx(() {
-      final unreadCount = notifCtrl.notifications
-          .where((n) => !n.isRead)
-          .length;
+      final bool isKh = LocalizationService.currentLanguageCode.value == 'km';
+      final liveGeneralApps = controller.generalServices;
 
-      return Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => Get.toNamed(AppRoutes.notification),
-          borderRadius: BorderRadius.circular(20),
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.12),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                const Icon(
-                  Icons.notifications_outlined,
-                  size: 20,
-                  color: Color(0xFF163774),
-                ),
-                if (unreadCount > 0)
-                  Positioned(
-                    top: -1,
-                    right: -1,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: const Color(0xffEF4444),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 1.5),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      );
-    });
-  }
+      // Mock/Default fallback general apps if backend has none
+      final List<Map<String, dynamic>> generalItems = liveGeneralApps.isNotEmpty
+          ? liveGeneralApps
+          : HomeController.defaultGeneralApps;
 
-  Widget _buildLanguageDropdown() {
-    return Obx(() {
-      final currentLang = LocalizationService.currentLanguageCode.value;
-      final isKh = currentLang == 'km';
-
-      return Theme(
-        data: Theme.of(Get.context!).copyWith(
-          popupMenuTheme: PopupMenuThemeData(
-            color: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: const BorderSide(color: Color(0xffF1F5F9), width: 1),
-            ),
-            elevation: 8,
-            shadowColor: const Color(0xff0F172A).withOpacity(0.12),
-          ),
-        ),
-        child: PopupMenuButton<String>(
-          onSelected: (String langCode) {
-            LocalizationService.changeLanguage(langCode);
-          },
-          offset: const Offset(0, 38),
-          padding: EdgeInsets.zero,
-          tooltip: 'select_language'.tr,
-          itemBuilder: (BuildContext context) => [
-            PopupMenuItem<String>(
-              value: 'km',
-              height: 42,
-              child: Row(
-                children: [
-                  const Text('🇰🇭', style: TextStyle(fontSize: 15)),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'ភាសាខ្មែរ (KH)',
-                      style: GoogleFonts.kantumruyPro(
-                        fontSize: 13,
-                        fontWeight: isKh ? FontWeight.bold : FontWeight.w500,
-                        color: isKh
-                            ? const Color(0xFF163774)
-                            : const Color(0xff334155),
-                      ),
-                    ),
-                  ),
-                  if (isKh)
-                    const Icon(
-                      Icons.check_rounded,
-                      size: 16,
-                      color: Color(0xffD4AF37),
-                    ),
-                ],
-              ),
-            ),
-            const PopupMenuDivider(height: 1),
-            PopupMenuItem<String>(
-              value: 'en',
-              height: 42,
-              child: Row(
-                children: [
-                  const Text('🇬🇧', style: TextStyle(fontSize: 15)),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'English (EN)',
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        fontWeight: !isKh ? FontWeight.bold : FontWeight.w500,
-                        color: !isKh
-                            ? const Color(0xFF163774)
-                            : const Color(0xff334155),
-                      ),
-                    ),
-                  ),
-                  if (!isKh)
-                    const Icon(
-                      Icons.check_rounded,
-                      size: 16,
-                      color: Color(0xffD4AF37),
-                    ),
-                ],
-              ),
-            ),
-          ],
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5.5),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.12),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  isKh ? '🇰🇭' : '🇬🇧',
-                  style: const TextStyle(fontSize: 13),
-                ),
-                const SizedBox(width: 5),
-                Text(
-                  isKh ? 'KH' : 'EN',
-                  style: GoogleFonts.poppins(
-                    color: const Color(0xFF163774),
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(width: 2),
-                const Icon(
-                  Icons.keyboard_arrow_down_rounded,
-                  size: 16,
-                  color: Color(0xFF163774),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    });
-  }
-
-  Widget _buildUserGreetingCard() {
-    return GestureDetector(
-      onTap: () {
-        if (Get.isRegistered<NavController>()) {
-          final bool isAdmin = Get.find<NavController>().isAdmin.value;
-          Get.find<NavController>().changeTab(isAdmin ? 4 : 2);
-        }
-      },
-      behavior: HitTestBehavior.opaque,
-      child: Container(
+      return Container(
         margin: const EdgeInsets.symmetric(horizontal: 16),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
+          color: AppColors.warmCream,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(
+            color: AppColors.warmCreamBorder,
+            width: 1.2,
+          ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF163774).withOpacity(0.04),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-            BoxShadow(
-              color: Colors.black.withOpacity(0.02),
-              blurRadius: 6,
+              color: Colors.black.withValues(alpha: 0.015),
+              blurRadius: 8,
               offset: const Offset(0, 2),
             ),
           ],
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // Left Blue Avatar Circle with solid person icon
-            Container(
-              width: 48,
-              height: 48,
-              decoration: const BoxDecoration(
-                color: Color(0xFFEFF6FF),
-                shape: BoxShape.circle,
-              ),
-              child: const Center(
-                child: Icon(
-                  Icons.person_rounded,
-                  color: Color(0xFF1D4ED8),
-                  size: 26,
-                ),
-              ),
-            ),
-            const SizedBox(width: 14),
-
-            // Greeting + Name Column
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'hello'.tr,
-                        style: GoogleFonts.kantumruyPro(
-                          color: const Color(0xFF0F172A),
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      const Text('👋', style: TextStyle(fontSize: 16)),
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  Obx(() {
-                    final name = controller.userDisplayName.value;
-                    return Text(
-                      name.isNotEmpty ? name : 'bin sovanvong',
-                      style: GoogleFonts.kantumruyPro(
-                        color: const Color(0xFF64748B),
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    );
-                  }),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-
-            // Far-Right Chevron ">"
-            const Icon(
-              Icons.chevron_right_rounded,
-              color: Color(0xFF1D4ED8),
-              size: 24,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader({
-    IconData? icon,
-    bool isPillAccent = false,
-    required String title,
-    VoidCallback? onTapSeeAll,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Row(
+            // Section Header inside the cream card
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                if (isPillAccent)
-                  Container(
-                    width: 4,
-                    height: 18,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1D4ED8),
-                      borderRadius: BorderRadius.circular(2),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.grid_view_rounded,
+                      size: 18,
+                      color: AppColors.royalGold,
                     ),
-                  )
-                else if (icon != null)
-                  Icon(icon, color: const Color(0xFF1D4ED8), size: 22),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.kantumruyPro(
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF0F172A),
+                    const SizedBox(width: 8),
+                    Text(
+                      'general_applications'.tr,
+                      style: isKh
+                          ? GoogleFonts.kantumruyPro(
+                              fontSize: 15.5,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF1E293B),
+                              height: 1.3,
+                            )
+                          : GoogleFonts.poppins(
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF1E293B),
+                              height: 1.3,
+                            ),
+                    ),
+                  ],
+                ),
+                GestureDetector(
+                  onTap: () {
+                    if (Get.isRegistered<ApplicationViewController>()) {
+                      Get.find<ApplicationViewController>().setFilterTab('general');
+                    }
+                    _navigateToAllApps();
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                    child: Text(
+                      'view_all'.tr,
+                      style: isKh
+                          ? GoogleFonts.kantumruyPro(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.royalGold,
+                              height: 1.3,
+                            )
+                          : GoogleFonts.poppins(
+                              fontSize: 12.0,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.royalGold,
+                              height: 1.3,
+                            ),
                     ),
                   ),
                 ),
               ],
             ),
-          ),
-          if (onTapSeeAll != null) ...[
-            const SizedBox(width: 8),
-            GestureDetector(
-              onTap: onTapSeeAll,
-              behavior: HitTestBehavior.opaque,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4.5,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEFF6FF),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'view_all'.tr,
-                      style: GoogleFonts.kantumruyPro(
-                        color: const Color(0xFF1D4ED8),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(
-                      Icons.arrow_forward_rounded,
-                      size: 14,
-                      color: Color(0xFF1D4ED8),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPopularServicesSection(BuildContext context) {
-    return Obx(() {
-      final activeServices = controller.homeServices;
-
-      if (activeServices.isEmpty) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildSectionHeader(
-              isPillAccent: true,
-              title: 'all_applications'.tr,
-            ),
             const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: EmptyAppsWidget(
-                isCompact: true,
-                title: 'no_applications_yet'.tr,
-                subtitle: 'no_applications_yet_desc'.tr,
-                actionText: 'refresh'.tr,
-                onAction: controller.fetchPortalApps,
+
+            // Horizontal Scrollable Cards
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                children: List.generate(generalItems.length, (index) {
+                  final item = generalItems[index];
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      right: index < generalItems.length - 1 ? 10.0 : 0.0,
+                    ),
+                    child: _buildGeneralAppCard(item),
+                  );
+                }),
               ),
             ),
-            const SizedBox(height: 20),
           ],
-        );
-      }
-
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildSectionHeader(isPillAccent: true, title: 'all_applications'.tr),
-          const SizedBox(height: 12),
-          _buildPopularServicesRow(context, activeServices),
-          const SizedBox(height: 20),
-        ],
+        ),
       );
     });
   }
 
-  Widget _buildPopularServicesRow(
-    BuildContext context,
-    List<Map<String, dynamic>> services,
-  ) {
+  Widget _buildGeneralAppCard(Map<String, dynamic> item) {
+    final bool isKh = LocalizationService.currentLanguageCode.value == 'km';
+    final String title = ApplicationView.resolveAppTitle(item, isKh);
+
+    final resolvedTheme = ApplicationView.resolveAppTheme(item);
+    final Color iconBg = item['iconBg'] is Color
+        ? (item['iconBg'] as Color)
+        : (resolvedTheme['bg'] as Color);
+    final IconData fallbackIcon = item['fallbackIcon'] is IconData
+        ? (item['fallbackIcon'] as IconData)
+        : (resolvedTheme['icon'] as IconData);
+
     final storage = GetStorage();
     final String sessionToken = (ApiClient.currentToken ??
             storage.read('token') ??
             storage.read('access_token') ??
             '')
         .toString();
-    final bool isEnglish =
-        LocalizationService.currentLanguageCode.value == 'en';
 
-    final themes = [
-      {
-        'bgColor': const Color(0xFFF0F7FF),
-        'borderColor': const Color(0xFFDBEAFE),
-        'iconBg': const Color(0xFFDBEAFE),
-        'tintColor': const Color(0xFF1D4ED8),
-        'fallbackIcon': Icons.description_rounded,
-      },
-      {
-        'bgColor': const Color(0xFFF0FDF4),
-        'borderColor': const Color(0xFFDCFCE7),
-        'iconBg': const Color(0xFFDCFCE7),
-        'tintColor': const Color(0xFF16A34A),
-        'fallbackIcon': Icons.badge_rounded,
-      },
-      {
-        'bgColor': const Color(0xFFFFF7ED),
-        'borderColor': const Color(0xFFFFEDD5),
-        'iconBg': const Color(0xFFFFEDD5),
-        'tintColor': const Color(0xFFEA580C),
-        'fallbackIcon': Icons.security_rounded,
-      },
-    ];
-
-    // Chunk all user services into rows of 3
-    final List<List<Map<String, dynamic>>> chunks = [];
-    for (var i = 0; i < services.length; i += 3) {
-      chunks.add(
-        services.sublist(i, i + 3 > services.length ? services.length : i + 3),
-      );
+    String? iconUrl;
+    final String rawImg = AppIconWidget.extractRawIcon(item);
+    if (rawImg.isNotEmpty &&
+        rawImg != 'assets/img/about-moi-logo.png' &&
+        rawImg != '/assets/img/about-moi-logo.png' &&
+        rawImg.toLowerCase() != 'null' &&
+        rawImg.toLowerCase() != 'undefined') {
+      iconUrl = AppIconWidget.formatIconUrl(rawImg, sessionToken);
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final double standardCardWidth = (constraints.maxWidth - 20) / 3;
-
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: List.generate(chunks.length, (rowIndex) {
-              final rowItems = chunks[rowIndex];
-
-              return Padding(
-                padding: EdgeInsets.only(
-                  bottom: rowIndex < chunks.length - 1 ? 10.0 : 0.0,
-                ),
-                child: Row(
-                  children: List.generate(rowItems.length, (colIndex) {
-                    final itemIndex = rowIndex * 3 + colIndex;
-                    final theme = themes[itemIndex % themes.length];
-                    final item = rowItems[colIndex];
-
-                    final String displayName = isEnglish
-                        ? (item["titleEn"] ??
-                                  item["nameEn"] ??
-                                  item["name"] ??
-                                  item["titleKh"] ??
-                                  item["nameKh"] ??
-                                  'application'.tr)
-                              .toString()
-                        : (item["titleKh"] ??
-                                  item["nameKh"] ??
-                                  item["name"] ??
-                                  item["titleEn"] ??
-                                  item["nameEn"] ??
-                                  'application'.tr)
-                              .toString();
-
-                    final String title = displayName.trim().isNotEmpty
-                        ? displayName.trim()
-                        : 'application'.tr;
-
-                    String? iconUrl;
-                    final String rawImg = AppIconWidget.extractRawIcon(item);
-                    if (rawImg.isNotEmpty &&
-                        rawImg != 'assets/img/about-moi-logo.png' &&
-                        rawImg != '/assets/img/about-moi-logo.png' &&
-                        rawImg.toLowerCase() != 'null' &&
-                        rawImg.toLowerCase() != 'undefined') {
-                      iconUrl = AppIconWidget.formatIconUrl(rawImg, sessionToken);
-                    }
-
-                    final String route =
-                        (item["appUrl"] ??
-                                item["launchUrl"] ??
-                                item["url"] ??
-                                item["route"] ??
-                                item["path"] ??
-                                '')
-                            .toString()
-                            .trim();
-
-                    final String rawIconStr = (item["icon"] ?? '').toString().trim();
-                    final bool isLocalPath = rawIconStr.toLowerCase().startsWith('assets/') ||
-                        rawIconStr.toLowerCase().startsWith('/assets/') ||
-                        rawIconStr.toLowerCase().startsWith('images/') ||
-                        rawIconStr.toLowerCase().startsWith('/images/');
-                    final String itemLocal = (isLocalPath &&
-                            rawIconStr != 'assets/img/about-moi-logo.png' &&
-                            rawIconStr != '/assets/img/about-moi-logo.png')
-                        ? rawIconStr
-                        : '';
-
-                    final Widget card = _buildServiceCard(
-                      bgColor: theme['bgColor'] as Color,
-                      borderColor: theme['borderColor'] as Color,
-                      iconBg: theme['iconBg'] as Color,
-                      tintColor: theme['tintColor'] as Color,
-                      fallbackIcon: theme['fallbackIcon'] as IconData,
-                      title: title,
-                      iconUrl: iconUrl,
-                      localAsset: itemLocal,
-                      sessionToken: sessionToken,
-                      onTap: () {
-                        if (route.isNotEmpty) {
-                          try {
-                            controller.addRecentActivity(item);
-                            final Map<String, dynamic> navigationArgs = {
-                              'url': route,
-                              'title': title,
-                            };
-                            if (route.startsWith('http://') ||
-                                route.startsWith('https://')) {
-                              Get.toNamed(
-                                AppRoutes.webView,
-                                arguments: navigationArgs,
-                              );
-                              return;
-                            }
-                            Get.toNamed(route, arguments: navigationArgs);
-                          } catch (e) {
-                            debugPrint("Navigation error: $e");
-                          }
-                        } else {
-                          if (Get.isRegistered<NavController>()) {
-                            final bool isAdmin =
-                                Get.find<NavController>().isAdmin.value;
-                            if (isAdmin) {
-                              Get.find<NavController>().changeTab(1);
-                            } else {
-                              Get.toNamed(AppRoutes.application);
-                            }
-                          }
-                        }
-                      },
-                    );
-
-                    if (rowItems.length == 3) {
-                      return Expanded(
-                        child: Padding(
-                          padding: EdgeInsets.only(
-                            right: colIndex < 2 ? 10.0 : 0.0,
-                          ),
-                          child: card,
-                        ),
-                      );
-                    }
-
-                    return Padding(
-                      padding: EdgeInsets.only(
-                        right: colIndex < rowItems.length - 1 ? 10.0 : 0.0,
-                      ),
-                      child: SizedBox(width: standardCardWidth, child: card),
-                    );
-                  }),
-                ),
-              );
-            }),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildServiceCard({
-    required Color bgColor,
-    required Color borderColor,
-    required Color iconBg,
-    required Color tintColor,
-    required IconData fallbackIcon,
-    required String title,
-    String? iconUrl,
-    String? localAsset,
-    String? sessionToken,
-    required VoidCallback onTap,
-  }) {
-    final cleanLocal = (localAsset != null &&
-            localAsset.trim().isNotEmpty &&
-            localAsset != 'assets/img/about-moi-logo.png' &&
-            localAsset != '/assets/img/about-moi-logo.png')
-        ? localAsset.trim()
+    final String rawIconStr = (item["icon"] ?? '').toString().trim();
+    final bool isLocalPath = rawIconStr.toLowerCase().startsWith('assets/') ||
+        rawIconStr.toLowerCase().startsWith('/assets/') ||
+        rawIconStr.toLowerCase().startsWith('images/') ||
+        rawIconStr.toLowerCase().startsWith('/images/');
+    final String itemLocal = (isLocalPath &&
+            rawIconStr != 'assets/img/about-moi-logo.png' &&
+            rawIconStr != '/assets/img/about-moi-logo.png')
+        ? rawIconStr
         : '';
-    final bool hasImage =
-        (iconUrl != null && iconUrl.trim().isNotEmpty) ||
-        cleanLocal.isNotEmpty;
+
+    final bool hasImage = (iconUrl != null && iconUrl.trim().isNotEmpty) || itemLocal.isNotEmpty;
 
     return GestureDetector(
-      onTap: onTap,
+      onTap: () => _handleAppLaunch(item, title),
       behavior: HitTestBehavior.opaque,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 6),
+        width: 236,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: bgColor,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: borderColor, width: 1.2),
+          border: Border.all(
+            color: const Color(0xFFF1F5F9),
+            width: 1.0,
+          ),
           boxShadow: [
             BoxShadow(
-              color: tintColor.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.025),
               blurRadius: 8,
               offset: const Offset(0, 3),
             ),
           ],
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        child: Row(
           children: [
-            // Squircle Icon Container
+            // Left Squircle Icon Container
             Container(
               width: 46,
               height: 46,
               decoration: BoxDecoration(
-                color: hasImage ? Colors.white : iconBg,
-                borderRadius: BorderRadius.circular(13),
-                border: hasImage
-                    ? Border.all(
-                        color: borderColor.withOpacity(0.9),
-                        width: 1.0,
-                      )
-                    : null,
-                boxShadow: hasImage
-                    ? [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.04),
-                          blurRadius: 5,
-                          offset: const Offset(0, 2),
-                        ),
-                      ]
-                    : null,
+                color: hasImage ? Colors.transparent : iconBg,
+                borderRadius: BorderRadius.circular(14),
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(14),
                 child: Center(
                   child: hasImage
-                      ? Padding(
-                          padding: const EdgeInsets.all(4.5),
-                          child: AppIconWidget(
-                            iconUrl: iconUrl ?? '',
-                            localAsset: cleanLocal,
-                            fallbackIcon: fallbackIcon,
-                            fallbackColor: tintColor,
-                            token: sessionToken ?? '',
-                            size: 32,
-                            fit: BoxFit.contain,
-                          ),
+                      ? AppIconWidget(
+                          iconUrl: iconUrl ?? '',
+                          localAsset: itemLocal,
+                          fallbackIcon: fallbackIcon,
+                          fallbackColor: iconBg,
+                          token: sessionToken,
+                          size: 46,
+                          fit: BoxFit.contain,
                         )
-                      : Icon(fallbackIcon, color: tintColor, size: 24),
+                      : Icon(
+                          fallbackIcon,
+                          color: Colors.white,
+                          size: 22,
+                        ),
                 ),
               ),
             ),
-            const SizedBox(height: 10),
-            // 2-Line Title
-            ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 34),
+            const SizedBox(width: 10),
+
+            // Middle App Title
+            Expanded(
               child: Text(
                 title,
-                textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.kantumruyPro(
-                  fontSize: 11.0,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF0F172A),
-                  height: 1.2,
-                ),
+                style: isKh
+                    ? GoogleFonts.kantumruyPro(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF1E293B),
+                        height: 1.35,
+                      )
+                    : GoogleFonts.poppins(
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF1E293B),
+                        height: 1.3,
+                      ),
               ),
             ),
-            const SizedBox(height: 10),
-            // Circular Arrow Button
+            const SizedBox(width: 6),
+
+            // Right Circular Chevron Button
             Container(
-              width: 26,
-              height: 26,
-              decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
-              child: Center(
+              width: 28,
+              height: 28,
+              decoration: const BoxDecoration(
+                color: AppColors.iconBeige,
+                shape: BoxShape.circle,
+              ),
+              child: const Center(
                 child: Icon(
-                  Icons.arrow_forward_rounded,
-                  color: tintColor,
-                  size: 14,
+                  Icons.chevron_right_rounded,
+                  size: 18,
+                  color: AppColors.royalGold,
                 ),
               ),
             ),
@@ -984,276 +418,687 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  Widget _buildAnnouncementsSectionHeader() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: Row(
+  // =========================================================================
+  // 4. DEPARTMENT APPLICATIONS SECTION (2-Column Grid of Concept Cards)
+  // =========================================================================
+  Widget _buildDepartmentApplicationsSection(BuildContext context) {
+    return Obx(() {
+      final bool isKh = LocalizationService.currentLanguageCode.value == 'km';
+      final liveApps = controller.departmentServices;
+
+      // Default 4 department apps from concept design if API has none
+      final List<Map<String, dynamic>> displayList = liveApps.isNotEmpty
+          ? liveApps
+          : [
+              {
+                'id': 'hr_system',
+                'titleKh': 'ប្រព័ន្ធគ្រប់គ្រងបុគ្គលិក',
+                'titleEn': 'HR Management System',
+                'iconBg': const Color(0xFF1E293B),
+                'fallbackIcon': Icons.people_alt_rounded,
+                'route': '',
+              },
+              {
+                'id': 'doc_system',
+                'titleKh': 'ប្រព័ន្ធគ្រប់គ្រងឯកសារ',
+                'titleEn': 'Document Management',
+                'iconBg': const Color(0xFF107C41),
+                'fallbackIcon': Icons.description_rounded,
+                'route': '',
+              },
+              {
+                'id': 'stat_system',
+                'titleKh': 'ប្រព័ន្ធស្ថិតិ',
+                'titleEn': 'Statistics System',
+                'iconBg': const Color(0xFF2563EB),
+                'fallbackIcon': Icons.bar_chart_rounded,
+                'route': '',
+              },
+              {
+                'id': 'finance_system',
+                'titleKh': 'ប្រព័ន្ធហិរញ្ញវត្ថុ',
+                'titleEn': 'Financial System',
+                'iconBg': const Color(0xFF9E2A2B),
+                'fallbackIcon': Icons.account_balance_wallet_rounded,
+                'route': '',
+              },
+            ];
+
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Section Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFEBF3FE),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.campaign_rounded,
-                      color: Color(0xFF1D4ED8),
-                      size: 24,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Flexible(
+                Expanded(
                   child: Text(
-                    'recent_announcements'.tr,
+                    'department_applications'.tr,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.kantumruyPro(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF0F172A),
-                    ),
+                    style: isKh
+                        ? GoogleFonts.kantumruyPro(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF0F172A),
+                            height: 1.3,
+                          )
+                        : GoogleFonts.poppins(
+                            fontSize: 15.0,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF0F172A),
+                            height: 1.3,
+                          ),
                   ),
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          GestureDetector(
-            onTap: () {
-              if (Get.isRegistered<NavController>()) {
-                final bool isAdmin =
-                    Get.find<NavController>().isAdmin.value;
-                Get.find<NavController>().changeTab(isAdmin ? 3 : 1);
-              }
-            },
-            behavior: HitTestBehavior.opaque,
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 7,
-              ),
-              decoration: BoxDecoration(
-                color: const Color(0xFFEBF3FE),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'view_all'.tr,
-                    style: GoogleFonts.kantumruyPro(
-                      color: const Color(0xFF1D4ED8),
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  const Icon(
-                    Icons.arrow_forward_rounded,
-                    size: 15,
-                    color: Color(0xFF1D4ED8),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNoticeSectionList(BuildContext context) {
-    return Obx(() {
-      final list = controller.announcements;
-      if (list.isEmpty) {
-        return Container(
-          width: double.infinity,
-          margin: const EdgeInsets.symmetric(horizontal: 16),
-          padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF163774).withOpacity(0.04),
-                blurRadius: 10,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Center(child: _MegaphoneIllustration()),
-              const SizedBox(height: 14),
-              Text(
-                'no_announcements'.tr,
-                style: GoogleFonts.kantumruyPro(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF0F2B66),
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 5),
-              Text(
-                'no_announcements_yet_desc'.tr,
-                style: GoogleFonts.kantumruyPro(
-                  fontSize: 12.5,
-                  color: const Color(0xFF94A3B8),
-                  fontWeight: FontWeight.w400,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        );
-      }
-
-      return ListView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: list.length > 3 ? 3 : list.length,
-        itemBuilder: (context, index) {
-          final a = list[index];
-          final String title = a['title']?.toString() ?? 'announcement'.tr;
-          final String content = a['content']?.toString() ?? '';
-          final String rawDate = a['date']?.toString() ?? '';
-          final String cleanContent = content
-              .replaceAll(RegExp(r'<[^>]*>|&nbsp;'), ' ')
-              .replaceAll(RegExp(r'\s+'), ' ')
-              .trim();
-
-          return Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: const Color(0xFFF1F5F9),
-                width: 1.0,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF163774).withOpacity(0.04),
-                  blurRadius: 14,
-                  offset: const Offset(0, 4),
-                ),
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.01),
-                  blurRadius: 4,
-                  offset: const Offset(0, 1),
-                ),
-              ],
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () => _showAnnouncementDialog(context, a),
-                borderRadius: BorderRadius.circular(20),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 16,
-                  ),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: () => _navigateToAllApps(),
+                  behavior: HitTestBehavior.opaque,
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFEBF3FE),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Center(
-                          child: Icon(
-                            Icons.description_rounded,
-                            color: Color(0xFF1D4ED8),
-                            size: 24,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Container(
-                        width: 1.0,
-                        height: 38,
-                        color: const Color(0xFFE2E8F0),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              title,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.kantumruyPro(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF0F172A),
+                      Text(
+                        'view_all'.tr,
+                        style: isKh
+                            ? GoogleFonts.kantumruyPro(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.royalGold,
+                                height: 1.3,
+                              )
+                            : GoogleFonts.poppins(
+                                fontSize: 12.0,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.royalGold,
+                                height: 1.3,
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              cleanContent.isNotEmpty
-                                  ? cleanContent
-                                  : '...',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.kantumruyPro(
-                                fontSize: 13,
-                                color: const Color(0xFF94A3B8),
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
-                      const SizedBox(width: 8),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          if (rawDate.isNotEmpty) ...[
-                            Text(
-                              _formatKhmerDate(rawDate),
-                              style: GoogleFonts.kantumruyPro(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xFF94A3B8),
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                          ],
-                          const Icon(
-                            Icons.chevron_right_rounded,
-                            size: 20,
-                            color: Color(0xFF94A3B8),
-                          ),
-                        ],
+                      const SizedBox(width: 4),
+                      const Icon(
+                        Icons.arrow_forward_rounded,
+                        size: 13,
+                        color: AppColors.royalGold,
                       ),
                     ],
                   ),
                 ),
-              ),
+              ],
             ),
-          );
-        },
+            const SizedBox(height: 12),
+
+            // 2-Column Grid
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final double cardWidth = (constraints.maxWidth - 12) / 2;
+
+                // Chunk into rows of 2
+                final List<List<Map<String, dynamic>>> rows = [];
+                for (var i = 0; i < displayList.length; i += 2) {
+                  rows.add(
+                    displayList.sublist(
+                      i,
+                      i + 2 > displayList.length ? displayList.length : i + 2,
+                    ),
+                  );
+                }
+
+                return Column(
+                  children: List.generate(rows.length, (rowIndex) {
+                    final rowItems = rows[rowIndex];
+
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        bottom: rowIndex < rows.length - 1 ? 12.0 : 0.0,
+                      ),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: cardWidth,
+                            child: _buildDepartmentCard(
+                              rowItems[0],
+                              ApplicationView.resolveAppTheme(rowItems[0]),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          if (rowItems.length > 1)
+                            SizedBox(
+                              width: cardWidth,
+                              child: _buildDepartmentCard(
+                                rowItems[1],
+                                ApplicationView.resolveAppTheme(rowItems[1]),
+                              ),
+                            )
+                          else
+                            SizedBox(width: cardWidth),
+                        ],
+                      ),
+                    );
+                  }),
+                );
+              },
+            ),
+          ],
+        ),
       );
     });
+  }
+
+  Widget _buildDepartmentCard(
+    Map<String, dynamic> item,
+    Map<String, dynamic> theme,
+  ) {
+    final bool isKh = LocalizationService.currentLanguageCode.value == 'km';
+    final String title = ApplicationView.resolveAppTitle(item, isKh);
+
+    final resolvedTheme = ApplicationView.resolveAppTheme(item);
+    final Color iconBg = item['iconBg'] is Color
+        ? (item['iconBg'] as Color)
+        : (resolvedTheme['bg'] as Color);
+    final IconData fallbackIcon = item['fallbackIcon'] is IconData
+        ? (item['fallbackIcon'] as IconData)
+        : (resolvedTheme['icon'] as IconData);
+
+    final storage = GetStorage();
+    final String sessionToken = (ApiClient.currentToken ??
+            storage.read('token') ??
+            storage.read('access_token') ??
+            '')
+        .toString();
+
+    String? iconUrl;
+    final String rawImg = AppIconWidget.extractRawIcon(item);
+    if (rawImg.isNotEmpty &&
+        rawImg != 'assets/img/about-moi-logo.png' &&
+        rawImg != '/assets/img/about-moi-logo.png' &&
+        rawImg.toLowerCase() != 'null' &&
+        rawImg.toLowerCase() != 'undefined') {
+      iconUrl = AppIconWidget.formatIconUrl(rawImg, sessionToken);
+    }
+
+    final String rawIconStr = (item["icon"] ?? '').toString().trim();
+    final bool isLocalPath = rawIconStr.toLowerCase().startsWith('assets/') ||
+        rawIconStr.toLowerCase().startsWith('/assets/') ||
+        rawIconStr.toLowerCase().startsWith('images/') ||
+        rawIconStr.toLowerCase().startsWith('/images/');
+    final String itemLocal = (isLocalPath &&
+            rawIconStr != 'assets/img/about-moi-logo.png' &&
+            rawIconStr != '/assets/img/about-moi-logo.png')
+        ? rawIconStr
+        : '';
+
+    final bool hasImage = (iconUrl != null && iconUrl.trim().isNotEmpty) || itemLocal.isNotEmpty;
+
+    return GestureDetector(
+      onTap: () => _handleAppLaunch(item, title),
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: const Color(0xFFF1F5F9),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.025),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Top Row: Squircle Icon & Chevron Circle
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Squircle Icon Box
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: hasImage ? Colors.transparent : iconBg,
+                    borderRadius: BorderRadius.circular(13),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(13),
+                    child: Center(
+                      child: hasImage
+                          ? AppIconWidget(
+                              iconUrl: iconUrl ?? '',
+                              localAsset: itemLocal,
+                              fallbackIcon: fallbackIcon,
+                              fallbackColor: iconBg,
+                              token: sessionToken,
+                              size: 44,
+                              fit: BoxFit.contain,
+                            )
+                          : Icon(
+                              fallbackIcon,
+                              color: Colors.white,
+                              size: 22,
+                            ),
+                    ),
+                  ),
+                ),
+
+                // Chevron Circle
+                Container(
+                  width: 26,
+                  height: 26,
+                  decoration: const BoxDecoration(
+                    color: AppColors.iconBeige,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.chevron_right_rounded,
+                      color: AppColors.royalGold,
+                      size: 16,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+
+            // Bottom Title (2 lines)
+            ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 34),
+              child: Text(
+                title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: isKh
+                    ? GoogleFonts.kantumruyPro(
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF1E293B),
+                        height: 1.35,
+                      )
+                    : GoogleFonts.poppins(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF1E293B),
+                        height: 1.3,
+                      ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // =========================================================================
+  // 5. LATEST ANNOUNCEMENTS SECTION
+  // =========================================================================
+  Widget _buildLatestAnnouncementsSection(BuildContext context) {
+    return Obx(() {
+      final bool isKh = LocalizationService.currentLanguageCode.value == 'km';
+      final announcementsList = controller.announcements;
+
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Section Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'recent_announcements'.tr,
+                  style: isKh
+                      ? GoogleFonts.kantumruyPro(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF0F172A),
+                          height: 1.3,
+                        )
+                      : GoogleFonts.poppins(
+                          fontSize: 15.0,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF0F172A),
+                          height: 1.3,
+                        ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    if (Get.isRegistered<NavController>()) {
+                      final bool isAdmin = Get.find<NavController>().isAdmin.value;
+                      Get.find<NavController>().changeTab(isAdmin ? 3 : 1);
+                    }
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'view_all'.tr,
+                        style: isKh
+                            ? GoogleFonts.kantumruyPro(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.royalGold,
+                                height: 1.3,
+                              )
+                            : GoogleFonts.poppins(
+                                fontSize: 12.0,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.royalGold,
+                                height: 1.3,
+                              ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(
+                        Icons.arrow_forward_rounded,
+                        size: 13,
+                        color: AppColors.royalGold,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Announcements Card Container
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(
+                  color: const Color(0xFFF1F5F9),
+                  width: 1.2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.025),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(22),
+                child: announcementsList.isEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Notification bell icon shown ONLY when there are no announcements
+                            Container(
+                              width: 44,
+                              height: 44,
+                              decoration: const BoxDecoration(
+                                color: AppColors.iconBeige,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Center(
+                                child: Icon(
+                                  Icons.notifications_none_rounded,
+                                  size: 22,
+                                  color: AppColors.royalGold,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'no_announcements'.tr,
+                              style: isKh
+                                  ? GoogleFonts.kantumruyPro(
+                                      fontSize: 14.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xFF1E293B),
+                                      height: 1.35,
+                                    )
+                                  : GoogleFonts.poppins(
+                                      fontSize: 14.0,
+                                      fontWeight: FontWeight.w600,
+                                      color: const Color(0xFF1E293B),
+                                      height: 1.3,
+                                    ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'no_announcements_yet_desc'.tr,
+                              style: isKh
+                                  ? GoogleFonts.kantumruyPro(
+                                      fontSize: 12.5,
+                                      color: const Color(0xFF64748B),
+                                      fontWeight: FontWeight.w400,
+                                      height: 1.35,
+                                    )
+                                  : GoogleFonts.poppins(
+                                      fontSize: 12.0,
+                                      color: const Color(0xFF64748B),
+                                      fontWeight: FontWeight.w400,
+                                      height: 1.3,
+                                    ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      )
+                    : Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Column(
+                            children: List.generate(
+                              announcementsList.length > 3 ? 3 : announcementsList.length,
+                              (index) {
+                                final a = announcementsList[index];
+                                final String title =
+                                    a['title']?.toString() ?? 'announcement'.tr;
+                                final String content =
+                                    a['content']?.toString() ?? '';
+                                final String rawDate =
+                                    a['date']?.toString() ?? '';
+                                final String cleanContent = content
+                                    .replaceAll(RegExp(r'<[^>]*>|&nbsp;'), ' ')
+                                    .replaceAll(RegExp(r'\s+'), ' ')
+                                    .trim();
+                                final String formattedDate =
+                                    _formatKhmerDate(rawDate);
+
+                                return Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: () =>
+                                        _showAnnouncementDialog(context, a),
+                                    child: Column(
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 14,
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              // Title & snippet (no notification icon when announcements exist)
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      title,
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: isKh
+                                                          ? GoogleFonts
+                                                              .kantumruyPro(
+                                                            fontSize: 13.5,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            color: const Color(
+                                                                0xFF1E293B),
+                                                            height: 1.3,
+                                                          )
+                                                          : GoogleFonts.poppins(
+                                                            fontSize: 13.0,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            color: const Color(
+                                                                0xFF1E293B),
+                                                            height: 1.3,
+                                                          ),
+                                                    ),
+                                                    const SizedBox(height: 3),
+                                                    Text(
+                                                      cleanContent.isNotEmpty
+                                                          ? cleanContent
+                                                          : (formattedDate
+                                                                  .isNotEmpty
+                                                              ? formattedDate
+                                                              : '...'),
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: isKh
+                                                          ? GoogleFonts
+                                                              .kantumruyPro(
+                                                            fontSize: 12.0,
+                                                            color: const Color(
+                                                                0xFF94A3B8),
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            height: 1.35,
+                                                          )
+                                                          : GoogleFonts.poppins(
+                                                            fontSize: 11.5,
+                                                            color: const Color(
+                                                                0xFF94A3B8),
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            height: 1.3,
+                                                          ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+
+                                              // Date snippet
+                                              if (formattedDate.isNotEmpty) ...[
+                                                Text(
+                                                  formattedDate,
+                                                  style: isKh
+                                                      ? GoogleFonts
+                                                          .kantumruyPro(
+                                                        fontSize: 11.5,
+                                                        color: const Color(
+                                                            0xFF94A3B8),
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                      )
+                                                      : GoogleFonts.poppins(
+                                                        fontSize: 11.0,
+                                                        color: const Color(
+                                                            0xFF94A3B8),
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                      ),
+                                                ),
+                                                const SizedBox(width: 6),
+                                              ],
+
+                                              // Chevron
+                                              const Icon(
+                                                Icons.chevron_right_rounded,
+                                                color: AppColors.royalGold,
+                                                size: 18,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        if (index <
+                                            (announcementsList.length > 3
+                                                    ? 3
+                                                    : announcementsList.length) -
+                                                1)
+                                          const Divider(
+                                            height: 1,
+                                            thickness: 1,
+                                            color: Color(0xFFF8FAFC),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  // =========================================================================
+  // NAVIGATION & CLICK HANDLERS
+  // =========================================================================
+  void _navigateToAllApps() {
+    if (Get.isRegistered<NavController>()) {
+      final bool isAdmin = Get.find<NavController>().isAdmin.value;
+      if (isAdmin) {
+        Get.find<NavController>().changeTab(1);
+      } else {
+        Get.toNamed(AppRoutes.application);
+      }
+    } else {
+      Get.toNamed(AppRoutes.application);
+    }
+  }
+
+  void _handleAppLaunch(Map<String, dynamic> item, String title) {
+    final String route = (item["appUrl"] ??
+            item["launchUrl"] ??
+            item["url"] ??
+            item["route"] ??
+            item["path"] ??
+            '')
+        .toString()
+        .trim();
+
+    if (route.isNotEmpty) {
+      try {
+        controller.addRecentActivity(item);
+        final Map<String, dynamic> navigationArgs = {
+          'url': route,
+          'title': title,
+        };
+        if (route.startsWith('http://') || route.startsWith('https://')) {
+          Get.toNamed(
+            AppRoutes.webView,
+            arguments: navigationArgs,
+          );
+          return;
+        }
+        Get.toNamed(route, arguments: navigationArgs);
+      } catch (e) {
+        debugPrint("Navigation error: $e");
+      }
+    } else {
+      _navigateToAllApps();
+    }
   }
 
   void _showAnnouncementDialog(
@@ -1305,29 +1150,25 @@ class HomeView extends GetView<HomeController> {
   }
 }
 
-
-
 /// Traditional Khmer Lotus / Kbach Watermark Line Art Painter
 class _KhmerLotusKbachPainter extends CustomPainter {
   final Color color;
-  final double strokeWidth;
-  final double opacity;
 
   const _KhmerLotusKbachPainter({
-    this.color = const Color(0xFF163774),
-    this.strokeWidth = 1.0,
-    this.opacity = 0.08,
+    this.color = AppColors.royalGold,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
+    const strokeWidth = 1.0;
+    const opacity = 0.08;
     final paint = Paint()
-      ..color = color.withOpacity(opacity)
+      ..color = color.withValues(alpha: opacity)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
 
     final fillPaint = Paint()
-      ..color = color.withOpacity(opacity * 0.25)
+      ..color = color.withValues(alpha: opacity * 0.25)
       ..style = PaintingStyle.fill;
 
     final cx = size.width / 2;
@@ -1408,121 +1249,6 @@ class _KhmerLotusKbachPainter extends CustomPainter {
     // Center circular ornament
     canvas.drawCircle(Offset(cx, cy), size.width * 0.06, paint);
     canvas.drawCircle(Offset(cx, cy), size.width * 0.03, fillPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-/// Megaphone vector illustration matching Screenshot 1 empty announcements state
-class _MegaphoneIllustration extends StatelessWidget {
-  const _MegaphoneIllustration();
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 90,
-      height: 72,
-      child: CustomPaint(painter: _MegaphonePainter()),
-    );
-  }
-}
-
-class _MegaphonePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final double w = size.width;
-    final double h = size.height;
-
-    // Megaphone horn
-    canvas.save();
-    canvas.translate(w * 0.42, h * 0.52);
-    canvas.rotate(-22 * 3.14159265 / 180);
-
-    // Body (trapezoid cone)
-    final hornPath = Path();
-    hornPath.moveTo(-w * 0.24, -h * 0.12);
-    hornPath.lineTo(w * 0.16, -h * 0.28);
-    hornPath.lineTo(w * 0.16, h * 0.28);
-    hornPath.lineTo(-w * 0.24, h * 0.12);
-    hornPath.close();
-
-    final bodyPaint = Paint()
-      ..shader = const LinearGradient(
-        colors: [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
-      ).createShader(Rect.fromLTWH(-w * 0.24, -h * 0.28, w * 0.4, h * 0.56));
-    canvas.drawPath(hornPath, bodyPaint);
-
-    // Base cup / handle connector
-    final basePaint = Paint()..color = const Color(0xFF1E40AF);
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(-w * 0.30, -h * 0.13, w * 0.08, h * 0.26),
-        const Radius.circular(3),
-      ),
-      basePaint,
-    );
-
-    // Handle
-    final handlePath = Path();
-    handlePath.moveTo(-w * 0.13, h * 0.14);
-    handlePath.lineTo(-w * 0.09, h * 0.36);
-    handlePath.lineTo(-w * 0.03, h * 0.36);
-    handlePath.lineTo(-w * 0.07, h * 0.16);
-    handlePath.close();
-    canvas.drawPath(handlePath, basePaint);
-
-    // Horn rim (light cyan/blue opening)
-    final rimPaint = Paint()..color = const Color(0xFF93C5FD);
-    canvas.drawOval(
-      Rect.fromCenter(
-        center: Offset(w * 0.16, 0),
-        width: w * 0.10,
-        height: h * 0.56,
-      ),
-      rimPaint,
-    );
-
-    // Inner rim
-    final innerRimPaint = Paint()..color = const Color(0xFF60A5FA);
-    canvas.drawOval(
-      Rect.fromCenter(
-        center: Offset(w * 0.16, 0),
-        width: w * 0.05,
-        height: h * 0.40,
-      ),
-      innerRimPaint,
-    );
-
-    canvas.restore();
-
-    // Sound waves emitting from the horn
-    final wavePaint = Paint()
-      ..color = const Color(0xFF60A5FA)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.2
-      ..strokeCap = StrokeCap.round;
-
-    final cx = w * 0.65;
-    final cy = h * 0.32;
-
-    // Small wave
-    canvas.drawArc(
-      Rect.fromCircle(center: Offset(cx, cy), radius: 13),
-      -0.65,
-      1.3,
-      false,
-      wavePaint,
-    );
-
-    // Large wave
-    canvas.drawArc(
-      Rect.fromCircle(center: Offset(cx, cy), radius: 23),
-      -0.65,
-      1.3,
-      false,
-      wavePaint,
-    );
   }
 
   @override

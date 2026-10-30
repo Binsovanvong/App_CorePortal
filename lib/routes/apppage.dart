@@ -8,6 +8,7 @@ import 'package:core_portal/screens/home/home_view.dart';
 import 'package:core_portal/screens/login/login_binding.dart';
 import 'package:core_portal/screens/login/login_view.dart';
 import 'package:core_portal/screens/announcement/announcement_view.dart';
+import 'package:core_portal/screens/announcement/announcement_detail_view.dart';
 import 'package:core_portal/screens/announcement/announcement_binding.dart';
 import 'package:core_portal/screens/modules/homepage/homepage_view.dart';
 import 'package:core_portal/screens/notification/notification_binding.dart';
@@ -52,6 +53,10 @@ class AppPages {
       name: AppRoutes.announcement,
       page: () => const AnnouncementView(),
       binding: AnnouncementBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.announcementDetail,
+      page: () => const AnnouncementDetailView(),
     ),
     GetPage(
       name: AppRoutes.setting,
@@ -124,8 +129,9 @@ class AppPages {
         final args = Get.arguments;
         final ticket = (args is Map ? args['ticket'] : null)?.toString() ?? '';
         final username = (args is Map ? args['username'] : null)?.toString();
-        final rawExpires =
-            args is Map ? (args['expires_in'] ?? args['expiresIn']) : null;
+        final rawExpires = args is Map
+            ? (args['expires_in'] ?? args['expiresIn'])
+            : null;
         final expiresIn = rawExpires is int
             ? rawExpires
             : int.tryParse(rawExpires?.toString() ?? '');

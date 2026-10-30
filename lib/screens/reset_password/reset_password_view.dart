@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:core_portal/screens/reset_password/reset_password_controller.dart';
+import 'package:core_portal/theme/app_colors.dart';
+import 'package:core_portal/widgets/password_requirements_card.dart';
 
 class ResetPasswordView extends GetView<ResetPasswordController> {
   const ResetPasswordView({super.key});
@@ -9,7 +11,7 @@ class ResetPasswordView extends GetView<ResetPasswordController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFBFDFF),
+      backgroundColor: const Color(0xFFFAF9F6),
       body: SafeArea(
         child: Column(
           children: [
@@ -27,24 +29,26 @@ class ResetPasswordView extends GetView<ResetPasswordController> {
                         width: 44,
                         height: 44,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppColors.warmCream,
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: const Color(0xFFE2E8F0),
-                            width: 1,
+                            color: AppColors.warmCreamBorder,
+                            width: 1.2,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.04),
-                              blurRadius: 10,
-                              offset: const Offset(0, 3),
+                              color: AppColors.royalGold.withValues(
+                                alpha: 0.10,
+                              ),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
                             ),
                           ],
                         ),
                         child: const Icon(
                           Icons.chevron_left_rounded,
                           size: 26,
-                          color: Color(0xFF0F172A),
+                          color: AppColors.royalGold,
                         ),
                       ),
                     ),
@@ -67,7 +71,7 @@ class ResetPasswordView extends GetView<ResetPasswordController> {
                     Stack(
                       clipBehavior: Clip.none,
                       children: [
-                        // Soft decorative ambient blob behind lock illustration
+                        // Soft warm gold ambient blob behind lock illustration
                         Positioned(
                           right: -10,
                           top: -15,
@@ -78,8 +82,10 @@ class ResetPasswordView extends GetView<ResetPasswordController> {
                               shape: BoxShape.circle,
                               gradient: RadialGradient(
                                 colors: [
-                                  const Color(0xFFDBEAFE).withValues(alpha: 0.6),
-                                  const Color(0xFFEFF6FF).withValues(alpha: 0.3),
+                                  AppColors.royalGoldLight.withValues(
+                                    alpha: 0.7,
+                                  ),
+                                  AppColors.warmCream.withValues(alpha: 0.35),
                                   Colors.transparent,
                                 ],
                               ),
@@ -93,7 +99,9 @@ class ResetPasswordView extends GetView<ResetPasswordController> {
                             width: 16,
                             height: 16,
                             decoration: BoxDecoration(
-                              color: const Color(0xFFDBEAFE).withValues(alpha: 0.7),
+                              color: AppColors.royalGoldLight.withValues(
+                                alpha: 0.8,
+                              ),
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -105,7 +113,7 @@ class ResetPasswordView extends GetView<ResetPasswordController> {
                             width: 18,
                             height: 18,
                             decoration: BoxDecoration(
-                              color: const Color(0xFFBFDBFE).withValues(alpha: 0.6),
+                              color: AppColors.iconBeige.withValues(alpha: 0.7),
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -125,8 +133,8 @@ class ResetPasswordView extends GetView<ResetPasswordController> {
                                     'reset_password_title'.tr,
                                     style: GoogleFonts.kantumruyPro(
                                       fontSize: 25,
-                                      fontWeight: FontWeight.w800,
-                                      color: const Color(0xFF0F1E36),
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.royalGold,
                                       letterSpacing: -0.2,
                                     ),
                                   ),
@@ -144,13 +152,29 @@ class ResetPasswordView extends GetView<ResetPasswordController> {
                               ),
                             ),
 
-                            // 3D Padlock Illustration
+                            // 3D Padlock Illustration in Warm Bordered Card
                             Container(
                               width: 110,
                               height: 110,
                               margin: const EdgeInsets.only(left: 8),
-                              child: ClipRRect(
+                              decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: AppColors.warmCreamBorder,
+                                  width: 1.5,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.royalGold.withValues(
+                                      alpha: 0.08,
+                                    ),
+                                    blurRadius: 14,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(18),
                                 child: Image.asset(
                                   'assets/img/reset_password_lock.jpg',
                                   fit: BoxFit.contain,
@@ -172,24 +196,37 @@ class ResetPasswordView extends GetView<ResetPasswordController> {
                         vertical: 12,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFEFF5FF),
+                        color: AppColors.warmCream,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: const Color(0xFFDBEAFE),
-                          width: 1,
+                          color: AppColors.warmCreamBorder,
+                          width: 1.2,
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.royalGold.withValues(alpha: 0.04),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: Row(
                         children: [
                           Container(
-                            width: 34,
-                            height: 34,
+                            width: 36,
+                            height: 36,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF2563EB),
+                              color: AppColors.royalGoldLight,
                               borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: AppColors.warmCreamBorder,
+                                width: 1,
+                              ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF2563EB).withValues(alpha: 0.25),
+                                  color: AppColors.royalGold.withValues(
+                                    alpha: 0.12,
+                                  ),
                                   blurRadius: 6,
                                   offset: const Offset(0, 2),
                                 ),
@@ -198,8 +235,8 @@ class ResetPasswordView extends GetView<ResetPasswordController> {
                             child: const Center(
                               child: Icon(
                                 Icons.verified_user_rounded,
-                                color: Colors.white,
-                                size: 19,
+                                color: AppColors.royalGold,
+                                size: 20,
                               ),
                             ),
                           ),
@@ -210,7 +247,7 @@ class ResetPasswordView extends GetView<ResetPasswordController> {
                               style: GoogleFonts.kantumruyPro(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: const Color(0xFF1D4ED8),
+                                color: AppColors.royalGold,
                                 height: 1.4,
                               ),
                             ),
@@ -237,13 +274,15 @@ class ResetPasswordView extends GetView<ResetPasswordController> {
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: const Color(0xFFE2E8F0),
+                            color: AppColors.warmCreamBorder,
                             width: 1.2,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.02),
-                              blurRadius: 8,
+                              color: AppColors.royalGold.withValues(
+                                alpha: 0.04,
+                              ),
+                              blurRadius: 10,
                               offset: const Offset(0, 2),
                             ),
                           ],
@@ -266,12 +305,12 @@ class ResetPasswordView extends GetView<ResetPasswordController> {
                               margin: const EdgeInsets.fromLTRB(10, 8, 10, 8),
                               padding: const EdgeInsets.all(7),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF1F5F9),
+                                color: AppColors.iconBeige,
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: const Icon(
                                 Icons.lock_outline_rounded,
-                                color: Color(0xFF64748B),
+                                color: AppColors.royalGold,
                                 size: 20,
                               ),
                             ),
@@ -280,7 +319,9 @@ class ResetPasswordView extends GetView<ResetPasswordController> {
                                 controller.isNewPasswordVisible.value
                                     ? Icons.visibility_outlined
                                     : Icons.visibility_off_outlined,
-                                color: const Color(0xFF64748B),
+                                color: AppColors.royalGold.withValues(
+                                  alpha: 0.75,
+                                ),
                                 size: 20,
                               ),
                               onPressed: controller.toggleNewPasswordVisibility,
@@ -316,7 +357,7 @@ class ResetPasswordView extends GetView<ResetPasswordController> {
                                   decoration: BoxDecoration(
                                     color: isActive
                                         ? color
-                                        : const Color(0xFFE2E8F0),
+                                        : AppColors.warmCreamBorder,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                 ),
@@ -366,20 +407,23 @@ class ResetPasswordView extends GetView<ResetPasswordController> {
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: const Color(0xFFE2E8F0),
+                            color: AppColors.warmCreamBorder,
                             width: 1.2,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.02),
-                              blurRadius: 8,
+                              color: AppColors.royalGold.withValues(
+                                alpha: 0.04,
+                              ),
+                              blurRadius: 10,
                               offset: const Offset(0, 2),
                             ),
                           ],
                         ),
                         child: TextField(
                           controller: controller.confirmPasswordController,
-                          obscureText: !controller.isConfirmPasswordVisible.value,
+                          obscureText:
+                              !controller.isConfirmPasswordVisible.value,
                           style: GoogleFonts.kantumruyPro(
                             fontSize: 14.5,
                             color: const Color(0xFF0F172A),
@@ -395,12 +439,12 @@ class ResetPasswordView extends GetView<ResetPasswordController> {
                               margin: const EdgeInsets.fromLTRB(10, 8, 10, 8),
                               padding: const EdgeInsets.all(7),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF1F5F9),
+                                color: AppColors.iconBeige,
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: const Icon(
                                 Icons.lock_outline_rounded,
-                                color: Color(0xFF64748B),
+                                color: AppColors.royalGold,
                                 size: 20,
                               ),
                             ),
@@ -409,10 +453,13 @@ class ResetPasswordView extends GetView<ResetPasswordController> {
                                 controller.isConfirmPasswordVisible.value
                                     ? Icons.visibility_outlined
                                     : Icons.visibility_off_outlined,
-                                color: const Color(0xFF64748B),
+                                color: AppColors.royalGold.withValues(
+                                  alpha: 0.75,
+                                ),
                                 size: 20,
                               ),
-                              onPressed: controller.toggleConfirmPasswordVisibility,
+                              onPressed:
+                                  controller.toggleConfirmPasswordVisibility,
                             ),
                             border: InputBorder.none,
                             contentPadding: const EdgeInsets.symmetric(
@@ -427,166 +474,13 @@ class ResetPasswordView extends GetView<ResetPasswordController> {
                     const SizedBox(height: 22),
 
                     // Password Requirements Card
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF4F8FE),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: const Color(0xFFE0EDFD),
-                          width: 1.2,
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Card Header
-                          Row(
-                            children: [
-                              Container(
-                                width: 34,
-                                height: 34,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFF1D6EEB),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Center(
-                                  child: Icon(
-                                    Icons.verified_user_rounded,
-                                    color: Colors.white,
-                                    size: 19,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'password_characteristics'.tr,
-                                      style: GoogleFonts.kantumruyPro(
-                                        fontSize: 14.5,
-                                        fontWeight: FontWeight.bold,
-                                        color: const Color(0xFF1D6EEB),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 1),
-                                    Text(
-                                      'password_characteristics_desc'.tr,
-                                      style: GoogleFonts.kantumruyPro(
-                                        fontSize: 11.5,
-                                        fontWeight: FontWeight.w400,
-                                        color: const Color(0xFF64748B),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 14),
-
-                          // Checklist & Document Graphic
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              // Checklist on Left
-                              Expanded(
-                                flex: 6,
-                                child: Obx(() {
-                                  return Column(
-                                    children: [
-                                      _buildChecklistRow(
-                                        'req_min_8_chars'.tr,
-                                        controller.hasMinLength,
-                                      ),
-                                      const SizedBox(height: 8),
-                                      _buildChecklistRow(
-                                        'req_both_cases'.tr,
-                                        controller.hasBothCases,
-                                      ),
-                                      const SizedBox(height: 8),
-                                      _buildChecklistRow(
-                                        'req_numbers'.tr,
-                                        controller.hasNumber,
-                                      ),
-                                      const SizedBox(height: 8),
-                                      _buildChecklistRow(
-                                        'req_special_chars'.tr,
-                                        controller.hasSpecialChar,
-                                      ),
-                                    ],
-                                  );
-                                }),
-                              ),
-
-                              // Document Graphic & Floating Accent Dots on Right
-                              Expanded(
-                                flex: 4,
-                                child: SizedBox(
-                                  height: 110,
-                                  child: Stack(
-                                    alignment: Alignment.center,
-                                    clipBehavior: Clip.none,
-                                    children: [
-                                      // Top right blue dot
-                                      Positioned(
-                                        top: 2,
-                                        right: 10,
-                                        child: Container(
-                                          width: 6,
-                                          height: 6,
-                                          decoration: const BoxDecoration(
-                                            color: Color(0xFF3B82F6),
-                                            shape: BoxShape.circle,
-                                          ),
-                                        ),
-                                      ),
-                                      // Left blue dot
-                                      Positioned(
-                                        left: 0,
-                                        top: 55,
-                                        child: Container(
-                                          width: 5,
-                                          height: 5,
-                                          decoration: const BoxDecoration(
-                                            color: Color(0xFF60A5FA),
-                                            shape: BoxShape.circle,
-                                          ),
-                                        ),
-                                      ),
-                                      // Bottom right amber dot
-                                      Positioned(
-                                        bottom: 6,
-                                        right: 18,
-                                        child: Container(
-                                          width: 5,
-                                          height: 5,
-                                          decoration: const BoxDecoration(
-                                            color: Color(0xFFFBBF24),
-                                            shape: BoxShape.circle,
-                                          ),
-                                        ),
-                                      ),
-                                      // 3D Document Illustration
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(14),
-                                        child: Image.asset(
-                                          'assets/img/security_card_doc.jpg',
-                                          width: 90,
-                                          height: 90,
-                                          fit: BoxFit.contain,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                    Obx(
+                      () => PasswordRequirementsCard(
+                        password: controller.newPassword.value,
+                        confirmPassword: controller.confirmPassword.value,
+                        titleColor: AppColors.royalGold,
+                        borderColor: AppColors.warmCreamBorder,
+                        unmetBorderColor: AppColors.warmCreamBorder,
                       ),
                     ),
 
@@ -607,16 +501,17 @@ class ResetPasswordView extends GetView<ResetPasswordController> {
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [
-                        Color(0xFF2563EB),
-                        Color(0xFF1D4ED8),
+                        Color(0xFFA67C1E),
+                        AppColors.royalGold,
+                        Color(0xFF73520F),
                       ],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF2563EB).withValues(alpha: 0.35),
+                        color: AppColors.royalGold.withValues(alpha: 0.35),
                         blurRadius: 16,
                         offset: const Offset(0, 6),
                       ),
@@ -665,40 +560,6 @@ class ResetPasswordView extends GetView<ResetPasswordController> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildChecklistRow(String text, bool isMet) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Container(
-          width: 18,
-          height: 18,
-          decoration: BoxDecoration(
-            color: isMet ? const Color(0xFF2563EB) : const Color(0xFFE2E8F0),
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: Icon(
-              Icons.check_rounded,
-              size: 13,
-              color: isMet ? Colors.white : const Color(0xFF94A3B8),
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            text,
-            style: GoogleFonts.kantumruyPro(
-              fontSize: 12,
-              fontWeight: isMet ? FontWeight.w600 : FontWeight.w400,
-              color: isMet ? const Color(0xFF0F172A) : const Color(0xFF475569),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

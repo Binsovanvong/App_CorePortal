@@ -87,6 +87,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      title: 'MOI Portal',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       initialRoute: initialRoute,

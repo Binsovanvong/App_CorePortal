@@ -18,6 +18,8 @@ class FirstLoginChangePasswordController extends GetxController {
   final obscureNewPassword = true.obs;
   final obscureConfirmPassword = true.obs;
   final isLoading = false.obs;
+  final newPasswordInput = ''.obs;
+  final confirmPasswordInput = ''.obs;
 
   late final String username;
   late final String tempPassword;
@@ -56,6 +58,12 @@ class FirstLoginChangePasswordController extends GetxController {
     if (tempPassword.isNotEmpty) {
       currentPasswordController.text = tempPassword;
     }
+    newPasswordController.addListener(() {
+      newPasswordInput.value = newPasswordController.text;
+    });
+    confirmPasswordController.addListener(() {
+      confirmPasswordInput.value = confirmPasswordController.text;
+    });
   }
 
   void _clearTicket() {
@@ -113,14 +121,6 @@ class FirstLoginChangePasswordController extends GetxController {
     if (!RegExp(r'[0-9]').hasMatch(password)) {
       CustomSnackbar.showError(
         message: 'pwd_rule_number'.tr,
-      );
-      return false;
-    }
-
-    // Special character check
-    if (!RegExp(r'[!@#\$&*~%^()_\+=\-\[\]{}|;:<>?\/]').hasMatch(password)) {
-      CustomSnackbar.showError(
-        message: 'pwd_rule_special'.tr,
       );
       return false;
     }

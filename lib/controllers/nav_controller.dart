@@ -1,7 +1,7 @@
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import '../screens/announcement/announcement_controller.dart';
-import '../screens/home/home_controller.dart';
 
 class NavController extends GetxController {
   var currentIndex = 0.obs;
@@ -76,35 +76,35 @@ class NavController extends GetxController {
 
   void changeTab(int index) {
     currentIndex.value = index;
-    final announcementIndex = isAdmin.value ? 3 : 1;
-    if (index == announcementIndex) {
-      List<Map<String, dynamic>> list = [];
-      if (Get.isRegistered<AnnouncementController>()) {
-        list = Get.find<AnnouncementController>().announcements;
-      }
-      if (list.isEmpty && Get.isRegistered<HomeController>()) {
-        list = Get.find<HomeController>().announcements;
-      }
-      markAllAsRead(list);
-    }
   }
 
   void updateUnreadCount(List<Map<String, dynamic>> fetchedAnnouncements) {
-    final announcementIndex = isAdmin.value ? 3 : 1;
-    if (currentIndex.value == announcementIndex) {
-      markAllAsRead(fetchedAnnouncements);
-      return;
-    }
-
     final readIds = List<String>.from(_box.read<List>('read_announcements') ?? []);
     int count = 0;
     for (var item in fetchedAnnouncements) {
       final id = (item['id'] ?? item['uuid'] ?? item['title'] ?? item['createdAt'] ?? '').toString();
-      if (id.isNotEmpty && !readIds.contains(id)) {
+      if (id.isNotEmpty && readIds.contains(id)) {
+        continue;
+      }
+      if (item.containsKey('isDefaultUnread')) {
+        if (item['isDefaultUnread'] == true) {
+          count++;
+        }
+      } else if (item['isRead'] == true || item['read'] == true) {
+        // read
+      } else {
         count++;
       }
     }
-    unreadCount.value = count;
+    final binding = WidgetsBinding.instance;
+    if (binding.schedulerPhase == SchedulerPhase.persistentCallbacks ||
+        binding.schedulerPhase == SchedulerPhase.midFrameMicrotasks) {
+      binding.addPostFrameCallback((_) {
+        unreadCount.value = count;
+      });
+    } else {
+      unreadCount.value = count;
+    }
   }
 
   void markAllAsRead(List<Map<String, dynamic>> currentAnnouncements) {

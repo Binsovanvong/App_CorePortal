@@ -18,14 +18,32 @@ class SettingViewController extends GetxController {
 
   bool _isAdmin = false;
 
+  // Settings layout toggle states
+  final receiveNotifications = true.obs;
+  final notificationSound = false.obs;
+
   @override
   void onInit() {
     super.onInit();
+    final box = GetStorage();
+    receiveNotifications.value = box.read('setting_receive_notifications') ?? true;
+    notificationSound.value = box.read('setting_notification_sound') ?? false;
+
     newPasswordController.addListener(() {
       newPasswordInput.value = newPasswordController.text;
     });
     updateRoleDisplay();
     loadCompleteProfileDashboard();
+  }
+
+  void toggleReceiveNotifications(bool val) {
+    receiveNotifications.value = val;
+    GetStorage().write('setting_receive_notifications', val);
+  }
+
+  void toggleNotificationSound(bool val) {
+    notificationSound.value = val;
+    GetStorage().write('setting_notification_sound', val);
   }
 
   @override
@@ -337,15 +355,16 @@ class SettingViewController extends GetxController {
   final isUpdatingPassword = false.obs;
   final passwordStrength = 0.obs;
   final newPasswordInput = ''.obs;
+  final confirmPasswordInput = ''.obs;
 
   bool get hasMinLength => newPasswordInput.value.length >= 8;
-  bool get hasBothCases =>
-      newPasswordInput.value.contains(RegExp(r'[a-z]')) &&
-      newPasswordInput.value.contains(RegExp(r'[A-Z]'));
-  bool get hasNumber => newPasswordInput.value.contains(RegExp(r'[0-9]'));
-  bool get hasSpecialChar =>
-      RegExp(r'[!@#\$&*~%^()_\+=\-\[\]{}|;:<>?\/]').hasMatch(newPasswordInput.value) ||
-      RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(newPasswordInput.value);
+  bool get hasUppercase => RegExp(r'[A-Z]').hasMatch(newPasswordInput.value);
+  bool get hasLowercase => RegExp(r'[a-z]').hasMatch(newPasswordInput.value);
+  bool get hasNumber => RegExp(r'[0-9]').hasMatch(newPasswordInput.value);
+  bool get hasPasswordsMatch =>
+      newPasswordInput.value.isNotEmpty &&
+      confirmPasswordInput.value.isNotEmpty &&
+      newPasswordInput.value == confirmPasswordInput.value;
 
   void _updatePasswordStrength(String password) {
     newPasswordInput.value = password;
@@ -379,6 +398,7 @@ class SettingViewController extends GetxController {
     newPasswordController.clear();
     confirmPasswordController.clear();
     newPasswordInput.value = '';
+    confirmPasswordInput.value = '';
     isUpdatingPassword.value = false;
     passwordStrength.value = 0;
 
@@ -428,12 +448,16 @@ class SettingViewController extends GetxController {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFEFF6FF),
+                      color: const Color(0xFFF6EEDB),
                       borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: const Color(0xFFEDE3CE),
+                        width: 0.8,
+                      ),
                     ),
                     child: const Icon(
                       Icons.lock_rounded,
-                      color: Color(0xFF2563EB),
+                      color: AppColors.royalGold,
                       size: 24,
                     ),
                   ),
@@ -550,7 +574,7 @@ class SettingViewController extends GetxController {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: const BorderSide(
-                        color: Color(0xFF2563EB),
+                        color: AppColors.royalGold,
                         width: 1.6,
                       ),
                     ),
@@ -625,7 +649,7 @@ class SettingViewController extends GetxController {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: const BorderSide(
-                        color: Color(0xFF2563EB),
+                        color: AppColors.royalGold,
                         width: 1.6,
                       ),
                     ),
@@ -736,6 +760,7 @@ class SettingViewController extends GetxController {
                 () => TextField(
                   controller: confirmPasswordController,
                   obscureText: obscureConfirm.value,
+                  onChanged: (val) => confirmPasswordInput.value = val,
                   style: GoogleFonts.kantumruyPro(
                     fontSize: 14,
                     color: const Color(0xFF0F172A),
@@ -785,7 +810,7 @@ class SettingViewController extends GetxController {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: const BorderSide(
-                        color: Color(0xFF2563EB),
+                        color: AppColors.royalGold,
                         width: 1.6,
                       ),
                     ),
@@ -809,7 +834,7 @@ class SettingViewController extends GetxController {
                         ? null
                         : _submitChangePassword,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1D4ED8),
+                      backgroundColor: AppColors.royalGold,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
@@ -883,13 +908,6 @@ class SettingViewController extends GetxController {
     if (!RegExp(r'[0-9]').hasMatch(password)) {
       CustomSnackbar.showWarning(
         message: 'password_number_error'.tr,
-      );
-      return false;
-    }
-
-    if (!RegExp(r'[!@#\$&*~%^()_\+=\-\[\]{}|;:<>?\/]').hasMatch(password)) {
-      CustomSnackbar.showWarning(
-        message: 'password_special_error'.tr,
       );
       return false;
     }
@@ -1004,201 +1022,11 @@ class SettingViewController extends GetxController {
     }
   }
 
-  Widget _buildChecklistRow(String text, bool isMet) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Container(
-          width: 18,
-          height: 18,
-          decoration: BoxDecoration(
-            color: isMet ? const Color(0xFF2563EB) : const Color(0xFFE2E8F0),
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: Icon(
-              Icons.check_rounded,
-              size: 13,
-              color: isMet ? Colors.white : const Color(0xFF94A3B8),
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            text,
-            style: GoogleFonts.kantumruyPro(
-              fontSize: 12,
-              fontWeight: isMet ? FontWeight.w600 : FontWeight.w400,
-              color: isMet ? const Color(0xFF0F172A) : const Color(0xFF475569),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildPasswordRequirementsCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF4F8FE),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: const Color(0xFFE0EDFD),
-          width: 1.2,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Card Header
-          Row(
-            children: [
-              Container(
-                width: 34,
-                height: 34,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF1D6EEB),
-                  shape: BoxShape.circle,
-                ),
-                child: const Center(
-                  child: Icon(
-                    Icons.verified_user_rounded,
-                    color: Colors.white,
-                    size: 19,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'password_characteristics'.tr,
-                      style: GoogleFonts.kantumruyPro(
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF1D6EEB),
-                      ),
-                    ),
-                    const SizedBox(height: 1),
-                    Text(
-                      'password_characteristics_desc'.tr,
-                      style: GoogleFonts.kantumruyPro(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w400,
-                        color: const Color(0xFF64748B),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-
-          // Checklist & Document Graphic
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Checklist on Left
-              Expanded(
-                flex: 6,
-                child: Obx(() {
-                  return Column(
-                    children: [
-                      _buildChecklistRow(
-                        'req_min_8_chars'.tr,
-                        hasMinLength,
-                      ),
-                      const SizedBox(height: 8),
-                      _buildChecklistRow(
-                        'req_both_cases'.tr,
-                        hasBothCases,
-                      ),
-                      const SizedBox(height: 8),
-                      _buildChecklistRow(
-                        'req_numbers'.tr,
-                        hasNumber,
-                      ),
-                      const SizedBox(height: 8),
-                      _buildChecklistRow(
-                        'req_special_chars'.tr,
-                        hasSpecialChar,
-                      ),
-                    ],
-                  );
-                }),
-              ),
-
-              // Document Graphic & Floating Accent Dots on Right
-              Expanded(
-                flex: 4,
-                child: SizedBox(
-                  height: 110,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    clipBehavior: Clip.none,
-                    children: [
-                      // Top right blue dot
-                      Positioned(
-                        top: 2,
-                        right: 10,
-                        child: Container(
-                          width: 6,
-                          height: 6,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF3B82F6),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
-                      // Left blue dot
-                      Positioned(
-                        left: 0,
-                        top: 55,
-                        child: Container(
-                          width: 5,
-                          height: 5,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF60A5FA),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
-                      // Bottom right amber dot
-                      Positioned(
-                        bottom: 6,
-                        right: 18,
-                        child: Container(
-                          width: 5,
-                          height: 5,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFFBBF24),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
-                      // 3D Document Illustration
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(14),
-                        child: Image.asset(
-                          'assets/img/security_card_doc.jpg',
-                          width: 90,
-                          height: 90,
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
+    return Obx(
+      () => PasswordRequirementsCard(
+        password: newPasswordInput.value,
+        confirmPassword: confirmPasswordInput.value,
       ),
     );
   }

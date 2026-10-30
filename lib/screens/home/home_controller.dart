@@ -1,9 +1,10 @@
+import 'package:core_portal/screens/application/application_view.dart';
 import 'package:core_portal/core/api/api_client.dart';
 import 'package:core_portal/core/api/services/auth_service.dart';
 import 'package:core_portal/controllers/nav_controller.dart';
 import 'package:core_portal/routes/page_route.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:core_portal/widgets/app_icon.dart';
@@ -28,11 +29,10 @@ class HomeController extends GetxController {
     final cachedServices = _storage.read('cached_portal_services');
     if (cachedServices is List && cachedServices.isNotEmpty) {
       try {
-        final nonGen = cachedServices
+        final list = cachedServices
             .map((e) => Map<String, dynamic>.from(e))
-            .where((s) => !isGeneralApp(s))
             .toList();
-        services.assignAll(nonGen);
+        services.assignAll(list);
       } catch (_) {}
     }
     loadRecentActivities();
@@ -80,14 +80,11 @@ class HomeController extends GetxController {
         'id': (app['id'] ?? app['_id'] ?? '').toString(),
         'icon': (app['icon'] ?? 'assets/img/about-moi-logo.png').toString(),
         'iconUrl': (app['iconUrl'] ?? app['icon_url'] ?? '').toString(),
-        'titleKh':
-            (app['titleKh'] ??
-                    app['title_kh'] ??
-                    app['name'] ??
-                    app['name_kh'] ??
-                    '')
-                .toString(),
-        'titleEn': (app['titleEn'] ?? app['title_en'] ?? '').toString(),
+        'titleKh': ApplicationView.resolveAppTitle(app, true),
+        'titleEn': ApplicationView.resolveAppTitle(app, false),
+        'nameKh': ApplicationView.resolveAppTitle(app, true),
+        'nameEn': ApplicationView.resolveAppTitle(app, false),
+        'name': ApplicationView.resolveAppTitle(app, true),
         'route': route,
         'url': route,
       };
@@ -235,12 +232,8 @@ class HomeController extends GetxController {
 
         for (var app in rawApps) {
           final String id = (app['id'] ?? app['_id'] ?? '').toString();
-          final String titleKh =
-              (app['nameKh'] ?? app['title_kh'] ?? app['titleKh'] ?? app['title'] ?? app['name'] ?? 'កម្មវិធី')
-                  .toString();
-          final String titleEn =
-              (app['nameEn'] ?? app['title_en'] ?? app['titleEn'] ?? app['title'] ?? app['name'] ?? 'App')
-                  .toString();
+          final String titleKh = ApplicationView.resolveAppTitle(app, true);
+          final String titleEn = ApplicationView.resolveAppTitle(app, false);
           final String rawIcon = AppIconWidget.extractRawIcon(app);
           String route =
               (app['launchUrl'] ?? app['appUrl'] ?? app['url'] ?? app['route'] ?? '')
@@ -338,10 +331,7 @@ class HomeController extends GetxController {
 
         // Assign filtered internal apps to state management array
         services.assignAll(tempServices);
-        _storage.write(
-          'cached_portal_services',
-          tempServices.where((s) => !isGeneralApp(s)).toList(),
-        );
+        _storage.write('cached_portal_services', tempServices);
       } else {
         services.clear();
         _storage.remove('cached_portal_services');
@@ -427,12 +417,70 @@ class HomeController extends GetxController {
     return false;
   }
 
+  /// Default general utility applications shown on Home and in the Application Directory
+  static const List<Map<String, dynamic>> defaultGeneralApps = [
+    {
+      'id': 'complaint_system',
+      'code': 'COMPLAINT',
+      'titleKh': 'ប្រព័ន្ធទទួលពាក្យបណ្តឹងអនឡាញ',
+      'titleEn': 'Online Complaint System',
+      'nameKh': 'ប្រព័ន្ធទទួលពាក្យបណ្តឹងអនឡាញ',
+      'nameEn': 'Online Complaint System',
+      'name': 'ប្រព័ន្ធទទួលពាក្យបណ្តឹងអនឡាញ',
+      'isGeneral': true,
+      'category': 'GENERAL',
+      'iconBg': Color(0xFF1E60D5),
+      'fallbackIcon': Icons.chat_bubble_outline_rounded,
+      'route': 'https://complaint.moi.gov.kh',
+      'url': 'https://complaint.moi.gov.kh',
+      'launchUrl': 'https://complaint.moi.gov.kh',
+      'appUrl': 'https://complaint.moi.gov.kh',
+      'isActive': true,
+      'status': 'ACTIVE',
+      'department': 'ទូទៅ',
+      'departmentName': 'ទូទៅ',
+      'unit': 'ទូទៅ',
+    },
+    {
+      'id': 'single_window_system',
+      'code': 'OWSO',
+      'titleKh': 'ប្រព័ន្ធច្រកចេញចូលតែមួយ',
+      'titleEn': 'Single Window Portal',
+      'nameKh': 'ប្រព័ន្ធច្រកចេញចូលតែមួយ',
+      'nameEn': 'Single Window Portal',
+      'name': 'ប្រព័ន្ធច្រកចេញចូលតែមួយ',
+      'isGeneral': true,
+      'category': 'GENERAL',
+      'iconBg': Color(0xFF107C41),
+      'fallbackIcon': Icons.login_rounded,
+      'route': 'https://owso.moi.gov.kh',
+      'url': 'https://owso.moi.gov.kh',
+      'launchUrl': 'https://owso.moi.gov.kh',
+      'appUrl': 'https://owso.moi.gov.kh',
+      'isActive': true,
+      'status': 'ACTIVE',
+      'department': 'ទូទៅ',
+      'departmentName': 'ទូទៅ',
+      'unit': 'ទូទៅ',
+    },
+  ];
+
   /// Services to be displayed on Home (strictly user portal apps, excludes general apps)
-  List<Map<String, dynamic>> get homeServices {
+  List<Map<String, dynamic>> get homeServices => departmentServices;
+
+  /// General utility applications (e.g. Complaint system, Single window portal, etc.)
+  List<Map<String, dynamic>> get generalServices {
     return services.where((s) {
       if (s['isActive'] == false) return false;
-      if (isGeneralApp(s)) return false;
-      return true;
+      return isGeneralApp(s);
+    }).toList();
+  }
+
+  /// Department / Unit applications
+  List<Map<String, dynamic>> get departmentServices {
+    return services.where((s) {
+      if (s['isActive'] == false) return false;
+      return !isGeneralApp(s);
     }).toList();
   }
 

@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.core_portal"
+    namespace = "kh.gov.interior.core.prod"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -21,7 +21,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.core_portal"
+        applicationId = "kh.gov.interior.core.prod"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

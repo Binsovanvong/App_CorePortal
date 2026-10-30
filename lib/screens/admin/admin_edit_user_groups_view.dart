@@ -7,6 +7,7 @@ import 'package:core_portal/screens/admin/admin_create_group_view.dart';
 import 'package:core_portal/screens/admin/admin_edit_group_view.dart';
 import 'package:core_portal/widgets/custom_snackbar.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:core_portal/theme/app_colors.dart';
 
 class AdminEditUserGroupsView extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -1097,7 +1098,7 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                 style: GoogleFonts.kantumruyPro(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: const Color(0xFF0F172A),
+                  color: AppColors.primary,
                 ),
               ),
               const SizedBox(height: 2),

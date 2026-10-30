@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:core_portal/widgets/app_icon.dart';
@@ -8,6 +9,8 @@ import 'package:core_portal/screens/application/application_view.dart';
 import 'package:core_portal/core/api/api_config.dart';
 import 'package:core_portal/screens/admin/admin_controller.dart';
 import 'package:core_portal/widgets/announcement_detail_dialog.dart';
+import 'package:core_portal/widgets/app_detail_dialog.dart';
+import 'package:core_portal/screens/announcement/announcement_controller.dart';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -194,6 +197,33 @@ void main() {
         AppIconWidget.extractRelativePath('https://example.com/external.png'),
         equals(''),
       );
+    });
+    test('resolveAppTheme provides consistent, stable fallback icons and colors across filters', () {
+      final anprApp = {'code': 'ANPR', 'titleKh': 'ប្រព័ន្ធស្នើសុំចេញចូលទីស្តីការក្រសួងមហាផ្ទៃ'};
+      final prisonApp = {'code': 'GDP_PRISONS', 'titleKh': 'ប្រព័ន្ធគ្រប់គ្រងពន្ធនាគារ'};
+      final complaintApp = {'code': 'COMPLAINT', 'titleKh': 'ប្រព័ន្ធទទួលពាក្យបណ្តឹងអនឡាញ'};
+      final owsoApp = {'code': 'OWSO', 'titleKh': 'ប្រព័ន្ធច្រកចេញចូលតែមួយ'};
+
+      final themeAnpr = ApplicationView.resolveAppTheme(anprApp);
+      final themePrison = ApplicationView.resolveAppTheme(prisonApp);
+      final themeComplaint = ApplicationView.resolveAppTheme(complaintApp);
+      final themeOwso = ApplicationView.resolveAppTheme(owsoApp);
+
+      expect(themeAnpr['icon'], equals(Icons.directions_car_rounded));
+      expect(themeAnpr['bg'], equals(const Color(0xFF0F766E)));
+
+      expect(themePrison['icon'], equals(Icons.shield_rounded));
+      expect(themePrison['bg'], equals(const Color(0xFFB45309)));
+
+      expect(themeComplaint['icon'], equals(Icons.chat_bubble_outline_rounded));
+      expect(themeComplaint['bg'], equals(const Color(0xFF1E60D5)));
+
+      expect(themeOwso['icon'], equals(Icons.login_rounded));
+      expect(themeOwso['bg'], equals(const Color(0xFF107C41)));
+
+      // Calling multiple times returns the exact same theme (deterministic)
+      expect(ApplicationView.resolveAppTheme(anprApp), equals(themeAnpr));
+      expect(ApplicationView.resolveAppTheme(prisonApp), equals(themePrison));
     });
   });
 
@@ -387,6 +417,54 @@ void main() {
         isTrue,
       );
     });
+
+    test('selectedFilterTab falls back to default general apps when sourceApps has no general apps', () {
+      final appCtrl = ApplicationViewController();
+      appCtrl.apiApps.assignAll([
+        {
+          'id': 'app1',
+          'titleKh': 'ប្រព័ន្ធស្នើសុំចេញចូលទីស្តីការក្រសួងមហាផ្ទៃ',
+          'isActive': true,
+          'isGeneral': false,
+        },
+        {
+          'id': 'app2',
+          'titleKh': 'ប្រព័ន្ធគ្រប់គ្រងពន្ធនាគារ',
+          'isActive': true,
+          'isGeneral': false,
+        },
+      ]);
+      appCtrl.searchController.clear();
+      appCtrl.clearFilters();
+
+      // General apps tab -> Shows default general apps (matching HomeView)
+      appCtrl.setFilterTab('general');
+      expect(appCtrl.filteredServices.isNotEmpty, isTrue);
+      expect(
+        appCtrl.filteredServices.any((a) => a['id'] == 'complaint_system'),
+        isTrue,
+      );
+      expect(
+        appCtrl.filteredServices.any((a) => a['id'] == 'single_window_system'),
+        isTrue,
+      );
+      expect(
+        appCtrl.filteredServices.every((a) => a['isGeneral'] == true),
+        isTrue,
+      );
+
+      // Department tab -> Strictly department apps (no general apps)
+      appCtrl.setFilterTab('department');
+      expect(appCtrl.filteredServices.length, equals(2));
+      expect(
+        appCtrl.filteredServices.every((a) => a['isGeneral'] != true),
+        isTrue,
+      );
+
+      // All tab -> Department apps + General apps
+      appCtrl.setFilterTab('all');
+      expect(appCtrl.filteredServices.length, equals(4));
+    });
   });
 
   group('Admin Department Mapping Tests', () {
@@ -550,5 +628,201 @@ void main() {
         );
       },
     );
+  });
+
+  group('ApplicationView Bilingual App Titles and Translations Tests', () {
+    test('resolveAppTitle translates Khmer app titles to English correctly', () {
+      expect(
+        ApplicationView.resolveAppTitle(
+          {'name': 'ប្រព័ន្ធទទួលពាក្យបណ្តឹងអនឡាញ'},
+          false,
+        ),
+        equals('Online Complaint System'),
+      );
+      expect(
+        ApplicationView.resolveAppTitle(
+          {'name': 'ប្រព័ន្ធច្រកចេញចូលតែមួយ'},
+          false,
+        ),
+        equals('Single Window Portal'),
+      );
+      expect(
+        ApplicationView.resolveAppTitle(
+          {'name': 'ប្រព័ន្ធស្នើសុំចេញលិខិតស្គាល់'},
+          false,
+        ),
+        equals('ID Letter Request System'),
+      );
+      expect(
+        ApplicationView.resolveAppTitle(
+          {'name': 'ប្រព័ន្ធគ្រប់គ្រងឯកសារ'},
+          false,
+        ),
+        equals('Document Management System'),
+      );
+      expect(
+        ApplicationView.resolveAppTitle(
+          {'name': 'ប្រព័ន្ធគ្រប់គ្រងស្នាក់នៅ'},
+          false,
+        ),
+        equals('Residence Management System'),
+      );
+      expect(
+        ApplicationView.resolveAppTitle(
+          {'name': 'ប្រព័ន្ធគ្រប់គ្រងបុគ្គលិក'},
+          false,
+        ),
+        equals('HR Management System'),
+      );
+      expect(
+        ApplicationView.resolveAppTitle(
+          {'code': 'ANPR', 'titleKh': 'ប្រព័ន្ធស្នើសុំចេញចូលទីស្តីការក្រសួងមហាផ្ទៃ'},
+          false,
+        ),
+        equals('MOI Access Request System'),
+      );
+      expect(
+        ApplicationView.resolveAppTitle(
+          {'name': 'ប្រព័ន្ធគ្រប់គ្រងពន្ធនាគារ'},
+          false,
+        ),
+        equals('Prison Management System'),
+      );
+      expect(
+        ApplicationView.resolveAppTitle(
+          {'name': 'ប្រតិទិនការងារ'},
+          false,
+        ),
+        equals('Work Calendar'),
+      );
+      expect(
+        ApplicationView.resolveAppTitle(
+          {'name': 'ប្រព័ន្ធគ្រប់គ្រងស្នាក់នៅ (TMS)'},
+          false,
+        ),
+        equals('Residence Management System (TMS)'),
+      );
+      expect(
+        ApplicationView.resolveAppTitle(
+          {'name': 'ប្រព័ន្ធគ្រប់គ្រងវត្តមាន (AMS)'},
+          false,
+        ),
+        equals('Attendance System (AMS)'),
+      );
+      expect(
+        ApplicationView.resolveAppTitle(
+          {'name': 'ការងារទូទៅ'},
+          false,
+        ),
+        equals('General Work System'),
+      );
+    });
+
+    test('resolveAppTitle retains Khmer titles when in Khmer mode', () {
+      expect(
+        ApplicationView.resolveAppTitle(
+          {'name': 'ប្រព័ន្ធទទួលពាក្យបណ្តឹងអនឡាញ', 'titleEn': 'Online Complaint System'},
+          true,
+        ),
+        equals('ប្រព័ន្ធទទួលពាក្យបណ្តឹងអនឡាញ'),
+      );
+      expect(
+        ApplicationView.resolveAppTitle(
+          {'code': 'ANPR'},
+          true,
+        ),
+        equals('ប្រព័ន្ធស្នើសុំចេញចូលទីស្តីការក្រសួងមហាផ្ទៃ'),
+      );
+      expect(
+        ApplicationView.resolveAppTitle(
+          {'name': 'Prison Management System'},
+          true,
+        ),
+        equals('ប្រព័ន្ធគ្រប់គ្រងពន្ធនាគារ'),
+      );
+      expect(
+        ApplicationView.resolveAppTitle(
+          {'name': 'Work Calendar'},
+          true,
+        ),
+        equals('ប្រតិទិនការងារ'),
+      );
+      expect(
+        ApplicationView.resolveAppTitle(
+          {'name': 'Google Map'},
+          true,
+        ),
+        equals('ផែនទី Google'),
+      );
+      expect(
+        ApplicationView.resolveAppTitle(
+          {'name': 'Google Calendar'},
+          true,
+        ),
+        equals('ប្រតិទិន Google'),
+      );
+    });
+  });
+
+  group('Announcement Concept Redesign Tests', () {
+    test('conceptFallbackAnnouncements contains 5 items matching concept image', () {
+      final list = AnnouncementController.conceptFallbackAnnouncements;
+      expect(list.length, equals(5));
+
+      expect(list[0]['title'], equals('ការជូនដំណឹងអំពីការធ្វើបច្ចុប្បន្នភាពប្រព័ន្ធ'));
+      expect(list[1]['title'], equals('សេចក្តីណែនាំស្តីពីការស្នើសុំចេញលិខិតស្គាល់'));
+      expect(list[2]['title'], equals('កាលវិភាគថែទាំប្រព័ន្ធប្រចាំសប្តាហ៍'));
+      expect(list[3]['title'], equals('ការអនុញ្ញាតឱ្យចូលប្រើកម្មវិធីថ្មី'));
+      expect(list[4]['title'], equals('សេចក្តីប្រកាសស្តីពីម៉ោងធ្វើការ'));
+
+      expect(list[0]['displayDateKh'], equals('២៧ តុលា ២០២៦ · ម៉ោង ០៩:៣០'));
+      expect(list[1]['displayDateKh'], equals('២៦ តុលា ២០២៦ · ម៉ោង ១៥:១០'));
+      expect(list[2]['displayDateKh'], equals('២៤ តុលា ២០២៦ · ម៉ោង ១០:០០'));
+      expect(list[3]['displayDateKh'], equals('២០ តុលា ២០២៦ · ម៉ោង ០៨:៤៥'));
+      expect(list[4]['displayDateKh'], equals('១៨ តុលា ២០២៦ · ម៉ោង ១៤:២០'));
+    });
+
+    test('AnnouncementController computes unread count = 2 initially matching concept pill មិនទាន់អាន (2)', () {
+      final controller = Get.put(AnnouncementController());
+      controller.announcements.clear();
+      controller.readAnnouncementIds.clear();
+
+      expect(controller.unreadCount, equals(2));
+
+      // Test filtering
+      controller.selectedFilterTab.value = 'all';
+      expect(controller.conceptFilteredAnnouncements.length, equals(5));
+
+      controller.selectedFilterTab.value = 'unread';
+      expect(controller.conceptFilteredAnnouncements.length, equals(2));
+
+      // Mark first announcement as read
+      final firstItem = controller.conceptFilteredAnnouncements.first;
+      controller.markAsRead(firstItem);
+
+      expect(controller.unreadCount, equals(1));
+      expect(controller.conceptFilteredAnnouncements.length, equals(1));
+      Get.delete<AnnouncementController>();
+    });
+  });
+  group('App Detail Dialog Tests', () {
+    test('AppDetailDialog accepts app data and resolves values correctly', () {
+      final testApp = {
+        'id': 'google_calendar',
+        'code': 'GOOGLE_CALENDAR',
+        'titleKh': 'Google Calendar',
+        'titleEn': 'Google Calendar',
+        'route': 'https://calendar.google.com/calendar/u/0/r?pli=1',
+        'department': 'GDDTM',
+        'isActive': true,
+      };
+
+      final dialog = AppDetailDialog(app: testApp);
+      expect(dialog.app['code'], equals('GOOGLE_CALENDAR'));
+      expect(dialog.app['titleKh'], equals('Google Calendar'));
+      expect(dialog.app['route'], equals('https://calendar.google.com/calendar/u/0/r?pli=1'));
+      expect(dialog.app['department'], equals('GDDTM'));
+      expect(dialog.app['isActive'], isTrue);
+    });
   });
 }

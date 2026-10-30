@@ -1,3 +1,4 @@
+import 'package:core_portal/core/localization/app_translations.dart';
 import 'package:core_portal/controllers/nav_controller.dart';
 import 'package:core_portal/screens/home/home_view.dart';
 import 'package:core_portal/screens/setting/setting_view.dart';
@@ -46,24 +47,26 @@ class MainpageView extends StatelessWidget {
       bottomNavigationBar: Obx(
         () {
           final bool isAdmin = controller.isAdmin.value;
+          // React to locale change so tab labels immediately re-translate
+          final String _ = LocalizationService.currentLanguageCode.value;
           return Container(
             margin: const EdgeInsets.fromLTRB(16, 0, 16, 20),
             padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(26),
+              borderRadius: BorderRadius.circular(28),
               border: Border.all(
-                color: const Color(0xFFE2E8F0),
+                color: const Color(0xFFF1F5F9),
                 width: 1.2,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF163774).withOpacity(0.08),
-                  blurRadius: 20,
-                  offset: const Offset(0, 6),
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
                 ),
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
+                  color: const Color(0xFF8C6615).withValues(alpha: 0.03),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -72,34 +75,32 @@ class MainpageView extends StatelessWidget {
             child: Row(
               children: isAdmin
                   ? [
-                      _buildNavItem(0, Icons.home_rounded, "home".tr),
-                      _buildNavItem(1, Icons.grid_view_rounded, "application".tr),
-                      _buildNavItem(
-                        2,
-                        Icons.people_alt_rounded,
-                        "users".tr,
-                      ),
+                      _buildNavItem(0, Icons.home_outlined, Icons.home_rounded, "home".tr),
+                      _buildNavItem(1, Icons.grid_view_rounded, Icons.grid_view_rounded, "application".tr),
+                      _buildNavItem(2, Icons.people_alt_outlined, Icons.people_alt_rounded, "users".tr),
                       _buildNavItem(
                         3,
-                        Icons.campaign_rounded,
-                        "announcement".tr,
+                        Icons.notifications_none_rounded,
+                        Icons.notifications_active_rounded,
+                        "nav_announcement".tr,
                         badge: controller.unreadCount.value > 0
                             ? controller.unreadCount.value.toString()
                             : null,
                       ),
-                      _buildNavItem(4, Icons.settings_rounded, "settings".tr),
+                      _buildNavItem(4, Icons.settings_outlined, Icons.settings_rounded, "settings".tr),
                     ]
                   : [
-                      _buildNavItem(0, Icons.home_rounded, "home".tr),
+                      _buildNavItem(0, Icons.home_outlined, Icons.home_rounded, "home".tr),
                       _buildNavItem(
                         1,
-                        Icons.campaign_rounded,
-                        "announcement".tr,
+                        Icons.notifications_none_rounded,
+                        Icons.notifications_active_rounded,
+                        "nav_announcement".tr,
                         badge: controller.unreadCount.value > 0
                             ? controller.unreadCount.value.toString()
                             : null,
                       ),
-                      _buildNavItem(2, Icons.settings_rounded, "settings".tr),
+                      _buildNavItem(2, Icons.settings_outlined, Icons.settings_rounded, "settings".tr),
                     ],
             ),
           );
@@ -110,7 +111,8 @@ class MainpageView extends StatelessWidget {
 
   Widget _buildNavItem(
     int index,
-    IconData icon,
+    IconData unselectedIcon,
+    IconData selectedIcon,
     String label, {
     String? badge,
   }) {
@@ -123,9 +125,9 @@ class MainpageView extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeInOut,
-          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFFEBF3FE) : Colors.transparent,
+            color: isSelected ? const Color(0xFFF6EEDB) : Colors.transparent,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
@@ -136,15 +138,15 @@ class MainpageView extends StatelessWidget {
                 clipBehavior: Clip.none,
                 children: [
                   Icon(
-                    icon,
+                    isSelected ? selectedIcon : unselectedIcon,
                     color: isSelected
-                        ? const Color(0xFF0F3C99)
-                        : const Color(0xff94A3B8),
-                    size: 22,
+                        ? const Color(0xFF8C6615)
+                        : const Color(0xFF94A3B8),
+                    size: 21,
                   ),
                   if (badge != null)
                     Positioned(
-                      right: -8,
+                      right: -7,
                       top: -4,
                       child: Container(
                         padding: const EdgeInsets.all(2.5),
@@ -169,15 +171,16 @@ class MainpageView extends StatelessWidget {
                     ),
                 ],
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 3),
               Text(
                 label,
                 style: GoogleFonts.kantumruyPro(
                   color: isSelected
-                      ? const Color(0xFF0F3C99)
-                      : const Color(0xff94A3B8),
+                      ? const Color(0xFF8C6615)
+                      : const Color(0xFF94A3B8),
                   fontSize: 10.5,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  height: 1.25,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

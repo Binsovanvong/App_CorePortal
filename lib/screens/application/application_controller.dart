@@ -67,25 +67,8 @@ class ApplicationViewController extends GetxController {
     final String id = (app['id'] ?? app['_id'] ?? '').toString().trim();
     final String code = (app['code'] ?? '').toString().trim();
 
-    final String titleKh = (app['nameKh'] ??
-            app['title_kh'] ??
-            app['titleKh'] ??
-            app['title'] ??
-            app['name'] ??
-            app['titleEn'] ??
-            'កម្មវិធី')
-        .toString()
-        .trim();
-
-    final String titleEn = (app['nameEn'] ??
-            app['title_en'] ??
-            app['titleEn'] ??
-            app['title'] ??
-            app['name'] ??
-            app['titleKh'] ??
-            'App')
-        .toString()
-        .trim();
+    final String titleKh = ApplicationView.resolveAppTitle(app, true);
+    final String titleEn = ApplicationView.resolveAppTitle(app, false);
 
     final String rawIcon = AppIconWidget.extractRawIcon(app);
 
@@ -208,18 +191,24 @@ class ApplicationViewController extends GetxController {
           lower.contains('អគ្គលេខាធិការដ្ឋាន');
     }
 
-    final bool isGen = app['isGeneral'] == true ||
-        app['is_general'] == true ||
-        ((cat == 'general' || cat == 'public' || cat == 'tools' || cat == 'utility' || cat == 'utilities') && !isGeneralDept(cat)) ||
-        cat == 'ទូទៅ' ||
-        ((subCat == 'general' || subCat == 'tools' || subCat == 'utility' || subCat == 'utilities') && !isGeneralDept(subCat)) ||
-        subCat == 'ទូទៅ' ||
-        (dept.toLowerCase() == 'general' && !isGeneralDept(dept)) ||
-        dept.toLowerCase() == 'ទូទៅ' ||
-        (unit == 'general' && !isGeneralDept(unit)) ||
-        unit == 'ទូទៅ' ||
-        (deptName == 'general' && !isGeneralDept(deptName)) ||
-        deptName == 'ទូទៅ';
+    bool isGen = false;
+    if (app['isGeneral'] == false || app['is_general'] == false) {
+      isGen = false;
+    } else if (app['isGeneral'] == true || app['is_general'] == true) {
+      isGen = true;
+    } else {
+      isGen = HomeController.isGeneralApp(app) ||
+          ((cat == 'general' || cat == 'public' || cat == 'tools' || cat == 'utility' || cat == 'utilities') && !isGeneralDept(cat)) ||
+          cat == 'ទូទៅ' ||
+          ((subCat == 'general' || subCat == 'tools' || subCat == 'utility' || subCat == 'utilities') && !isGeneralDept(subCat)) ||
+          subCat == 'ទូទៅ' ||
+          (dept.toLowerCase() == 'general' && !isGeneralDept(dept)) ||
+          dept.toLowerCase() == 'ទូទៅ' ||
+          (unit == 'general' && !isGeneralDept(unit)) ||
+          unit == 'ទូទៅ' ||
+          (deptName == 'general' && !isGeneralDept(deptName)) ||
+          deptName == 'ទូទៅ';
+    }
 
     final String desc = (app['description'] ??
             app['desc'] ??
@@ -256,6 +245,8 @@ class ApplicationViewController extends GetxController {
       'description': desc,
       'desc': desc,
       'accessRules': accessRules,
+      'iconBg': app['iconBg'] is Color ? app['iconBg'] : ApplicationView.resolveAppTheme(app)['bg'],
+      'fallbackIcon': app['fallbackIcon'] is IconData ? app['fallbackIcon'] : ApplicationView.resolveAppTheme(app)['icon'],
       'userCount': app['userCount'] ??
           app['usersCount'] ??
           app['totalUsers'] ??
@@ -381,6 +372,21 @@ class ApplicationViewController extends GetxController {
     return false;
   }
 
+  /// Returns general utility applications (from sourceApps, HomeController, or defaults)
+  List<Map<String, dynamic>> get generalApps {
+    final liveFromSource = sourceApps.where((a) => a['isGeneral'] == true).toList();
+    if (liveFromSource.isNotEmpty) {
+      return liveFromSource;
+    }
+    if (Get.isRegistered<HomeController>()) {
+      final homeCtrl = Get.find<HomeController>();
+      if (homeCtrl.generalServices.isNotEmpty) {
+        return homeCtrl.generalServices;
+      }
+    }
+    return HomeController.defaultGeneralApps;
+  }
+
   List<Map<String, dynamic>> get sourceApps {
     final List<Map<String, dynamic>> all = [];
     final Set<String> seen = {};
@@ -407,12 +413,22 @@ class ApplicationViewController extends GetxController {
 
     if (apiApps.isNotEmpty) {
       addApps(apiApps);
+    } else if (homeController.services.isNotEmpty) {
+      addApps(homeController.services);
     } else if (Get.isRegistered<AdminController>() && Get.find<AdminController>().appsList.isNotEmpty) {
       addApps(Get.find<AdminController>().appsList);
     } else {
+      final cachedPortal = GetStorage().read('cached_portal_services');
+      if (cachedPortal is List && cachedPortal.isNotEmpty) {
+        addApps(cachedPortal);
+      }
       final cached = GetStorage().read('cached_admin_apps_list');
       if (cached is List && cached.isNotEmpty) {
         addApps(cached);
+      }
+      final cachedTiles = GetStorage().read('cached_tiles');
+      if (cachedTiles is List && cachedTiles.isNotEmpty) {
+        addApps(cachedTiles);
       }
     }
 
@@ -488,6 +504,12 @@ class ApplicationViewController extends GetxController {
   void onInit() {
     super.onInit();
 
+    ever(homeController.services, (_) {
+      if (apiApps.isEmpty) {
+        _filterApps();
+      }
+    });
+
     if (Get.isRegistered<AdminController>()) {
       final adminCtrl = Get.find<AdminController>();
       ever(adminCtrl.appsList, (_) {
@@ -500,6 +522,12 @@ class ApplicationViewController extends GetxController {
     // Listener for search input
     searchController.addListener(() {
       rxSearchQuery.value = searchController.text.trim();
+    });
+
+    // Listen to language changes
+    ever(LocalizationService.currentLanguageCode, (_) {
+      selectedSubCategory.value = 'all_units'.tr;
+      _filterApps();
     });
 
     // Listen to changes
@@ -564,15 +592,33 @@ class ApplicationViewController extends GetxController {
         }
       }
 
-      // Fetch admin portal apps (/admin/portal-apps) with fallback to portal apps (/portals/apps)
-      dynamic adminAppsRes;
-      try {
-        adminAppsRes = await _authService.fetchAdminApps();
-      } catch (e) {
-        debugPrint("ApplicationViewController fetchAdminApps error: $e");
+      bool isAdmin = false;
+      if (Get.isRegistered<AdminController>()) {
+        isAdmin = Get.find<AdminController>().isPortalAdministrator();
+      } else {
+        final box = GetStorage();
+        final rawRoles = box.read('roles');
+        final List list = (rawRoles is List && rawRoles.isNotEmpty) ? rawRoles : [];
+        final roles = list.map((e) => e.toString().toUpperCase().trim()).toList();
+        isAdmin = roles.any((r) =>
+            (r.contains('PORTAL') && (r.contains('ADMIN') || r.contains('ADMINISTRATOR'))) ||
+            r == 'ADMIN' ||
+            r == 'ADMINISTRATOR' ||
+            r == 'SUPER_ADMIN' ||
+            r == 'SUPERADMIN');
       }
 
-      // If admin portal apps was null or empty, fallback to /portals/apps
+      // Fetch admin portal apps (/admin/portal-apps) only if admin, with fallback to /portals/apps
+      dynamic adminAppsRes;
+      if (isAdmin) {
+        try {
+          adminAppsRes = await _authService.fetchAdminApps();
+        } catch (e) {
+          debugPrint("ApplicationViewController fetchAdminApps error: $e");
+        }
+      }
+
+      // If not admin or admin portal apps was null or empty, fallback to /portals/apps
       if (adminAppsRes == null || (adminAppsRes is List && adminAppsRes.isEmpty)) {
         try {
           adminAppsRes = await _authService.fetchPortalApps();
@@ -620,6 +666,7 @@ class ApplicationViewController extends GetxController {
         apiApps.assignAll(filteredByDept);
         ApplicationView.clearUserCountCache();
         GetStorage().write('cached_admin_apps_list', filteredByDept);
+        GetStorage().write('cached_portal_services', filteredByDept);
       }
     } catch (e) {
       debugPrint("ApplicationViewController fetchAppsFromApi error: $e");
@@ -632,11 +679,27 @@ class ApplicationViewController extends GetxController {
   void _filterApps() {
     List<Map<String, dynamic>> result = List.from(sourceApps);
 
-    // Filter tab: all, portal, general
-    if (selectedFilterTab.value == 'portal') {
+    // Filter tab: all, portal, general, department
+    if (selectedFilterTab.value == 'portal' || selectedFilterTab.value == 'department') {
       result = result.where((app) => app['isGeneral'] != true).toList();
     } else if (selectedFilterTab.value == 'general') {
-      result = result.where((app) => app['isGeneral'] == true).toList();
+      final genApps = sourceApps.where((app) => app['isGeneral'] == true).toList();
+      if (genApps.isNotEmpty) {
+        result = genApps;
+      } else {
+        result = List.from(generalApps);
+      }
+    } else {
+      // 'all' tab: If sourceApps has no general apps, merge generalApps so that "All" includes all available apps
+      final bool hasGenInSource = sourceApps.any((a) => a['isGeneral'] == true);
+      if (!hasGenInSource) {
+        final existingIds = result.map((a) => a['id']?.toString()).toSet();
+        for (var gApp in generalApps) {
+          if (!existingIds.contains(gApp['id']?.toString())) {
+            result.add(gApp);
+          }
+        }
+      }
     }
 
     // Search query filter
@@ -759,7 +822,10 @@ class ApplicationViewController extends GetxController {
 
   Future<void> refreshApps() async {
     try {
-      await fetchAppsFromApi();
+      await Future.wait([
+        fetchAppsFromApi(),
+        homeController.fetchPortalApps(),
+      ]);
     } catch (_) {}
     _filterApps();
   }

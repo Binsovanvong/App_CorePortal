@@ -1,4 +1,4 @@
-package com.example.core_portal
+package kh.gov.interior.core.prod
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 
