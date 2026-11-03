@@ -34,7 +34,7 @@ class AdminView extends GetView<AdminController> {
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xffF8FAFC),
+      backgroundColor: AppColors.warmCream,
 
       body: Obx(() => pages[controller.currentIndex.value]),
 
@@ -45,19 +45,19 @@ class AdminView extends GetView<AdminController> {
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
 
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.95),
+            color: Colors.white.withValues(alpha: 0.95),
 
             borderRadius: BorderRadius.circular(35),
 
             border: Border.all(
-              color: const Color(0xffD4AF37).withOpacity(0.2),
+              color: AppColors.warmCreamBorder,
 
               width: 1.5,
             ),
 
             boxShadow: [
               BoxShadow(
-                color: const Color(0xffD4AF37).withOpacity(0.08),
+                color: AppColors.royalGold.withValues(alpha: 0.08),
 
                 blurRadius: 25,
 
@@ -65,7 +65,7 @@ class AdminView extends GetView<AdminController> {
               ),
 
               BoxShadow(
-                color: Colors.black.withOpacity(0.03),
+                color: Colors.black.withValues(alpha: 0.03),
 
                 blurRadius: 10,
 
@@ -108,13 +108,13 @@ class AdminView extends GetView<AdminController> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
 
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFEFF4FB) : Colors.transparent,
+          color: isSelected ? AppColors.royalGoldLight : Colors.transparent,
 
           borderRadius: BorderRadius.circular(20),
 
           border: Border.all(
             color: isSelected
-                ? const Color(0xFF163774).withOpacity(0.3)
+                ? AppColors.warmCreamBorder
                 : Colors.transparent,
 
             width: 1,
@@ -129,7 +129,7 @@ class AdminView extends GetView<AdminController> {
               icon,
 
               color: isSelected
-                  ? const Color(0xFF163774)
+                  ? AppColors.royalGold
                   : Colors.grey.shade500,
 
               size: 20,
@@ -142,7 +142,7 @@ class AdminView extends GetView<AdminController> {
                 label,
 
                 style: GoogleFonts.kantumruyPro(
-                  color: const Color(0xFF163774),
+                  color: AppColors.royalGold,
 
                   fontSize: 12,
 
@@ -174,7 +174,7 @@ class AdminView extends GetView<AdminController> {
 
   Widget _buildDashboardHome(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffF8FAFC),
+      backgroundColor: AppColors.warmCream,
 
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -217,13 +217,13 @@ class AdminView extends GetView<AdminController> {
       body: RefreshIndicator(
         onRefresh: controller.fetchDashboardData,
 
-        color: const Color(0xFF163774),
+        color: AppColors.royalGold,
 
         child: Obx(() {
           if (controller.isLoading.value && controller.appsList.isEmpty) {
             return const Center(
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF163774)),
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.royalGold),
               ),
             );
           }
@@ -293,7 +293,7 @@ class AdminView extends GetView<AdminController> {
 
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF163774).withOpacity(0.15),
+            color: AppColors.royalGold.withValues(alpha: 0.15),
 
             blurRadius: 10,
 
@@ -330,7 +330,7 @@ class AdminView extends GetView<AdminController> {
                 ),
 
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
 
                   borderRadius: BorderRadius.circular(30),
                 ),
@@ -356,7 +356,7 @@ class AdminView extends GetView<AdminController> {
             'welcome_admin_subtitle'.tr,
 
             style: GoogleFonts.kantumruyPro(
-              color: Colors.white.withOpacity(0.85),
+              color: Colors.white.withValues(alpha: 0.85),
 
               fontSize: 13,
 
@@ -390,9 +390,9 @@ class AdminView extends GetView<AdminController> {
 
           Icons.grid_view_rounded,
 
-          const Color(0xffEFF6FF),
+          AppColors.royalGoldLight,
 
-          const Color(0xff2563EB),
+          AppColors.royalGold,
         ),
 
         _buildStatCard(
@@ -453,11 +453,11 @@ class AdminView extends GetView<AdminController> {
 
         borderRadius: BorderRadius.circular(20),
 
-        border: Border.all(color: const Color(0xffF1F5F9)),
+        border: Border.all(color: AppColors.warmCreamBorder),
 
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: AppColors.royalGold.withValues(alpha: 0.04),
 
             blurRadius: 4,
 
@@ -571,7 +571,7 @@ class AdminView extends GetView<AdminController> {
 
                   fontWeight: FontWeight.bold,
 
-                  color: const Color(0xFF163774),
+                  color: AppColors.royalGold,
                 ),
               ),
             ),
@@ -591,7 +591,7 @@ class AdminView extends GetView<AdminController> {
 
               borderRadius: BorderRadius.circular(20),
 
-              border: Border.all(color: const Color(0xffE2E8F0)),
+              border: Border.all(color: AppColors.warmCreamBorder),
             ),
 
             child: Center(
@@ -637,7 +637,7 @@ class AdminView extends GetView<AdminController> {
 
         borderRadius: BorderRadius.circular(16),
 
-        border: Border.all(color: const Color(0xffF1F5F9)),
+        border: Border.all(color: AppColors.warmCreamBorder),
       ),
 
       child: Row(
@@ -648,7 +648,7 @@ class AdminView extends GetView<AdminController> {
             padding: const EdgeInsets.all(8),
 
             decoration: const BoxDecoration(
-              color: Color(0xffFEF3C7),
+              color: AppColors.royalGoldLight,
 
               shape: BoxShape.circle,
             ),
@@ -656,7 +656,7 @@ class AdminView extends GetView<AdminController> {
             child: const Icon(
               Icons.campaign_outlined,
 
-              color: Color(0xffD97706),
+              color: AppColors.royalGold,
 
               size: 18,
             ),
@@ -732,7 +732,7 @@ class AdminView extends GetView<AdminController> {
 
               borderRadius: BorderRadius.circular(20),
 
-              border: Border.all(color: const Color(0xffE2E8F0)),
+              border: Border.all(color: AppColors.warmCreamBorder),
             ),
 
             child: Center(
@@ -756,7 +756,7 @@ class AdminView extends GetView<AdminController> {
 
               borderRadius: BorderRadius.circular(20),
 
-              border: Border.all(color: const Color(0xffF1F5F9)),
+              border: Border.all(color: AppColors.warmCreamBorder),
             ),
 
             child: ListView.separated(
@@ -769,7 +769,7 @@ class AdminView extends GetView<AdminController> {
                   : controller.auditLogs.length,
 
               separatorBuilder: (context, index) =>
-                  const Divider(height: 24, color: Color(0xffF1F5F9)),
+                  const Divider(height: 24, color: AppColors.warmCreamBorder),
 
               itemBuilder: (context, index) {
                 final log = controller.auditLogs[index];
@@ -863,7 +863,7 @@ class AdminView extends GetView<AdminController> {
 
         borderRadius: BorderRadius.circular(20),
 
-        border: Border.all(color: const Color(0xffE2E8F0)),
+        border: Border.all(color: AppColors.warmCreamBorder),
       ),
 
       child: Column(
@@ -879,7 +879,7 @@ class AdminView extends GetView<AdminController> {
                   const Icon(
                     Icons.grid_view_rounded,
 
-                    color: Color(0xFF163774),
+                    color: AppColors.royalGold,
 
                     size: 18,
                   ),
@@ -911,7 +911,7 @@ class AdminView extends GetView<AdminController> {
 
                     fontWeight: FontWeight.bold,
 
-                    color: const Color(0xFF163774),
+                    color: AppColors.royalGold,
                   ),
                 ),
               ),
@@ -922,7 +922,7 @@ class AdminView extends GetView<AdminController> {
 
           _buildAppTableHeader(),
 
-          const Divider(height: 1, color: Color(0xffE2E8F0)),
+          const Divider(height: 1, color: AppColors.warmCreamBorder),
 
           if (controller.appsList.isEmpty)
             Padding(
@@ -944,7 +944,7 @@ class AdminView extends GetView<AdminController> {
               itemCount: controller.appsList.length,
 
               separatorBuilder: (context, index) =>
-                  const Divider(height: 1, color: Color(0xffF1F5F9)),
+                  const Divider(height: 1, color: AppColors.warmCreamBorder),
 
               itemBuilder: (context, index) {
                 final app = controller.appsList[index];
@@ -1126,11 +1126,11 @@ class AdminView extends GetView<AdminController> {
       height: 32,
 
       decoration: BoxDecoration(
-        color: const Color(0xffF8FAFC),
+        color: AppColors.warmCream,
 
         borderRadius: BorderRadius.circular(8),
 
-        border: Border.all(color: const Color(0xffE2E8F0)),
+        border: Border.all(color: AppColors.warmCreamBorder),
       ),
 
       child: ClipRRect(
@@ -1152,7 +1152,7 @@ class AdminView extends GetView<AdminController> {
       children: [
         Row(
           children: [
-            const Icon(Icons.bolt_outlined, color: Color(0xFF163774), size: 18),
+            const Icon(Icons.bolt_outlined, color: AppColors.royalGold, size: 18),
 
             const SizedBox(width: 8),
 
@@ -1191,7 +1191,7 @@ class AdminView extends GetView<AdminController> {
 
               Icons.add_to_photos_rounded,
 
-              const Color(0xff2563EB),
+              AppColors.royalGold,
 
               () => Get.to(
                 () => const AdminAppsListView(),
@@ -1250,7 +1250,7 @@ class AdminView extends GetView<AdminController> {
 
         elevation: 0,
 
-        side: const BorderSide(color: Color(0xffE2E8F0)),
+        side: const BorderSide(color: AppColors.warmCreamBorder),
 
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
 
@@ -1267,7 +1267,7 @@ class AdminView extends GetView<AdminController> {
             padding: const EdgeInsets.all(8),
 
             decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.1),
+              color: iconColor.withValues(alpha: 0.1),
 
               shape: BoxShape.circle,
             ),
@@ -1311,7 +1311,7 @@ class AdminView extends GetView<AdminController> {
     final bool canPop = Navigator.of(context).canPop();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF9F6),
+      backgroundColor: AppColors.warmCream,
       body: Column(
         children: [
           PortalTopAppBar(canPop: canPop),
@@ -1401,12 +1401,12 @@ class AdminView extends GetView<AdminController> {
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(26),
                               border: Border.all(
-                                color: const Color(0xFFE2E8F0),
+                                color: AppColors.warmCreamBorder,
                                 width: 1.1,
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF163774).withOpacity(0.04),
+                                  color: AppColors.royalGold.withValues(alpha: 0.04),
                                   blurRadius: 14,
                                   offset: const Offset(0, 4),
                                 ),
@@ -1472,7 +1472,7 @@ class AdminView extends GetView<AdminController> {
                             padding: EdgeInsets.symmetric(vertical: 48),
                             child: Center(
                               child: CircularProgressIndicator(
-                                color: Color(0xFF1D4ED8),
+                                color: AppColors.royalGold,
                                 strokeWidth: 2.5,
                               ),
                             ),
@@ -1490,9 +1490,7 @@ class AdminView extends GetView<AdminController> {
                                     Icon(
                                       Icons.person_off_rounded,
                                       size: 48,
-                                      color: const Color(
-                                        0xFF163774,
-                                      ).withOpacity(0.3),
+                                      color: AppColors.royalGold.withValues(alpha: 0.3),
                                     ),
                                     const SizedBox(height: 12),
                                     Text(
@@ -1570,7 +1568,7 @@ class AdminView extends GetView<AdminController> {
             const Icon(
               Icons.notifications_off_outlined,
               size: 80,
-              color: Color(0xff8E9BAE),
+              color: AppColors.royalGold,
             ),
             const SizedBox(height: 18),
             // Title
@@ -1596,7 +1594,7 @@ class AdminView extends GetView<AdminController> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            const Divider(color: Color(0xFFE2E8F0), height: 1, thickness: 0.8),
+            const Divider(color: AppColors.warmCreamBorder, height: 1, thickness: 0.8),
             const SizedBox(height: 16),
 
             // Item 1: What you can search
@@ -1606,7 +1604,7 @@ class AdminView extends GetView<AdminController> {
               subtitle: whatDesc,
             ),
             const SizedBox(height: 14),
-            const Divider(color: Color(0xffF1ECE1), height: 1, thickness: 0.8),
+            const Divider(color: AppColors.warmCreamBorder, height: 1, thickness: 0.8),
             const SizedBox(height: 14),
 
             // Item 2: Search tips
@@ -1616,7 +1614,7 @@ class AdminView extends GetView<AdminController> {
               subtitle: tipsDesc,
             ),
             const SizedBox(height: 14),
-            const Divider(color: Color(0xffF1ECE1), height: 1, thickness: 0.8),
+            const Divider(color: AppColors.warmCreamBorder, height: 1, thickness: 0.8),
             const SizedBox(height: 14),
 
             // Item 3: Examples
@@ -1632,10 +1630,10 @@ class AdminView extends GetView<AdminController> {
               width: double.infinity,
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: const Color(0xFFEFF4FB),
+                color: AppColors.royalGoldLight.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: const Color(0xFFE2E8F0),
+                  color: AppColors.warmCreamBorder,
                   width: 1,
                 ),
               ),
@@ -1647,7 +1645,7 @@ class AdminView extends GetView<AdminController> {
                       const Icon(
                         Icons.info_outline_rounded,
                         size: 16,
-                        color: Color(0xff8E9BAE),
+                        color: AppColors.royalGold,
                       ),
                       const SizedBox(width: 6),
                       Text(
@@ -1676,7 +1674,7 @@ class AdminView extends GetView<AdminController> {
             const SizedBox(height: 18),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1D4ED8),
+                backgroundColor: AppColors.royalGold,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
@@ -1715,12 +1713,12 @@ class AdminView extends GetView<AdminController> {
           width: 38,
           height: 38,
           decoration: const BoxDecoration(
-            color: Color(0xffFAF3E5),
+            color: AppColors.royalGoldLight,
             shape: BoxShape.circle,
           ),
           child: Icon(
             icon,
-            color: const Color(0xFF163774),
+            color: AppColors.royalGold,
             size: 20,
           ),
         ),
@@ -1880,7 +1878,7 @@ class AdminView extends GetView<AdminController> {
 
     // Pastel Avatar Themes from mockup
     final avatarThemes = [
-      {'bg': const Color(0xFFDBEAFE), 'text': const Color(0xFF1D4ED8)}, // Blue (BI)
+      {'bg': AppColors.royalGoldLight, 'text': AppColors.royalGold}, // Royal Gold
       {'bg': const Color(0xFFF3E8FF), 'text': const Color(0xFF7E22CE)}, // Purple (HU)
       {'bg': const Color(0xFFFFEDD5), 'text': const Color(0xFFC2410C)}, // Peach (ME)
       {'bg': const Color(0xFFDCFCE7), 'text': const Color(0xFF15803D)}, // Mint
@@ -1894,10 +1892,10 @@ class AdminView extends GetView<AdminController> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: const Color(0xFFF1F5F9), width: 1.2),
+        border: Border.all(color: AppColors.warmCreamBorder, width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF163774).withOpacity(0.04),
+            color: AppColors.royalGold.withValues(alpha: 0.04),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -1975,8 +1973,11 @@ class AdminView extends GetView<AdminController> {
                   _buildUserCircleBtn(
                     icon: Icons.edit_outlined,
                     iconColor: canEdit
-                        ? const Color(0xFF1E293B)
+                        ? AppColors.royalGold
                         : const Color(0xFFCBD5E1),
+                    bgColor: canEdit
+                        ? AppColors.royalGoldLight
+                        : const Color(0xFFF1F5F9),
                     onTap: canEdit
                         ? () => Get.to(() => AdminEditUserGroupsView(user: user))
                         : () {
@@ -1989,8 +1990,8 @@ class AdminView extends GetView<AdminController> {
                   const SizedBox(width: 6),
                   _buildUserCircleBtn(
                     icon: Icons.lock_reset_rounded,
-                    iconColor: const Color(0xFFD97706),
-                    bgColor: const Color(0xFFFEF3C7),
+                    iconColor: AppColors.royalGold,
+                    bgColor: AppColors.royalGoldLight,
                     onTap: () => Get.toNamed(
                       AppRoutes.resetPassword,
                       arguments: {
@@ -2007,7 +2008,7 @@ class AdminView extends GetView<AdminController> {
 
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 12),
-            child: Divider(color: Color(0xFFF1F5F9), height: 1, thickness: 1),
+            child: Divider(color: AppColors.warmCreamBorder, height: 1, thickness: 1),
           ),
 
           // Row 2: Unit (Group) + Status Badge
@@ -2061,10 +2062,10 @@ class AdminView extends GetView<AdminController> {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEFF6FF),
+                    color: AppColors.royalGoldLight,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: const Color(0xFFBFDBFE),
+                      color: AppColors.warmCreamBorder,
                       width: 0.8,
                     ),
                   ),
@@ -2073,7 +2074,7 @@ class AdminView extends GetView<AdminController> {
                     style: GoogleFonts.kantumruyPro(
                       fontSize: 10.5,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF1D4ED8),
+                      color: AppColors.royalGold,
                     ),
                   ),
                 ),
@@ -2141,14 +2142,14 @@ class AdminView extends GetView<AdminController> {
           width: 32,
           height: 32,
           decoration: BoxDecoration(
-            color: bgColor ?? const Color(0xFFEFF6FF),
+            color: bgColor ?? AppColors.royalGoldLight,
             shape: BoxShape.circle,
           ),
           child: Center(
             child: Icon(
               icon,
               size: 16,
-              color: iconColor ?? const Color(0xFF1D4ED8),
+              color: iconColor ?? AppColors.royalGold,
             ),
           ),
         ),
@@ -2258,12 +2259,12 @@ class AdminView extends GetView<AdminController> {
                         width: 48,
                         height: 48,
                         decoration: const BoxDecoration(
-                          color: Color(0xFFEFF6FF),
+                          color: AppColors.royalGoldLight,
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
                           Icons.person_rounded,
-                          color: Color(0xFF2563EB),
+                          color: AppColors.royalGold,
                           size: 26,
                         ),
                       ),
@@ -2296,14 +2297,14 @@ class AdminView extends GetView<AdminController> {
                         width: 36,
                         height: 36,
                         decoration: const BoxDecoration(
-                          color: Color(0xFFF1F5F9),
+                          color: AppColors.royalGoldLight,
                           shape: BoxShape.circle,
                         ),
                         child: IconButton(
                           icon: const Icon(
                             Icons.close_rounded,
                             size: 18,
-                            color: Color(0xFF0F172A),
+                            color: AppColors.royalGold,
                           ),
                           onPressed: () => Navigator.of(context).pop(),
                           padding: EdgeInsets.zero,
@@ -2313,7 +2314,7 @@ class AdminView extends GetView<AdminController> {
                   ),
                 ),
                 const Divider(
-                  color: Color(0xFFF1F5F9),
+                  color: AppColors.warmCreamBorder,
                   height: 1,
                   thickness: 1,
                 ),
@@ -2325,8 +2326,8 @@ class AdminView extends GetView<AdminController> {
                       // Tile 0: Display Name / Full Name
                       _buildModernUserDetailTile(
                         icon: Icons.badge_outlined,
-                        iconBgColor: const Color(0xFFEFF6FF),
-                        iconColor: const Color(0xFF2563EB),
+                        iconBgColor: AppColors.royalGoldLight,
+                        iconColor: AppColors.royalGold,
                         label: 'full_name'.tr,
                         value: displayName,
                       ),
@@ -2334,8 +2335,8 @@ class AdminView extends GetView<AdminController> {
                       // Tile 1: Account Name / Username
                       _buildModernUserDetailTile(
                         icon: Icons.mail_outline_rounded,
-                        iconBgColor: const Color(0xFFF1F5F9),
-                        iconColor: const Color(0xFF475569),
+                        iconBgColor: AppColors.royalGoldLight,
+                        iconColor: AppColors.royalGold,
                         label: 'account_number_or_name'.tr,
                         value: username,
                       ),
@@ -2343,8 +2344,8 @@ class AdminView extends GetView<AdminController> {
                       // Tile 2: Role
                       _buildModernUserDetailTile(
                         icon: Icons.people_alt_rounded,
-                        iconBgColor: const Color(0xFFFAF5FF),
-                        iconColor: const Color(0xFF9333EA),
+                        iconBgColor: AppColors.royalGoldLight,
+                        iconColor: AppColors.royalGold,
                         label: 'role'.tr,
                         value: role,
                       ),
@@ -2352,8 +2353,8 @@ class AdminView extends GetView<AdminController> {
                       // Tile 3: Unit (Ministry)
                       _buildModernUserDetailTile(
                         icon: Icons.apartment_rounded,
-                        iconBgColor: const Color(0xFFFEF3C7),
-                        iconColor: const Color(0xFFD97706),
+                        iconBgColor: AppColors.royalGoldLight,
+                        iconColor: AppColors.royalGold,
                         label: 'unit_ministry'.tr,
                         value: unit,
                       ),
@@ -2432,7 +2433,7 @@ class AdminView extends GetView<AdminController> {
         const Divider(
           height: 12,
           thickness: 1,
-          color: Color(0xFFF8FAFC),
+          color: AppColors.warmCreamBorder,
         ),
       ],
     );
@@ -2484,7 +2485,7 @@ class AdminView extends GetView<AdminController> {
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: isActive
-                          ? const Color(0xFFA7F3D0).withOpacity(0.6)
+                          ? const Color(0xFFA7F3D0).withValues(alpha: 0.6)
                           : const Color(0xFFFECACA),
                       width: 0.8,
                     ),
@@ -2654,7 +2655,7 @@ class AdminView extends GetView<AdminController> {
 
   Widget _buildAdminSettingsTab(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffF8FAFC),
+      backgroundColor: AppColors.warmCream,
 
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -2694,7 +2695,7 @@ class AdminView extends GetView<AdminController> {
 
                 borderRadius: BorderRadius.circular(24),
 
-                border: Border.all(color: const Color(0xffF1F5F9)),
+                border: Border.all(color: AppColors.warmCreamBorder),
               ),
 
               child: Row(
@@ -2702,12 +2703,12 @@ class AdminView extends GetView<AdminController> {
                   const CircleAvatar(
                     radius: 30,
 
-                    backgroundColor: Color(0xffF6EBC2),
+                    backgroundColor: AppColors.royalGoldLight,
 
                     child: Icon(
                       Icons.admin_panel_settings_rounded,
 
-                      color: Color(0xFF163774),
+                      color: AppColors.royalGold,
 
                       size: 36,
                     ),
@@ -2742,7 +2743,7 @@ class AdminView extends GetView<AdminController> {
                           ),
 
                           decoration: BoxDecoration(
-                            color: const Color(0xffFEF3C7),
+                            color: AppColors.royalGoldLight,
 
                             borderRadius: BorderRadius.circular(6),
                           ),
@@ -2755,7 +2756,7 @@ class AdminView extends GetView<AdminController> {
 
                               fontWeight: FontWeight.bold,
 
-                              color: const Color(0xffD97706),
+                              color: AppColors.royalGold,
                             ),
                           ),
                         ),
@@ -2789,7 +2790,7 @@ class AdminView extends GetView<AdminController> {
 
                 borderRadius: BorderRadius.circular(20),
 
-                border: Border.all(color: const Color(0xffF1F5F9)),
+                border: Border.all(color: AppColors.warmCreamBorder),
               ),
 
               child: Column(
@@ -2799,26 +2800,26 @@ class AdminView extends GetView<AdminController> {
 
                     title: 'go_to_client'.tr,
 
-                    iconColor: const Color(0xFF163774),
+                    iconColor: AppColors.royalGold,
 
                     onTap: () {
                       Get.offAllNamed(AppRoutes.mainPage);
                     },
                   ),
 
-                  const Divider(height: 1, color: Color(0xffF1F5F9)),
+                  const Divider(height: 1, color: AppColors.warmCreamBorder),
 
                   _buildSettingTile(
                     icon: Icons.backup_rounded,
 
                     title: 'backup'.tr,
 
-                    iconColor: const Color(0xff2563EB),
+                    iconColor: AppColors.royalGold,
 
                     onTap: () => controller.backupDatabase(),
                   ),
 
-                  const Divider(height: 1, color: Color(0xffF1F5F9)),
+                  const Divider(height: 1, color: AppColors.warmCreamBorder),
 
                   _buildSettingTile(
                     icon: Icons.cleaning_services_rounded,
@@ -2830,7 +2831,7 @@ class AdminView extends GetView<AdminController> {
                     onTap: () => controller.clearSystemCache(),
                   ),
 
-                  const Divider(height: 1, color: Color(0xffF1F5F9)),
+                  const Divider(height: 1, color: AppColors.warmCreamBorder),
 
                   _buildSettingTile(
                     icon: Icons.api_rounded,
@@ -2868,7 +2869,7 @@ class AdminView extends GetView<AdminController> {
 
                 borderRadius: BorderRadius.circular(20),
 
-                border: Border.all(color: const Color(0xffF1F5F9)),
+                border: Border.all(color: AppColors.warmCreamBorder),
               ),
 
               child: Column(
@@ -2878,14 +2879,14 @@ class AdminView extends GetView<AdminController> {
 
                     title: 'change_password'.tr,
 
-                    iconColor: const Color(0xffD97706),
+                    iconColor: AppColors.royalGold,
 
                     onTap: () {
                       // Navigate to change password helper
                     },
                   ),
 
-                  const Divider(height: 1, color: Color(0xffF1F5F9)),
+                  const Divider(height: 1, color: AppColors.warmCreamBorder),
 
                   _buildSettingTile(
                     icon: Icons.logout_rounded,
@@ -2934,7 +2935,7 @@ class AdminView extends GetView<AdminController> {
               padding: const EdgeInsets.all(8),
 
               decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.08),
+                color: iconColor.withValues(alpha: 0.08),
 
                 shape: BoxShape.circle,
               ),
@@ -2973,7 +2974,7 @@ class AdminView extends GetView<AdminController> {
 
   Widget _buildBackupOverlay() {
     return Container(
-      color: Colors.black.withOpacity(0.6),
+      color: Colors.black.withValues(alpha: 0.6),
 
       width: double.infinity,
 
@@ -2996,7 +2997,7 @@ class AdminView extends GetView<AdminController> {
 
             children: [
               const CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF163774)),
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.royalGold),
               ),
 
               const SizedBox(height: 24),
@@ -3018,10 +3019,10 @@ class AdminView extends GetView<AdminController> {
               LinearProgressIndicator(
                 value: controller.backupProgress.value,
 
-                backgroundColor: const Color(0xffE2E8F0),
+                backgroundColor: AppColors.warmCreamBorder,
 
                 valueColor: const AlwaysStoppedAnimation<Color>(
-                  Color(0xFF163774),
+                  AppColors.royalGold,
                 ),
               ),
 
@@ -3033,7 +3034,7 @@ class AdminView extends GetView<AdminController> {
                 style: GoogleFonts.poppins(
                   fontWeight: FontWeight.bold,
 
-                  color: const Color(0xFF163774),
+                  color: AppColors.royalGold,
                 ),
               ),
             ],
@@ -3057,7 +3058,7 @@ class AdminAppsListView extends GetView<AdminController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffF8FAFC),
+      backgroundColor: AppColors.warmCream,
 
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -3071,7 +3072,7 @@ class AdminAppsListView extends GetView<AdminController> {
                 icon: const Icon(
                   Icons.arrow_back_ios_new_rounded,
 
-                  color: Color(0xFF163774),
+                  color: AppColors.royalGold,
                 ),
 
                 onPressed: () => Navigator.of(context).pop(),
@@ -3095,7 +3096,7 @@ class AdminAppsListView extends GetView<AdminController> {
             icon: const Icon(
               Icons.add_rounded,
 
-              color: Color(0xFF163774),
+              color: AppColors.royalGold,
 
               size: 24,
             ),
@@ -3249,12 +3250,12 @@ class AdminAppsListView extends GetView<AdminController> {
                                 ),
 
                                 decoration: BoxDecoration(
-                                  color: const Color(0xffEFF6FF),
+                                  color: AppColors.royalGoldLight,
 
                                   borderRadius: BorderRadius.circular(10),
 
                                   border: Border.all(
-                                    color: const Color(0xff3B82F6),
+                                    color: AppColors.warmCreamBorder,
 
                                     width: 1,
                                   ),
@@ -3269,7 +3270,7 @@ class AdminAppsListView extends GetView<AdminController> {
 
                                       size: 16,
 
-                                      color: Color(0xff2563EB),
+                                      color: AppColors.royalGold,
                                     ),
 
                                     const SizedBox(width: 6),
@@ -3282,7 +3283,7 @@ class AdminAppsListView extends GetView<AdminController> {
 
                                         fontWeight: FontWeight.bold,
 
-                                        color: const Color(0xff2563EB),
+                                        color: AppColors.royalGold,
                                       ),
                                     ),
                                   ],
@@ -3380,12 +3381,12 @@ class AdminAppsListView extends GetView<AdminController> {
                               ),
 
                               decoration: BoxDecoration(
-                                color: const Color(0xffF8FAFC),
+                                color: AppColors.warmCream,
 
                                 borderRadius: BorderRadius.circular(8),
 
                                 border: Border.all(
-                                  color: const Color(0xffE2E8F0),
+                                  color: AppColors.warmCreamBorder,
                                 ),
                               ),
 
@@ -3410,7 +3411,7 @@ class AdminAppsListView extends GetView<AdminController> {
 
                                     size: 14,
 
-                                    color: Color(0xff475569),
+                                    color: AppColors.royalGold,
                                   ),
                                 ],
                               ),
@@ -3458,7 +3459,7 @@ class AdminAppsListView extends GetView<AdminController> {
       }),
 
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xff2563EB),
+        backgroundColor: AppColors.royalGold,
 
         elevation: 4,
 
@@ -3519,9 +3520,9 @@ class AdminAppsListView extends GetView<AdminController> {
 
           icon: Icons.apps_rounded,
 
-          iconColor: const Color(0xff2563EB),
+          iconColor: AppColors.royalGold,
 
-          bgIconColor: const Color(0xffEFF6FF),
+          bgIconColor: AppColors.royalGoldLight,
         ),
 
         _buildStatCardItem(
@@ -3590,11 +3591,11 @@ class AdminAppsListView extends GetView<AdminController> {
 
         borderRadius: BorderRadius.circular(16),
 
-        border: Border.all(color: const Color(0xffE2E8F0)),
+        border: Border.all(color: AppColors.warmCreamBorder),
 
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: AppColors.royalGold.withValues(alpha: 0.04),
 
             blurRadius: 10,
 
@@ -3708,11 +3709,11 @@ class AdminAppsListView extends GetView<AdminController> {
 
         borderRadius: BorderRadius.circular(16),
 
-        border: Border.all(color: const Color(0xffE2E8F0)),
+        border: Border.all(color: AppColors.warmCreamBorder),
 
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: AppColors.royalGold.withValues(alpha: 0.04),
 
             blurRadius: 10,
 
@@ -3785,7 +3786,7 @@ class AdminAppsListView extends GetView<AdminController> {
 
                   const SizedBox(height: 12),
 
-                  const Divider(height: 1, color: Color(0xffF1F5F9)),
+                  const Divider(height: 1, color: AppColors.warmCreamBorder),
 
                   const SizedBox(height: 12),
 
@@ -3796,7 +3797,7 @@ class AdminAppsListView extends GetView<AdminController> {
 
                         size: 16,
 
-                        color: Color(0xff2563EB),
+                        color: AppColors.royalGold,
                       ),
 
                       const SizedBox(width: 6),
@@ -3812,7 +3813,7 @@ class AdminAppsListView extends GetView<AdminController> {
                           style: GoogleFonts.poppins(
                             fontSize: 11,
 
-                            color: const Color(0xff2563EB),
+                            color: AppColors.royalGold,
 
                             decoration: TextDecoration.underline,
                           ),
@@ -3858,7 +3859,7 @@ class AdminAppsListView extends GetView<AdminController> {
 
                         label: 'view'.tr,
 
-                        color: const Color(0xff2563EB),
+                        color: AppColors.royalGold,
 
                         onTap: () => _showAppDetailDialog(context, app),
                       ),
@@ -3952,11 +3953,11 @@ class AdminAppsListView extends GetView<AdminController> {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
 
         decoration: BoxDecoration(
-          color: color.withOpacity(0.06),
+          color: color.withValues(alpha: 0.08),
 
           borderRadius: BorderRadius.circular(8),
 
-          border: Border.all(color: color.withOpacity(0.12)),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
         ),
 
         child: Row(
@@ -3995,11 +3996,11 @@ class AdminAppsListView extends GetView<AdminController> {
       height: 38,
 
       decoration: BoxDecoration(
-        color: const Color(0xffF8FAFC),
+        color: AppColors.warmCream,
 
         borderRadius: BorderRadius.circular(10),
 
-        border: Border.all(color: const Color(0xffE2E8F0)),
+        border: Border.all(color: AppColors.warmCreamBorder),
       ),
 
       child: ClipRRect(
@@ -4052,7 +4053,7 @@ class AdminAppsListView extends GetView<AdminController> {
         actions: [
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF163774),
+              backgroundColor: AppColors.royalGold,
 
               minimumSize: const Size(80, 36),
             ),
@@ -4238,7 +4239,7 @@ class _AdminAppCreateViewState extends State<AdminAppCreateView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffF8FAFC),
+      backgroundColor: AppColors.warmCream,
 
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -4251,7 +4252,7 @@ class _AdminAppCreateViewState extends State<AdminAppCreateView> {
           icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
 
-            color: Color(0xFF163774),
+            color: AppColors.royalGold,
           ),
 
           onPressed: () => Navigator.of(context).pop(),
@@ -4286,7 +4287,7 @@ class _AdminAppCreateViewState extends State<AdminAppCreateView> {
               decoration: const BoxDecoration(
                 color: Colors.white,
 
-                border: Border(bottom: BorderSide(color: Color(0xffE2E8F0))),
+                border: Border(bottom: BorderSide(color: AppColors.warmCreamBorder)),
               ),
 
               child: Column(
@@ -4465,7 +4466,7 @@ class _AdminAppCreateViewState extends State<AdminAppCreateView> {
 
                           elevation: 0,
 
-                          side: const BorderSide(color: Color(0xffCBD5E1)),
+                          side: const BorderSide(color: AppColors.warmCreamBorder),
 
                           minimumSize: const Size(100, 40),
 
@@ -4497,7 +4498,7 @@ class _AdminAppCreateViewState extends State<AdminAppCreateView> {
 
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xff2563EB),
+                          backgroundColor: AppColors.royalGold,
 
                           foregroundColor: Colors.white,
 
@@ -4594,19 +4595,19 @@ class _AdminAppCreateViewState extends State<AdminAppCreateView> {
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
 
-        borderSide: const BorderSide(color: Color(0xffE2E8F0)),
+        borderSide: const BorderSide(color: AppColors.warmCreamBorder),
       ),
 
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
 
-        borderSide: const BorderSide(color: Color(0xffE2E8F0)),
+        borderSide: const BorderSide(color: AppColors.warmCreamBorder),
       ),
 
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
 
-        borderSide: const BorderSide(color: Color(0xff2563EB), width: 1.5),
+        borderSide: const BorderSide(color: AppColors.royalGold, width: 1.5),
       ),
     );
   }
@@ -4626,15 +4627,15 @@ class _AdminAppCreateViewState extends State<AdminAppCreateView> {
 
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xffFEF3C7).withOpacity(0.3)
+              ? AppColors.royalGoldLight.withValues(alpha: 0.35)
               : Colors.white,
 
           borderRadius: BorderRadius.circular(10),
 
           border: Border.all(
             color: isSelected
-                ? const Color(0xffD97706)
-                : const Color(0xffE2E8F0),
+                ? AppColors.royalGold
+                : AppColors.warmCreamBorder,
 
             width: isSelected ? 1.5 : 1,
           ),
@@ -4651,7 +4652,7 @@ class _AdminAppCreateViewState extends State<AdminAppCreateView> {
                 shape: BoxShape.circle,
 
                 border: Border.all(
-                  color: isSelected ? const Color(0xffD97706) : Colors.grey,
+                  color: isSelected ? AppColors.royalGold : Colors.grey,
 
                   width: 2,
                 ),
@@ -4662,7 +4663,7 @@ class _AdminAppCreateViewState extends State<AdminAppCreateView> {
                       margin: const EdgeInsets.all(3),
 
                       decoration: const BoxDecoration(
-                        color: Color(0xffD97706),
+                        color: AppColors.royalGold,
 
                         shape: BoxShape.circle,
                       ),
@@ -4681,7 +4682,7 @@ class _AdminAppCreateViewState extends State<AdminAppCreateView> {
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
 
                 color: isSelected
-                    ? const Color(0xff92400E)
+                    ? AppColors.royalGold
                     : const Color(0xff1E293B),
               ),
             ),

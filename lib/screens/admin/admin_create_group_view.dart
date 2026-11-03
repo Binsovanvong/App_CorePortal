@@ -8,6 +8,7 @@ import 'package:core_portal/screens/admin/admin_controller.dart';
 import 'package:core_portal/widgets/custom_snackbar.dart';
 import 'package:core_portal/widgets/app_icon.dart';
 import 'package:core_portal/screens/admin/admin_edit_user_groups_view.dart';
+import 'package:core_portal/theme/app_colors.dart';
 
 class AdminCreateGroupView extends StatefulWidget {
   final Map<String, dynamic>? initialUser;
@@ -667,10 +668,10 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: const Color(0xFFF1F5F9), width: 1.2),
+                border: Border.all(color: AppColors.warmCreamBorder, width: 1.2),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.06),
+                    color: Colors.black.withValues(alpha: 0.06),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
@@ -726,9 +727,9 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF8FAFC),
+                      color: AppColors.warmCream,
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      border: Border.all(color: AppColors.warmCreamBorder),
                     ),
                     child: Row(
                       children: [
@@ -736,12 +737,12 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                           width: 34,
                           height: 34,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFEFF6FF),
+                            color: AppColors.royalGoldLight,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: const Icon(
                             Icons.groups_rounded,
-                            color: Color(0xFF2563EB),
+                            color: AppColors.royalGold,
                             size: 18,
                           ),
                         ),
@@ -801,7 +802,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                         Navigator.of(dialogCtx).pop();
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2563EB),
+                        backgroundColor: AppColors.royalGold,
                         foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
@@ -838,7 +839,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffF8FAFC),
+      backgroundColor: const Color(0xFFFAF9F6),
       body: SafeArea(
         child: Column(
           children: [
@@ -893,12 +894,12 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                   width: 40,
                   height: 40,
                   decoration: const BoxDecoration(
-                    color: Color(0xffEFF6FF),
+                    color: AppColors.royalGoldLight,
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
                     Icons.arrow_back_rounded,
-                    color: Color(0xff0F172A),
+                    color: AppColors.royalGold,
                     size: 20,
                   ),
                 ),
@@ -934,7 +935,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                           style: GoogleFonts.kantumruyPro(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xff2563EB),
+                            color: AppColors.royalGold,
                           ),
                         ),
                       ],
@@ -956,10 +957,10 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xffE2E8F0)),
+        border: Border.all(color: AppColors.warmCreamBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.015),
+            color: Colors.black.withValues(alpha: 0.015),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -975,7 +976,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                 width: 32,
                 height: 32,
                 decoration: const BoxDecoration(
-                  color: Color(0xffEFF6FF),
+                  color: AppColors.royalGoldLight,
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
@@ -984,7 +985,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xff2563EB),
+                    color: AppColors.royalGold,
                   ),
                 ),
               ),
@@ -1015,7 +1016,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xffE2E8F0)),
+              border: Border.all(color: AppColors.warmCreamBorder),
             ),
             child: Row(
               children: [
@@ -1023,12 +1024,12 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   decoration: const BoxDecoration(
                     border: Border(
-                      right: BorderSide(color: Color(0xffE2E8F0)),
+                      right: BorderSide(color: AppColors.warmCreamBorder),
                     ),
                   ),
                   child: const Icon(
                     Icons.apartment_rounded,
-                    color: Color(0xff94A3B8),
+                    color: AppColors.royalGold,
                     size: 20,
                   ),
                 ),
@@ -1073,7 +1074,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xffE2E8F0)),
+              border: Border.all(color: AppColors.warmCreamBorder),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1128,7 +1129,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
           ),
           const SizedBox(height: 16),
 
-          // ស្ថានភាព (Status Selection with Blue Active style)
+          // ស្ថានភាព (Status Selection with Royal Gold Active style)
           Text(
             'status'.tr,
             style: GoogleFonts.kantumruyPro(
@@ -1149,13 +1150,13 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
                       color: _status == 'ACTIVE'
-                          ? const Color(0xffEFF6FF)
+                          ? AppColors.royalGoldLight
                           : Colors.white,
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
                         color: _status == 'ACTIVE'
-                            ? const Color(0xff3B82F6)
-                            : const Color(0xffE2E8F0),
+                            ? AppColors.royalGold
+                            : AppColors.warmCreamBorder,
                         width: 1.2,
                       ),
                     ),
@@ -1167,7 +1168,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                               ? Icons.radio_button_checked
                               : Icons.radio_button_off,
                           color: _status == 'ACTIVE'
-                              ? const Color(0xff2563EB)
+                              ? AppColors.royalGold
                               : const Color(0xff94A3B8),
                           size: 20,
                         ),
@@ -1178,7 +1179,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                             fontSize: 13,
                             fontWeight: FontWeight.bold,
                             color: _status == 'ACTIVE'
-                                ? const Color(0xff2563EB)
+                                ? AppColors.royalGold
                                 : const Color(0xff64748B),
                           ),
                         ),
@@ -1198,13 +1199,13 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
                       color: _status == 'INACTIVE'
-                          ? const Color(0xffEFF6FF)
+                          ? AppColors.royalGoldLight
                           : Colors.white,
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
                         color: _status == 'INACTIVE'
-                            ? const Color(0xff3B82F6)
-                            : const Color(0xffE2E8F0),
+                            ? AppColors.royalGold
+                            : AppColors.warmCreamBorder,
                         width: 1.2,
                       ),
                     ),
@@ -1216,7 +1217,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                               ? Icons.radio_button_checked
                               : Icons.radio_button_off,
                           color: _status == 'INACTIVE'
-                              ? const Color(0xff2563EB)
+                              ? AppColors.royalGold
                               : const Color(0xff94A3B8),
                           size: 20,
                         ),
@@ -1227,7 +1228,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                             fontSize: 13,
                             fontWeight: FontWeight.bold,
                             color: _status == 'INACTIVE'
-                                ? const Color(0xff2563EB)
+                                ? AppColors.royalGold
                                 : const Color(0xff64748B),
                           ),
                         ),
@@ -1315,10 +1316,10 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AppColors.warmCreamBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 4,
             offset: const Offset(0, 1),
           ),
@@ -1347,10 +1348,10 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xffE2E8F0)),
+        border: Border.all(color: AppColors.warmCreamBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.015),
+            color: Colors.black.withValues(alpha: 0.015),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -1367,7 +1368,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                 width: 32,
                 height: 32,
                 decoration: const BoxDecoration(
-                  color: Color(0xffFEF3C7),
+                  color: AppColors.royalGoldLight,
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
@@ -1376,7 +1377,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xffD97706),
+                    color: AppColors.royalGold,
                   ),
                 ),
               ),
@@ -1424,22 +1425,22 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
               prefixIcon: const Icon(
                 Icons.search_rounded,
                 size: 20,
-                color: Color(0xff94A3B8),
+                color: AppColors.royalGold,
               ),
               filled: true,
               fillColor: Colors.white,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: Color(0xffE2E8F0)),
+                borderSide: const BorderSide(color: AppColors.warmCreamBorder),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: Color(0xffE2E8F0)),
+                borderSide: const BorderSide(color: AppColors.warmCreamBorder),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide:
-                    const BorderSide(color: Color(0xff2563EB), width: 1.4),
+                    const BorderSide(color: AppColors.royalGold, width: 1.4),
               ),
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -1456,7 +1457,10 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                 child: const SizedBox(
                   width: 24,
                   height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2.5),
+                  child: CircularProgressIndicator(
+                    color: AppColors.royalGold,
+                    strokeWidth: 2.5,
+                  ),
                 ),
               );
             }
@@ -1488,7 +1492,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xffE2E8F0)),
+                border: Border.all(color: AppColors.warmCreamBorder),
               ),
               child: ListView.separated(
                 shrinkWrap: true,
@@ -1497,7 +1501,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                 separatorBuilder: (context, index) => const Divider(
                   height: 1,
                   thickness: 1,
-                  color: Color(0xffF1F5F9),
+                  color: AppColors.warmCreamBorder,
                 ),
                 itemBuilder: (context, index) {
                   final app = filtered[index];
@@ -1553,12 +1557,12 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                               height: 20,
                               decoration: BoxDecoration(
                                 color: isChecked
-                                    ? const Color(0xff2563EB)
+                                    ? AppColors.royalGold
                                     : Colors.white,
                                 borderRadius: BorderRadius.circular(4),
                                 border: Border.all(
                                   color: isChecked
-                                      ? const Color(0xff2563EB)
+                                      ? AppColors.royalGold
                                       : const Color(0xff94A3B8),
                                   width: 1.5,
                                 ),
@@ -1592,10 +1596,10 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xffE2E8F0)),
+        border: Border.all(color: AppColors.warmCreamBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.015),
+            color: Colors.black.withValues(alpha: 0.015),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -1612,7 +1616,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                 width: 32,
                 height: 32,
                 decoration: const BoxDecoration(
-                  color: Color(0xffEFF6FF),
+                  color: AppColors.royalGoldLight,
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
@@ -1621,7 +1625,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xff2563EB),
+                    color: AppColors.royalGold,
                   ),
                 ),
               ),
@@ -1677,22 +1681,22 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                     prefixIcon: const Icon(
                       Icons.search_rounded,
                       size: 20,
-                      color: Color(0xff94A3B8),
+                      color: AppColors.royalGold,
                     ),
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0xffE2E8F0)),
+                      borderSide: const BorderSide(color: AppColors.warmCreamBorder),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0xffE2E8F0)),
+                      borderSide: const BorderSide(color: AppColors.warmCreamBorder),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide:
-                          const BorderSide(color: Color(0xff2563EB), width: 1.4),
+                          const BorderSide(color: AppColors.royalGold, width: 1.4),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 14,
@@ -1714,9 +1718,9 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                     vertical: 11,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xffEFF6FF),
+                    color: AppColors.royalGoldLight,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xffBFDBFE)),
+                    border: Border.all(color: AppColors.warmCreamBorder),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -1726,7 +1730,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                             ? Icons.keyboard_arrow_up_rounded
                             : Icons.keyboard_arrow_down_rounded,
                         size: 18,
-                        color: const Color(0xff2563EB),
+                        color: AppColors.royalGold,
                       ),
                       const SizedBox(width: 4),
                       Text(
@@ -1734,7 +1738,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                         style: GoogleFonts.kantumruyPro(
                           fontSize: 12.5,
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xff2563EB),
+                          color: AppColors.royalGold,
                         ),
                       ),
                     ],
@@ -1762,9 +1766,9 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                       vertical: 5,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xffEFF6FF),
+                      color: AppColors.royalGoldLight,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: const Color(0xffBFDBFE)),
+                      border: Border.all(color: AppColors.warmCreamBorder),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -1772,7 +1776,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                         const Icon(
                           Icons.person_outline_rounded,
                           size: 14,
-                          color: Color(0xff2563EB),
+                          color: AppColors.royalGold,
                         ),
                         const SizedBox(width: 6),
                         Text(
@@ -1780,7 +1784,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                           style: GoogleFonts.poppins(
                             fontSize: 11.5,
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xff1E40AF),
+                            color: AppColors.royalGold,
                           ),
                         ),
                         const SizedBox(width: 6),
@@ -1789,7 +1793,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                           child: const Icon(
                             Icons.close_rounded,
                             size: 14,
-                            color: Color(0xff2563EB),
+                            color: AppColors.royalGold,
                           ),
                         ),
                       ],
@@ -1808,7 +1812,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xffE2E8F0)),
+                border: Border.all(color: AppColors.warmCreamBorder),
               ),
               child: Obx(() {
                 final query = userSearchQuery.value.toLowerCase().trim();
@@ -1841,7 +1845,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                   separatorBuilder: (context, index) => const Divider(
                     height: 1,
                     thickness: 1,
-                    color: Color(0xffF1F5F9),
+                    color: AppColors.warmCreamBorder,
                   ),
                   itemBuilder: (context, index) {
                     final user = filtered[index];
@@ -1869,7 +1873,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                             children: [
                               CircleAvatar(
                                 radius: 16,
-                                backgroundColor: const Color(0xffEFF6FF),
+                                backgroundColor: AppColors.royalGoldLight,
                                 child: Text(
                                   uName.isNotEmpty
                                       ? uName[0].toUpperCase()
@@ -1877,7 +1881,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                                   style: GoogleFonts.poppins(
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
-                                    color: const Color(0xff2563EB),
+                                    color: AppColors.royalGold,
                                   ),
                                 ),
                               ),
@@ -1915,12 +1919,12 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                                 height: 20,
                                 decoration: BoxDecoration(
                                   color: isChecked
-                                      ? const Color(0xff2563EB)
+                                      ? AppColors.royalGold
                                       : Colors.white,
                                   borderRadius: BorderRadius.circular(4),
                                   border: Border.all(
                                     color: isChecked
-                                        ? const Color(0xff2563EB)
+                                        ? AppColors.royalGold
                                         : const Color(0xff94A3B8),
                                     width: 1.5,
                                   ),
@@ -1953,7 +1957,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(top: BorderSide(color: Color(0xffE2E8F0))),
+        border: Border(top: BorderSide(color: AppColors.warmCreamBorder)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Center(
@@ -1971,7 +1975,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     side: const BorderSide(
-                      color: Color(0xffCBD5E1),
+                      color: AppColors.warmCreamBorder,
                       width: 1.2,
                     ),
                   ),
@@ -1996,7 +2000,7 @@ class _AdminCreateGroupViewState extends State<AdminCreateGroupView> {
                 child: ElevatedButton(
                   onPressed: isSaving ? null : _createGroup,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xff2563EB),
+                    backgroundColor: AppColors.royalGold,
                     foregroundColor: Colors.white,
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),

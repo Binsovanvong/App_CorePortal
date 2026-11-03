@@ -439,10 +439,10 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: const Color(0xFFF1F5F9), width: 1.2),
+              border: Border.all(color: AppColors.warmCreamBorder, width: 1.2),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.06),
+                  color: Colors.black.withValues(alpha: 0.06),
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),
@@ -504,7 +504,7 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                   child: ElevatedButton(
                     onPressed: () => Navigator.of(dialogCtx).pop(),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2563EB),
+                      backgroundColor: AppColors.royalGold,
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
@@ -558,10 +558,10 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: const Color(0xFFF1F5F9), width: 1.2),
+              border: Border.all(color: AppColors.warmCreamBorder, width: 1.2),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.06),
+                  color: Colors.black.withValues(alpha: 0.06),
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),
@@ -620,9 +620,9 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF8FAFC),
+                    color: AppColors.warmCream,
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                    border: Border.all(color: AppColors.warmCreamBorder),
                   ),
                   child: Row(
                     children: [
@@ -698,7 +698,7 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                           onPressed: () => Navigator.of(dialogCtx).pop(),
                           style: OutlinedButton.styleFrom(
                             side: const BorderSide(
-                              color: Color(0xFFCBD5E1),
+                              color: AppColors.warmCreamBorder,
                               width: 1.2,
                             ),
                             shape: RoundedRectangleBorder(
@@ -838,10 +838,10 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: const Color(0xFFF1F5F9), width: 1.2),
+                  border: Border.all(color: AppColors.warmCreamBorder, width: 1.2),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.06),
+                      color: Colors.black.withValues(alpha: 0.06),
                       blurRadius: 20,
                       offset: const Offset(0, 8),
                     ),
@@ -897,9 +897,9 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF8FAFC),
+                        color: AppColors.warmCream,
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                        border: Border.all(color: AppColors.warmCreamBorder),
                       ),
                       child: Row(
                         children: [
@@ -972,7 +972,7 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                           Navigator.of(dialogCtx).pop();
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2563EB),
+                          backgroundColor: AppColors.royalGold,
                           foregroundColor: Colors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
@@ -1009,7 +1009,7 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
     final bool canEdit = controller.canEditUser(_selectedUser);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.warmCream,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -1075,14 +1075,14 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
           width: 44,
           height: 44,
           decoration: const BoxDecoration(
-            color: Color(0xFFEFF6FF),
+            color: AppColors.royalGoldLight,
             shape: BoxShape.circle,
           ),
           child: IconButton(
             icon: const Icon(
               Icons.arrow_back_ios_new_rounded,
               size: 18,
-              color: Color(0xFF1E293B),
+              color: AppColors.royalGold,
             ),
             onPressed: () => Get.back(),
             padding: EdgeInsets.zero,
@@ -1098,7 +1098,7 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                 style: GoogleFonts.kantumruyPro(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
+                  color: AppColors.royalGold,
                 ),
               ),
               const SizedBox(height: 2),
@@ -1125,10 +1125,10 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFF1F5F9), width: 1.2),
+        border: Border.all(color: AppColors.warmCreamBorder, width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: AppColors.royalGold.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -1149,9 +1149,9 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
             decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
+              color: AppColors.warmCream,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
+              border: Border.all(color: AppColors.warmCreamBorder),
             ),
             child: Row(
               children: [
@@ -1159,12 +1159,12 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEFF6FF),
+                    color: AppColors.royalGoldLight,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(
                     Icons.groups_rounded,
-                    color: Color(0xFF2563EB),
+                    color: AppColors.royalGold,
                     size: 20,
                   ),
                 ),
@@ -1179,7 +1179,7 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                       isExpanded: true,
                       icon: const Icon(
                         Icons.keyboard_arrow_down_rounded,
-                        color: Color(0xFF64748B),
+                        color: AppColors.royalGold,
                       ),
                       items: users.map((user) {
                         final uEmail = (user['email'] ?? '').toString().trim();
@@ -1353,10 +1353,10 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFF1F5F9), width: 1.2),
+        border: Border.all(color: AppColors.warmCreamBorder, width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: AppColors.royalGold.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -1373,7 +1373,7 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                 width: 68,
                 height: 68,
                 decoration: const BoxDecoration(
-                  color: Color(0xFFEFF6FF),
+                  color: AppColors.royalGoldLight,
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
@@ -1381,7 +1381,7 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                   initial,
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xFF2563EB),
+                    color: AppColors.royalGold,
                     fontSize: 22,
                   ),
                 ),
@@ -1452,7 +1452,7 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                         const Icon(
                           Icons.person_outline_rounded,
                           size: 15,
-                          color: Color(0xFF64748B),
+                          color: AppColors.royalGold,
                         ),
                         const SizedBox(width: 6),
                         Text(
@@ -1472,7 +1472,7 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
           ),
 
           const SizedBox(height: 16),
-          const Divider(color: Color(0xFFF1F5F9), height: 1, thickness: 1.2),
+          const Divider(color: AppColors.warmCreamBorder, height: 1, thickness: 1.2),
           const SizedBox(height: 14),
 
           // Detail row 1: អង្គភាព
@@ -1549,10 +1549,10 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFF1F5F9), width: 1.2),
+        border: Border.all(color: AppColors.warmCreamBorder, width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: AppColors.royalGold.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -1561,19 +1561,19 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header: Amber icon + Title + Subtitle + Create Group Button
+          // Header: Royal Gold icon + Title + Subtitle + Create Group Button
           Row(
             children: [
               Container(
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFEF3C7),
+                  color: AppColors.royalGoldLight,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
                   Icons.group_add_rounded,
-                  color: Color(0xFFD97706),
+                  color: AppColors.royalGold,
                   size: 22,
                 ),
               ),
@@ -1609,10 +1609,10 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEFF6FF),
+                    color: AppColors.royalGoldLight,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: const Color(0xFFBFDBFE),
+                      color: AppColors.warmCreamBorder,
                       width: 1,
                     ),
                   ),
@@ -1622,7 +1622,7 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                       const Icon(
                         Icons.add_rounded,
                         size: 16,
-                        color: Color(0xFF2563EB),
+                        color: AppColors.royalGold,
                       ),
                       const SizedBox(width: 4),
                       Text(
@@ -1630,7 +1630,7 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                         style: GoogleFonts.kantumruyPro(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xFF2563EB),
+                          color: AppColors.royalGold,
                         ),
                       ),
                     ],
@@ -1646,9 +1646,9 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
           Container(
             height: 46,
             decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
+              color: AppColors.warmCream,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
+              border: Border.all(color: AppColors.warmCreamBorder),
             ),
             child: TextField(
               onChanged: (val) => searchQuery.value = val,
@@ -1665,7 +1665,7 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                 prefixIcon: const Icon(
                   Icons.search_rounded,
                   size: 20,
-                  color: Color(0xFF94A3B8),
+                  color: AppColors.royalGold,
                 ),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(
@@ -1686,7 +1686,7 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                 alignment: Alignment.center,
                 child: const CircularProgressIndicator(
                   strokeWidth: 2.5,
-                  color: Color(0xFF2563EB),
+                  color: AppColors.royalGold,
                 ),
               );
             }
@@ -1710,14 +1710,12 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
+                        color: AppColors.royalGoldLight,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Icon(
-                        isSearching
-                            ? Icons.search_off_rounded
-                            : Icons.groups_outlined,
-                        color: const Color(0xFF94A3B8),
+                      child: const Icon(
+                        Icons.groups_outlined,
+                        color: AppColors.royalGold,
                         size: 22,
                       ),
                     ),
@@ -1747,7 +1745,7 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2563EB),
+                        backgroundColor: AppColors.royalGold,
                         foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
@@ -1775,10 +1773,10 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                 return Container(
                   margin: const EdgeInsets.only(bottom: 8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF8FAFC),
+                    color: isChecked ? AppColors.royalGoldLight.withValues(alpha: 0.35) : AppColors.warmCream,
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: isChecked ? const Color(0xFFBFDBFE) : const Color(0xFFF1F5F9),
+                      color: isChecked ? AppColors.royalGold : AppColors.warmCreamBorder,
                     ),
                   ),
                   child: Padding(
@@ -1797,12 +1795,12 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                                   width: 22,
                                   height: 22,
                                   decoration: BoxDecoration(
-                                    color: isChecked ? const Color(0xFF2563EB) : Colors.white,
+                                    color: isChecked ? AppColors.royalGold : Colors.white,
                                     borderRadius: BorderRadius.circular(6),
                                     border: Border.all(
                                       color: isChecked
-                                          ? const Color(0xFF2563EB)
-                                          : const Color(0xFFCBD5E1),
+                                          ? AppColors.royalGold
+                                          : AppColors.warmCreamBorder,
                                       width: 1.6,
                                     ),
                                   ),
@@ -1848,10 +1846,10 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                                                 vertical: 1.5,
                                               ),
                                               decoration: BoxDecoration(
-                                                color: const Color(0xFFEFF6FF),
+                                                color: AppColors.royalGoldLight,
                                                 borderRadius: BorderRadius.circular(4),
                                                 border: Border.all(
-                                                  color: const Color(0xFFBFDBFE),
+                                                  color: AppColors.warmCreamBorder,
                                                   width: 0.6,
                                                 ),
                                               ),
@@ -1861,7 +1859,7 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                                                   const Icon(
                                                     Icons.person_outline_rounded,
                                                     size: 11,
-                                                    color: Color(0xFF2563EB),
+                                                    color: AppColors.royalGold,
                                                   ),
                                                   const SizedBox(width: 3),
                                                   Text(
@@ -1869,7 +1867,7 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                                                     style: GoogleFonts.kantumruyPro(
                                                       fontSize: 10,
                                                       fontWeight: FontWeight.w600,
-                                                      color: const Color(0xFF2563EB),
+                                                      color: AppColors.royalGold,
                                                     ),
                                                   ),
                                                 ],
@@ -1914,16 +1912,16 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                                 height: 32,
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFEFF6FF),
+                                  color: AppColors.royalGoldLight,
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
-                                    color: const Color(0xFFBFDBFE),
+                                    color: AppColors.warmCreamBorder,
                                   ),
                                 ),
                                 child: const Icon(
                                   Icons.edit_outlined,
                                   size: 16,
-                                  color: Color(0xFF2563EB),
+                                  color: AppColors.royalGold,
                                 ),
                               ),
                             ),
@@ -1972,7 +1970,7 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
           }),
 
           const SizedBox(height: 16),
-          const Divider(color: Color(0xFFF1F5F9), height: 1, thickness: 1.2),
+          const Divider(color: AppColors.warmCreamBorder, height: 1, thickness: 1.2),
           const SizedBox(height: 14),
 
           // ─── Bottom Section: ក្រុមដែលបានកំណត់ (X) ──────────────────────────
@@ -1987,7 +1985,7 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                     children: [
                       const Icon(
                         Icons.groups_rounded,
-                        color: Color(0xFFEF4444),
+                        color: AppColors.royalGold,
                         size: 20,
                       ),
                       const SizedBox(width: 8),
@@ -2004,7 +2002,7 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                         isAssignedExpanded.value
                             ? Icons.keyboard_arrow_up_rounded
                             : Icons.keyboard_arrow_down_rounded,
-                        color: const Color(0xFF64748B),
+                        color: AppColors.royalGold,
                         size: 22,
                       ),
                     ],
@@ -2031,10 +2029,10 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFEF2F2),
+                            color: AppColors.royalGoldLight,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: const Color(0xFFFCA5A5).withOpacity(0.5),
+                              color: AppColors.warmCreamBorder,
                             ),
                           ),
                           child: Row(
@@ -2045,7 +2043,7 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                                 style: GoogleFonts.poppins(
                                   fontSize: 11.5,
                                   fontWeight: FontWeight.w600,
-                                  color: const Color(0xFFEF4444),
+                                  color: AppColors.royalGold,
                                 ),
                               ),
                               const SizedBox(width: 6),
@@ -2057,7 +2055,7 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                                   child: Icon(
                                     Icons.close_rounded,
                                     size: 14,
-                                    color: Color(0xFFEF4444),
+                                    color: AppColors.royalGold,
                                   ),
                                 ),
                               ),
@@ -2082,11 +2080,11 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
       decoration: BoxDecoration(
         color: Colors.white,
         border: const Border(
-          top: BorderSide(color: Color(0xFFF1F5F9), width: 1.5),
+          top: BorderSide(color: AppColors.warmCreamBorder, width: 1.5),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: AppColors.royalGold.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, -4),
           ),
@@ -2104,7 +2102,7 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  side: const BorderSide(color: Color(0xFFE2E8F0)),
+                  side: const BorderSide(color: AppColors.warmCreamBorder),
                 ),
                 onPressed: () => Get.back(),
                 child: FittedBox(
@@ -2131,7 +2129,7 @@ class _AdminEditUserGroupsViewState extends State<AdminEditUserGroupsView> {
                 () => ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
-                    backgroundColor: const Color(0xFF2563EB),
+                    backgroundColor: AppColors.royalGold,
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
