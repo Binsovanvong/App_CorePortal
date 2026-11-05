@@ -79,14 +79,24 @@ class AuthInterceptor extends QueuedInterceptor {
 
       handler.next(options);
     } catch (error) {
-      await tokens.clear();
-      onSessionExpired();
+      final bool isAuthFailure = (error is DioException &&
+              (error.response?.statusCode == 401 ||
+                  error.response?.statusCode == 400)) ||
+          (error is StateError && error.message == 'No refresh token');
+
+      if (isAuthFailure) {
+        await tokens.clear();
+        onSessionExpired();
+      }
+
       handler.reject(
-        DioException(
-          requestOptions: options,
-          error: error,
-          type: DioExceptionType.unknown,
-        ),
+        error is DioException
+            ? error
+            : DioException(
+                requestOptions: options,
+                error: error,
+                type: DioExceptionType.unknown,
+              ),
       );
     }
   }
@@ -118,9 +128,17 @@ class AuthInterceptor extends QueuedInterceptor {
 
       final response = await api.fetch<dynamic>(request);
       handler.resolve(response);
-    } catch (_) {
-      await tokens.clear();
-      onSessionExpired();
+    } catch (refreshErr) {
+      final bool isAuthFailure = (refreshErr is DioException &&
+              (refreshErr.response?.statusCode == 401 ||
+                  refreshErr.response?.statusCode == 400)) ||
+          (refreshErr is StateError &&
+              refreshErr.message == 'No refresh token');
+
+      if (isAuthFailure) {
+        await tokens.clear();
+        onSessionExpired();
+      }
       handler.next(error);
     }
   }

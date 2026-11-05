@@ -233,7 +233,9 @@ class SettingViewController extends GetxController {
       final targetUserId = box.read('userProfileUserId')?.toString();
       final response =
           await _authService.fetchMyEmploymentInfos(userId: targetUserId);
-      debugPrint("👉 Employment Info Payload: $response");
+      if (kDebugMode) {
+        debugPrint("👉 Employment Info Payload: $response");
+      }
 
       List employmentList = [];
       if (response is List) {

@@ -100,7 +100,9 @@ class SplashView extends GetView<SplashController> {
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFFD4AF37).withOpacity(0.32),
+                                    color: const Color(
+                                      0xFFD4AF37,
+                                    ).withOpacity(0.32),
                                     blurRadius: 30,
                                     spreadRadius: 2.0,
                                     offset: const Offset(0, 5),
@@ -117,7 +119,9 @@ class SplashView extends GetView<SplashController> {
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   border: Border.all(
-                                    color: const Color(0xFFEAB308).withOpacity(0.45),
+                                    color: const Color(
+                                      0xFFEAB308,
+                                    ).withOpacity(0.45),
                                     width: 1.4,
                                   ),
                                 ),
@@ -154,19 +158,19 @@ class SplashView extends GetView<SplashController> {
                             ),
                             const SizedBox(height: 6),
 
-                            // System Subtitle (ប្រព័ន្ធច្រកចេញចូលតែមួយ)
-                            Text(
-                              'app_title'.tr.isNotEmpty
-                                  ? 'app_title'.tr
-                                  : 'ប្រព័ន្ធច្រកចេញចូលតែមួយ',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.kantumruyPro(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xFFE5C058),
-                                letterSpacing: 0.4,
-                              ),
-                            ),
+                            // // System Subtitle (ប្រព័ន្ធច្រកចេញចូលតែមួយ)
+                            // Text(
+                            //   'app_title'.tr.isNotEmpty
+                            //       ? 'app_title'.tr
+                            //       : 'ប្រព័ន្ធច្រកចេញចូលតែមួយ',
+                            //   textAlign: TextAlign.center,
+                            //   style: GoogleFonts.kantumruyPro(
+                            //     fontSize: 15,
+                            //     fontWeight: FontWeight.w500,
+                            //     color: const Color(0xFFE5C058),
+                            //     letterSpacing: 0.4,
+                            //   ),
+                            // ),
                             const SizedBox(height: 10),
 
                             // Fine Gold Accent Line
@@ -174,7 +178,9 @@ class SplashView extends GetView<SplashController> {
                               width: 38,
                               height: 2,
                               decoration: BoxDecoration(
-                                color: const Color(0xFFD4AF37).withOpacity(0.65),
+                                color: const Color(
+                                  0xFFD4AF37,
+                                ).withOpacity(0.65),
                                 borderRadius: BorderRadius.circular(2),
                               ),
                             ),
@@ -199,20 +205,20 @@ class SplashView extends GetView<SplashController> {
                             alignment: Alignment.centerLeft,
                             child: Obx(
                               () => Container(
-                                width: 160 *
+                                width:
+                                    160 *
                                     controller.progress.value.clamp(0.0, 1.0),
                                 height: 4.0,
                                 decoration: BoxDecoration(
                                   gradient: const LinearGradient(
-                                    colors: [
-                                      Color(0xFFE5C058),
-                                      Colors.white,
-                                    ],
+                                    colors: [Color(0xFFE5C058), Colors.white],
                                   ),
                                   borderRadius: BorderRadius.circular(10),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: const Color(0xFFD4AF37).withOpacity(0.5),
+                                      color: const Color(
+                                        0xFFD4AF37,
+                                      ).withOpacity(0.5),
                                       blurRadius: 6,
                                       spreadRadius: 0.5,
                                     ),
@@ -263,7 +269,9 @@ class SplashView extends GetView<SplashController> {
                                 fontWeight: FontWeight.bold,
                                 shadows: [
                                   Shadow(
-                                    color: const Color(0xFFD4AF37).withOpacity(0.6),
+                                    color: const Color(
+                                      0xFFD4AF37,
+                                    ).withOpacity(0.6),
                                     blurRadius: 4,
                                   ),
                                 ],
@@ -289,7 +297,9 @@ class SplashView extends GetView<SplashController> {
                                 fontWeight: FontWeight.bold,
                                 shadows: [
                                   Shadow(
-                                    color: const Color(0xFFD4AF37).withOpacity(0.6),
+                                    color: const Color(
+                                      0xFFD4AF37,
+                                    ).withOpacity(0.6),
                                     blurRadius: 4,
                                   ),
                                 ],
@@ -388,7 +398,14 @@ class _KhmerLotusIconPainter extends CustomPainter {
     // Left Petal
     final leftPath = Path();
     leftPath.moveTo(w * 0.45, h * 0.90);
-    leftPath.cubicTo(w * 0.15, h * 0.60, w * 0.10, h * 0.25, w * 0.20, h * 0.30);
+    leftPath.cubicTo(
+      w * 0.15,
+      h * 0.60,
+      w * 0.10,
+      h * 0.25,
+      w * 0.20,
+      h * 0.30,
+    );
     leftPath.quadraticBezierTo(w * 0.32, h * 0.50, w * 0.45, h * 0.90);
     leftPath.close();
     canvas.drawPath(leftPath, paint);
@@ -396,7 +413,14 @@ class _KhmerLotusIconPainter extends CustomPainter {
     // Right Petal
     final rightPath = Path();
     rightPath.moveTo(w * 0.55, h * 0.90);
-    rightPath.cubicTo(w * 0.85, h * 0.60, w * 0.90, h * 0.25, w * 0.80, h * 0.30);
+    rightPath.cubicTo(
+      w * 0.85,
+      h * 0.60,
+      w * 0.90,
+      h * 0.25,
+      w * 0.80,
+      h * 0.30,
+    );
     rightPath.quadraticBezierTo(w * 0.68, h * 0.50, w * 0.55, h * 0.90);
     rightPath.close();
     canvas.drawPath(rightPath, paint);

@@ -25,13 +25,27 @@ class _WebViewScreenState extends State<WebViewScreen> {
         ? args
         : {};
 
-    final String url = argumentMap['url'] ?? 'https://google.com';
-    _title = argumentMap['title'] ?? 'Portal App';
+    final String rawUrl = argumentMap['url']?.toString() ?? 'https://google.com';
+    _title = argumentMap['title']?.toString() ?? 'Portal App';
+
+    // Validate URI scheme to block unsafe protocols (file://, javascript:, intent:, data:)
+    final Uri? parsedUri = Uri.tryParse(rawUrl);
+    final bool isSafeScheme = parsedUri != null &&
+        (parsedUri.scheme == 'http' || parsedUri.scheme == 'https');
+    final String url = isSafeScheme ? rawUrl : 'about:blank';
 
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(
         NavigationDelegate(
+          onNavigationRequest: (NavigationRequest request) {
+            final uri = Uri.tryParse(request.url);
+            if (uri == null || (uri.scheme != 'http' && uri.scheme != 'https')) {
+              debugPrint('WebView: Blocked navigation to unsafe scheme: ${request.url}');
+              return NavigationDecision.prevent;
+            }
+            return NavigationDecision.navigate;
+          },
           onProgress: (int progress) {
             setState(() {
               _progress = progress / 100.0;

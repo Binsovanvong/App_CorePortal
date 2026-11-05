@@ -6,6 +6,7 @@ import 'package:core_portal/widgets/custom_snackbar.dart';
 import 'package:core_portal/widgets/logout_dialog.dart';
 import 'package:core_portal/widgets/password_requirements_card.dart';
 import 'package:core_portal/widgets/portal_top_app_bar.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';

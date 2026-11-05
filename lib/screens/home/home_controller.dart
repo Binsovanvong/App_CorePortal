@@ -4,6 +4,7 @@ import 'package:core_portal/core/api/services/auth_service.dart';
 import 'package:core_portal/controllers/nav_controller.dart';
 import 'package:core_portal/routes/page_route.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -498,7 +499,9 @@ class HomeController extends GetxController {
       }
 
       final response = await _authService.fetchProfile();
-      debugPrint("👉 API User Profile Response: $response");
+      if (kDebugMode) {
+        debugPrint("👉 API User Profile Response: $response");
+      }
 
       if (response != null) {
         Map<String, dynamic> userData = {};

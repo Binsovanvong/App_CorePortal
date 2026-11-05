@@ -6,6 +6,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:core_portal/core/api/api_client.dart';
 import 'package:core_portal/core/api/services/auth_service.dart';
 import 'package:core_portal/core/api/services/biometric_service.dart';
+import 'package:core_portal/core/services/security_service.dart';
 import 'package:core_portal/routes/page_route.dart';
 import 'package:core_portal/widgets/custom_snackbar.dart';
 import 'package:dio/dio.dart' show DioException;
@@ -107,6 +108,15 @@ class AppLockService extends GetxService with WidgetsBindingObserver {
     isAuthenticating.value = true;
 
     try {
+      // 0. Verify device integrity against root/jailbreak exploits
+      final integrity = await SecurityService.checkDeviceIntegrity();
+      if (!integrity.isSafe) {
+        await unlockWithFullLogout(
+          sessionExpiredMessage: 'device_compromised_msg'.tr,
+        );
+        return;
+      }
+
       // 1. Verify biometric hardware availability
       final bool canAuth = await BiometricService.canAuthenticate();
       if (!canAuth) {
