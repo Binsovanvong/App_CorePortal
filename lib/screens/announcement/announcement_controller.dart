@@ -94,10 +94,7 @@ class AnnouncementController extends GetxController {
   ];
 
   List<Map<String, dynamic>> get effectiveAnnouncements {
-    if (announcements.isNotEmpty) {
-      return announcements;
-    }
-    return conceptFallbackAnnouncements;
+    return announcements;
   }
 
   bool isAnnouncementUnread(Map<String, dynamic> item) {

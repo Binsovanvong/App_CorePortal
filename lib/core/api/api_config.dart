@@ -9,7 +9,7 @@ class ApiConfig {
   static const String productionBaseUrl = 'https://core-app.interior.gov.kh';
 
   // Set to true to use the active UAT backend (UAT gateway currently verified & working)
-  static const bool useUat = true;
+  static const bool useUat = false;
 
   // Set to true to use a custom server IP or domain (e.g., http://127.0.0.1:8000)
   static const bool useCustomServer = false;
@@ -45,7 +45,7 @@ class ApiConfig {
       return '127.0.0.1'; // Default (iOS Simulator / Desktop)
     }
     final uri = Uri.tryParse(baseUrl);
-    return uri?.host ?? 'uat-app-core.interior.gov.kh';
+    return uri?.host ?? 'core-app.interior.gov.kh';
   }
 
   static String get baseUrl {

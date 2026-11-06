@@ -418,7 +418,7 @@ void main() {
       );
     });
 
-    test('selectedFilterTab falls back to default general apps when sourceApps has no general apps', () {
+    test('selectedFilterTab does not inject fake general apps when sourceApps has no general apps', () {
       final appCtrl = ApplicationViewController();
       appCtrl.apiApps.assignAll([
         {
@@ -437,21 +437,9 @@ void main() {
       appCtrl.searchController.clear();
       appCtrl.clearFilters();
 
-      // General apps tab -> Shows default general apps (matching HomeView)
+      // General apps tab -> Empty when user has no general apps
       appCtrl.setFilterTab('general');
-      expect(appCtrl.filteredServices.isNotEmpty, isTrue);
-      expect(
-        appCtrl.filteredServices.any((a) => a['id'] == 'complaint_system'),
-        isTrue,
-      );
-      expect(
-        appCtrl.filteredServices.any((a) => a['id'] == 'single_window_system'),
-        isTrue,
-      );
-      expect(
-        appCtrl.filteredServices.every((a) => a['isGeneral'] == true),
-        isTrue,
-      );
+      expect(appCtrl.filteredServices.isEmpty, isTrue);
 
       // Department tab -> Strictly department apps (no general apps)
       appCtrl.setFilterTab('department');
@@ -461,9 +449,9 @@ void main() {
         isTrue,
       );
 
-      // All tab -> Department apps + General apps
+      // All tab -> Strictly the 2 real apps (no fake general apps injected)
       appCtrl.setFilterTab('all');
-      expect(appCtrl.filteredServices.length, equals(4));
+      expect(appCtrl.filteredServices.length, equals(2));
     });
   });
 
@@ -782,11 +770,10 @@ void main() {
       expect(list[4]['displayDateKh'], equals('១៨ តុលា ២០២៦ · ម៉ោង ១៤:២០'));
     });
 
-    test('AnnouncementController computes unread count = 2 initially matching concept pill មិនទាន់អាន (2)', () {
+    test('AnnouncementController computes unread count accurately when announcements are loaded', () {
       final controller = Get.put(AnnouncementController());
-      controller.announcements.clear();
+      controller.announcements.assignAll(AnnouncementController.conceptFallbackAnnouncements);
       controller.readAnnouncementIds.clear();
-
       expect(controller.unreadCount, equals(2));
 
       // Test filtering

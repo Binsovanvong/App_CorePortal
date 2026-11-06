@@ -1,1 +1,1 @@
-{"device_unique_uuid":"fc1678c5-f011-49f9-ac1d-67e8f335adb6","biometric_registered_test_user_conditions":true,"is_face_enrolled":true}
+{"device_unique_uuid":"e4a1445b-b788-4ccd-8cde-eecf10c835b5","biometric_registered_test_user_conditions":true,"is_face_enrolled":true}

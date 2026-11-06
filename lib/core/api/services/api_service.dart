@@ -3,7 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 
 class ApiService {
-final Dio dio = ApiClient.dio;
+  final Dio dio = ApiClient.dio;
 
   Future<dynamic> post({
     required String endpoint,
@@ -79,4 +79,3 @@ final Dio dio = ApiClient.dio;
     }
   }
 }
-

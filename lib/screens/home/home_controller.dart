@@ -46,7 +46,9 @@ class HomeController extends GetxController {
 
     final token = await ApiClient.getAccessToken();
     if (token == null || token.isEmpty) {
-      debugPrint("HomeController: No token exists. Showing login instead of calling endpoints.");
+      debugPrint(
+        "HomeController: No token exists. Showing login instead of calling endpoints.",
+      );
       if (Get.currentRoute != AppRoutes.login) {
         Get.offAllNamed(AppRoutes.login);
       }
@@ -71,6 +73,7 @@ class HomeController extends GetxController {
     }
   }
 
+  //
   void addRecentActivity(Map<String, dynamic> app) {
     try {
       String route = (app['url'] ?? app['route'] ?? app['path'] ?? '')
@@ -115,6 +118,47 @@ class HomeController extends GetxController {
     _storage.remove(_recentKey);
   }
 
+  /// Robustly extracts List items from any API wrapper structure
+  static List _extractListFromResponse(dynamic res) {
+    if (res == null) return [];
+    if (res is List) return res;
+    if (res is Map) {
+      for (final key in [
+        'data',
+        'items',
+        'value',
+        'content',
+        'tiles',
+        'apps',
+        'portalApps',
+        'portal_apps',
+        'portalApplications',
+        'rows',
+        'result',
+        'results',
+      ]) {
+        final val = res[key];
+        if (val is List) return val;
+        if (val is Map) {
+          for (final nestedKey in [
+            'items',
+            'apps',
+            'tiles',
+            'portalApps',
+            'portal_apps',
+            'rows',
+            'data',
+            'value',
+          ]) {
+            final nestedVal = val[nestedKey];
+            if (nestedVal is List) return nestedVal;
+          }
+        }
+      }
+    }
+    return [];
+  }
+
   Future<void> fetchPortalApps() async {
     // 1. Wait until login or session restoration finishes before fetching apps
     await AuthService.waitForAuth();
@@ -122,7 +166,9 @@ class HomeController extends GetxController {
     // 2. If no token exists, show login instead of calling these endpoints
     final accessToken = await ApiClient.getAccessToken();
     if (accessToken == null || accessToken.isEmpty) {
-      debugPrint("HomeController: No token exists. Showing login instead of calling apps endpoints.");
+      debugPrint(
+        "HomeController: No token exists. Showing login instead of calling apps endpoints.",
+      );
       if (Get.currentRoute != AppRoutes.login) {
         Get.offAllNamed(AppRoutes.login);
       }
@@ -147,7 +193,9 @@ class HomeController extends GetxController {
         if (app is Map) {
           final id = (app['id'] ?? app['_id'] ?? '').toString().trim();
           final code = (app['code'] ?? '').toString().trim();
-          final name = (app['name'] ?? app['nameKh'] ?? app['title_kh'] ?? '').toString().trim();
+          final name = (app['name'] ?? app['nameKh'] ?? app['title_kh'] ?? '')
+              .toString()
+              .trim();
           final key = id.isNotEmpty
               ? 'id:$id'
               : (code.isNotEmpty ? 'code:$code' : 'name:$name');
@@ -162,29 +210,16 @@ class HomeController extends GetxController {
         }
       }
 
-      // Fetch user portal tiles (/portals/tiles) - strictly portal tiles for Home
+      // 1. Fetch user portal tiles (/portals/tiles)
       try {
         final tilesRes = await _authService.fetchApps();
-        if (tilesRes != null) {
-          List list = [];
-          if (tilesRes is List) {
-            list = tilesRes;
-          } else if (tilesRes is Map) {
-            final data = tilesRes['data'] ??
-                tilesRes['value'] ??
-                tilesRes['items'] ??
-                tilesRes['content'] ??
-                tilesRes['tiles'] ??
-                tilesRes['apps'] ??
-                [];
-            if (data is List) list = data;
-          }
-          for (var item in list) {
-            addAppIfNew(item, isGeneral: false);
-          }
+        debugPrint("👉 /portals/tiles raw response: $tilesRes");
+        final list = _extractListFromResponse(tilesRes);
+        for (var item in list) {
+          addAppIfNew(item, isGeneral: false);
         }
       } on DioException catch (e) {
-        debugPrint("fetchApps (tiles) error: $e");
+        debugPrint("fetchApps (tiles) notice: $e");
         if (e.response?.statusCode == 401) {
           is401 = true;
         }
@@ -192,31 +227,37 @@ class HomeController extends GetxController {
         debugPrint("fetchApps (tiles) error: $e");
       }
 
-      // If /portals/tiles returned empty or failed (non-401), fallback to /portals/apps
+      // 2. Fallback to /portals/apps
       if (rawApps.isEmpty && !is401) {
         try {
           final portalAppsRes = await _authService.fetchPortalApps();
-          if (portalAppsRes != null) {
-            List list = [];
-            if (portalAppsRes is List) {
-              list = portalAppsRes;
-            } else if (portalAppsRes is Map) {
-              final data = portalAppsRes['data'] ??
-                  portalAppsRes['value'] ??
-                  portalAppsRes['items'] ??
-                  portalAppsRes['content'] ??
-                  portalAppsRes['apps'] ??
-                  [];
-              if (data is List) list = data;
-            }
-            for (var item in list) {
-              addAppIfNew(item, isGeneral: false);
-            }
+          debugPrint("👉 /portals/apps raw response: $portalAppsRes");
+          final list = _extractListFromResponse(portalAppsRes);
+          for (var item in list) {
+            addAppIfNew(item, isGeneral: false);
           }
         } catch (e) {
           debugPrint("Fallback fetchPortalApps in home controller error: $e");
         }
       }
+
+      // 3. Fallback to /admin/portal-apps if admin and tiles/apps were empty
+      final box = GetStorage();
+      final bool isAdmin = box.read('isAdmin') == true;
+      if (rawApps.isEmpty && !is401 && isAdmin) {
+        try {
+          final adminAppsRes = await _authService.fetchAdminApps();
+          debugPrint("👉 /admin/portal-apps raw response: $adminAppsRes");
+          final list = _extractListFromResponse(adminAppsRes);
+          for (var item in list) {
+            addAppIfNew(item, isGeneral: false);
+          }
+        } catch (e) {
+          debugPrint("Fallback fetchAdminApps in home controller error: $e");
+        }
+      }
+
+      debugPrint("👉 HomeController total rawApps loaded: ${rawApps.length}");
 
       // If 401 occurred, redirect to login
       if (is401) {
@@ -237,7 +278,11 @@ class HomeController extends GetxController {
           final String titleEn = ApplicationView.resolveAppTitle(app, false);
           final String rawIcon = AppIconWidget.extractRawIcon(app);
           String route =
-              (app['launchUrl'] ?? app['appUrl'] ?? app['url'] ?? app['route'] ?? '')
+              (app['launchUrl'] ??
+                      app['appUrl'] ??
+                      app['url'] ??
+                      app['route'] ??
+                      '')
                   .toString()
                   .trim();
 
@@ -259,7 +304,8 @@ class HomeController extends GetxController {
               rawIcon.toLowerCase() != 'null' &&
               rawIcon.toLowerCase() != 'undefined') {
             final cleanLower = rawIcon.toLowerCase();
-            final bool isLocal = cleanLower.startsWith('assets/') ||
+            final bool isLocal =
+                cleanLower.startsWith('assets/') ||
                 cleanLower.startsWith('asset/') ||
                 cleanLower.startsWith('/assets/') ||
                 cleanLower.startsWith('/asset/') ||
@@ -267,7 +313,9 @@ class HomeController extends GetxController {
                 cleanLower.startsWith('/images/');
 
             if (isLocal) {
-              iconPath = rawIcon.startsWith('/') ? rawIcon.substring(1) : rawIcon;
+              iconPath = rawIcon.startsWith('/')
+                  ? rawIcon.substring(1)
+                  : rawIcon;
               if (!iconPath.startsWith('assets/')) {
                 iconPath = 'assets/$iconPath';
               }
@@ -277,7 +325,10 @@ class HomeController extends GetxController {
           }
 
           final dynamic rawActive =
-              app['isActive'] ?? app['is_active'] ?? app['active'] ?? app['enabled'];
+              app['isActive'] ??
+              app['is_active'] ??
+              app['active'] ??
+              app['enabled'];
           final dynamic rawStatus = app['status'];
           bool isActive = true;
           if (rawStatus != null) {
@@ -318,15 +369,37 @@ class HomeController extends GetxController {
             'route': route,
             'isActive': isActive,
             'isGeneral': isGen,
-            'status': rawStatus?.toString() ?? (isActive ? 'ACTIVE' : 'INACTIVE'),
+            'status':
+                rawStatus?.toString() ?? (isActive ? 'ACTIVE' : 'INACTIVE'),
             'code': (app['code'] ?? '').toString(),
-            'category': (app['category'] ?? app['subCategory'] ?? '').toString(),
+            'category': (app['category'] ?? app['subCategory'] ?? '')
+                .toString(),
             'subCategory': (app['subCategory'] ?? '').toString(),
-            'department': (app['department'] ?? app['unit'] ?? app['departmentName'] ?? app['generalDepartmentCode'] ?? app['ownerOrgCode'] ?? '').toString(),
-            'departmentName': (app['departmentName'] ?? app['department'] ?? app['unit'] ?? app['generalDepartmentName'] ?? app['ownerOrgCode'] ?? '').toString(),
+            'department':
+                (app['department'] ??
+                        app['unit'] ??
+                        app['departmentName'] ??
+                        app['generalDepartmentCode'] ??
+                        app['ownerOrgCode'] ??
+                        '')
+                    .toString(),
+            'departmentName':
+                (app['departmentName'] ??
+                        app['department'] ??
+                        app['unit'] ??
+                        app['generalDepartmentName'] ??
+                        app['ownerOrgCode'] ??
+                        '')
+                    .toString(),
             'unit': (app['unit'] ?? '').toString(),
-            'description': (app['description'] ?? app['desc'] ?? app['descriptionKh'] ?? '').toString(),
-            'accessRules': app['accessRules'] ?? app['access_rules'] ?? app['rules'] ?? [],
+            'description':
+                (app['description'] ??
+                        app['desc'] ??
+                        app['descriptionKh'] ??
+                        '')
+                    .toString(),
+            'accessRules':
+                app['accessRules'] ?? app['access_rules'] ?? app['rules'] ?? [],
           });
         }
 
@@ -356,11 +429,24 @@ class HomeController extends GetxController {
     final subCat = (app['subCategory'] ?? '').toString().toLowerCase().trim();
     final dept = (app['department'] ?? '').toString().toLowerCase().trim();
     final unit = (app['unit'] ?? '').toString().toLowerCase().trim();
-    final deptName = (app['departmentName'] ?? '').toString().toLowerCase().trim();
+    final deptName = (app['departmentName'] ?? '')
+        .toString()
+        .toLowerCase()
+        .trim();
     final code = (app['code'] ?? '').toString().toUpperCase().trim();
-    final titleEn = (app['titleEn'] ?? app['nameEn'] ?? app['name'] ?? '').toString().toLowerCase().trim();
-    final titleKh = (app['titleKh'] ?? app['nameKh'] ?? '').toString().toLowerCase().trim();
-    final route = (app['route'] ?? app['url'] ?? app['launchUrl'] ?? app['appUrl'] ?? '').toString().toLowerCase().trim();
+    final titleEn = (app['titleEn'] ?? app['nameEn'] ?? app['name'] ?? '')
+        .toString()
+        .toLowerCase()
+        .trim();
+    final titleKh = (app['titleKh'] ?? app['nameKh'] ?? '')
+        .toString()
+        .toLowerCase()
+        .trim();
+    final route =
+        (app['route'] ?? app['url'] ?? app['launchUrl'] ?? app['appUrl'] ?? '')
+            .toString()
+            .toLowerCase()
+            .trim();
 
     // Helper: returns true if the string designates an official General Department (not generic utility)
     bool isGeneralDeptString(String s) {
@@ -433,7 +519,6 @@ class HomeController extends GetxController {
       'iconBg': Color(0xFF1E60D5),
       'fallbackIcon': Icons.chat_bubble_outline_rounded,
       'route': 'https://complaint.moi.gov.kh',
-      'url': 'https://complaint.moi.gov.kh',
       'launchUrl': 'https://complaint.moi.gov.kh',
       'appUrl': 'https://complaint.moi.gov.kh',
       'isActive': true,
@@ -455,7 +540,6 @@ class HomeController extends GetxController {
       'iconBg': Color(0xFF107C41),
       'fallbackIcon': Icons.login_rounded,
       'route': 'https://owso.moi.gov.kh',
-      'url': 'https://owso.moi.gov.kh',
       'launchUrl': 'https://owso.moi.gov.kh',
       'appUrl': 'https://owso.moi.gov.kh',
       'isActive': true,
@@ -516,10 +600,13 @@ class HomeController extends GetxController {
         }
 
         final String liveName =
-            (userData['name'] ??
-                    userData['display_name'] ??
-                    userData['displayName'] ??
+            (userData['nameKh'] ??
                     userData['name_kh'] ??
+                    userData['fullName'] ??
+                    userData['full_name'] ??
+                    userData['displayName'] ??
+                    userData['display_name'] ??
+                    userData['name'] ??
                     userData['username'] ??
                     '')
                 .toString()
@@ -530,36 +617,50 @@ class HomeController extends GetxController {
           await _storage.write('user_display_name', liveName);
         }
 
-        if (userData['roles'] is List && (userData['roles'] as List).isNotEmpty) {
+        if (userData['roles'] is List &&
+            (userData['roles'] as List).isNotEmpty) {
           await _storage.write('roles', userData['roles']);
         }
-        if (userData['groups'] is List && (userData['groups'] as List).isNotEmpty) {
+        if (userData['groups'] is List &&
+            (userData['groups'] as List).isNotEmpty) {
           await _storage.write('groups', userData['groups']);
         }
-        if (userData['userGroups'] is List && (userData['userGroups'] as List).isNotEmpty) {
+        if (userData['userGroups'] is List &&
+            (userData['userGroups'] as List).isNotEmpty) {
           await _storage.write('userGroups', userData['userGroups']);
         }
-        if (userData['permissions'] is List && (userData['permissions'] as List).isNotEmpty) {
+        if (userData['permissions'] is List &&
+            (userData['permissions'] as List).isNotEmpty) {
           await _storage.write('permissions', userData['permissions']);
         }
 
-        final gCode = userData['generalDepartmentCode'] ??
+        final gCode =
+            userData['generalDepartmentCode'] ??
             userData['departmentCode'] ??
             userData['orgCode'];
         if (gCode != null && gCode.toString().isNotEmpty) {
-          await _storage.write('generalDepartmentCode', gCode.toString().trim());
+          await _storage.write(
+            'generalDepartmentCode',
+            gCode.toString().trim(),
+          );
         }
 
-        final gNameKh = userData['generalDepartmentNameKh'] ??
-            userData['departmentNameKh'];
+        final gNameKh =
+            userData['generalDepartmentNameKh'] ?? userData['departmentNameKh'];
         if (gNameKh != null && gNameKh.toString().isNotEmpty) {
-          await _storage.write('generalDepartmentNameKh', gNameKh.toString().trim());
+          await _storage.write(
+            'generalDepartmentNameKh',
+            gNameKh.toString().trim(),
+          );
         }
 
-        final gName = userData['generalDepartmentName'] ??
-            userData['departmentName'];
+        final gName =
+            userData['generalDepartmentName'] ?? userData['departmentName'];
         if (gName != null && gName.toString().isNotEmpty) {
-          await _storage.write('generalDepartmentName', gName.toString().trim());
+          await _storage.write(
+            'generalDepartmentName',
+            gName.toString().trim(),
+          );
         }
 
         final orgCode = userData['orgCode'];
@@ -567,9 +668,15 @@ class HomeController extends GetxController {
           await _storage.write('orgCode', orgCode.toString().trim());
         }
 
-        final profileUserId = userData['userProfileUserId'] ?? userData['id'] ?? userData['subject'];
+        final profileUserId =
+            userData['userProfileUserId'] ??
+            userData['id'] ??
+            userData['subject'];
         if (profileUserId != null && profileUserId.toString().isNotEmpty) {
-          await _storage.write('userProfileUserId', profileUserId.toString().trim());
+          await _storage.write(
+            'userProfileUserId',
+            profileUserId.toString().trim(),
+          );
         }
 
         if (Get.isRegistered<NavController>()) {
@@ -580,7 +687,8 @@ class HomeController extends GetxController {
       }
     } catch (e) {
       debugPrint("Failed to fetch live user profile: $e");
-      if (userDisplayName.value == 'guest'.tr || userDisplayName.value == 'ភ្ញៀវ') {
+      if (userDisplayName.value == 'guest'.tr ||
+          userDisplayName.value == 'ភ្ញៀវ') {
         userDisplayName.value = 'officer'.tr;
       }
     }

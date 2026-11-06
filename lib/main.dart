@@ -44,7 +44,8 @@ class DevHttpOverrides extends HttpOverrides {
     if (kDebugMode) {
       client.badCertificateCallback =
           (X509Certificate cert, String host, int port) {
-            return host == 'uat-app-core.interior.gov.kh' ||
+            return host == 'core-app.interior.gov.kh' ||
+                host == 'uat-app-core.interior.gov.kh' ||
                 host == '172.30.192.127' ||
                 host == '10.0.2.2' ||
                 host == '127.0.0.1' ||

@@ -26,6 +26,44 @@ class AppIconWidget extends StatelessWidget {
     this.fallbackColor,
   });
 
+  /// Returns true if the candidate string looks like a valid image or icon asset.
+  static bool isImageCandidate(String s) {
+    final clean = s.trim();
+    if (clean.isEmpty ||
+        clean.toLowerCase() == 'null' ||
+        clean.toLowerCase() == 'undefined' ||
+        clean == 'assets/img/about-moi-logo.png' ||
+        clean == '/assets/img/about-moi-logo.png') {
+      return false;
+    }
+    final lower = clean.toLowerCase();
+    if (lower.startsWith('assets/') ||
+        lower.startsWith('/assets/') ||
+        lower.startsWith('images/') ||
+        lower.startsWith('/images/') ||
+        lower.startsWith('data:image/')) {
+      return true;
+    }
+
+    // If it's a full web URL, ensure it actually has an image file extension or known upload folder
+    if (lower.startsWith('http://') || lower.startsWith('https://')) {
+      final pathOnly = lower.split('?').first;
+      return pathOnly.endsWith('.png') ||
+          pathOnly.endsWith('.jpg') ||
+          pathOnly.endsWith('.jpeg') ||
+          pathOnly.endsWith('.svg') ||
+          pathOnly.endsWith('.webp') ||
+          pathOnly.endsWith('.gif') ||
+          pathOnly.endsWith('.ico') ||
+          pathOnly.endsWith('.bmp') ||
+          pathOnly.contains('portal-app-icons') ||
+          pathOnly.contains('/uploads/') ||
+          pathOnly.contains('uploads/');
+    }
+
+    return true;
+  }
+
   /// Safely extracts the raw icon candidate from an app Map or dynamic object.
   static String extractRawIcon(dynamic data) {
     if (data == null) return '';
@@ -109,7 +147,14 @@ class AppIconWidget extends StatelessWidget {
             s.toLowerCase() != 'undefined' &&
             s != 'assets/img/about-moi-logo.png' &&
             s != '/assets/img/about-moi-logo.png') {
-          return s;
+          if (key == 'url' || key == 'link' || key == 'src' || key == 'path' ||
+              s.startsWith('http://') || s.startsWith('https://')) {
+            if (isImageCandidate(s)) {
+              return s;
+            }
+          } else {
+            return s;
+          }
         }
       } else if (val is Map) {
         final innerRes = extractRawIcon(val);
@@ -152,15 +197,22 @@ class AppIconWidget extends StatelessWidget {
   static String extractRelativePath(dynamic raw) {
     if (raw == null) return '';
     if (raw is Map) {
-      final inner = raw['url'] ??
-          raw['path'] ??
+      final inner = raw['iconUrl'] ??
+          raw['icon_url'] ??
+          raw['icon'] ??
+          raw['portalAppIcon'] ??
+          raw['portal_app_icon'] ??
+          raw['imageUrl'] ??
+          raw['image_url'] ??
+          raw['logoUrl'] ??
+          raw['logo_url'] ??
           raw['filePath'] ??
           raw['filepath'] ??
-          raw['iconUrl'] ??
-          raw['icon_url'] ??
           raw['fileUrl'] ??
           raw['downloadUrl'] ??
           raw['file'] ??
+          raw['path'] ??
+          raw['url'] ??
           raw['name'];
       raw = inner?.toString().trim() ?? '';
     }
@@ -251,15 +303,22 @@ class AppIconWidget extends StatelessWidget {
   static String formatIconUrl(dynamic raw, [String? explicitToken]) {
     if (raw == null) return '';
     if (raw is Map) {
-      final inner = raw['url'] ??
-          raw['path'] ??
+      final inner = raw['iconUrl'] ??
+          raw['icon_url'] ??
+          raw['icon'] ??
+          raw['portalAppIcon'] ??
+          raw['portal_app_icon'] ??
+          raw['imageUrl'] ??
+          raw['image_url'] ??
+          raw['logoUrl'] ??
+          raw['logo_url'] ??
           raw['filePath'] ??
           raw['filepath'] ??
-          raw['iconUrl'] ??
-          raw['icon_url'] ??
           raw['fileUrl'] ??
           raw['downloadUrl'] ??
           raw['file'] ??
+          raw['path'] ??
+          raw['url'] ??
           raw['name'];
       raw = inner?.toString().trim() ?? '';
     }
@@ -297,7 +356,10 @@ class AppIconWidget extends StatelessWidget {
     final relativePath = extractRelativePath(url);
     if (relativePath.isEmpty) {
       if (url.startsWith('http://') || url.startsWith('https://')) {
-        return url;
+        if (isImageCandidate(url)) {
+          return url;
+        }
+        return '';
       }
       return url;
     }

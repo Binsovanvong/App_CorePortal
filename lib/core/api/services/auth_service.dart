@@ -1242,12 +1242,13 @@ class AuthService {
 
   Future<dynamic> fetchMyEmploymentInfos({String? userId}) async {
     try {
-      final r = await ApiClient.dio.get('/accounts/profile/employment-infos');
-      return r.data;
-    } on DioException catch (e) {
-      debugPrint(
-        "ACCOUNTS EMPLOYMENT INFO API STATUS: ${e.response?.statusCode}",
+      final r = await ApiClient.dio.get(
+        '/accounts/profile/employment-infos',
+        options: Options(validateStatus: (s) => s != null && s < 500),
       );
+      if (r.statusCode == 200) {
+        return r.data;
+      }
 
       // If 403 (forbidden) or 404, fallback to gateway user-profile endpoint
       String? targetUserId = userId;
@@ -1264,16 +1265,17 @@ class AuthService {
       if (targetUserId != null && targetUserId.isNotEmpty) {
         try {
           final r = await ApiClient.dio.get(
-            '/gateway/user-profile/users/$targetUserId/employment-infos',
+            // '/gateway/user-profile/users/$targetUserId/employment-infos',
+            'api/mobile/portals/me',
+            options: Options(validateStatus: (s) => s != null && s < 500),
           );
-          return r.data;
-        } catch (gatewayErr) {
-          debugPrint("GATEWAY EMPLOYMENT INFO API ERROR: $gatewayErr");
-        }
+          if (r.statusCode == 200) {
+            return r.data;
+          }
+        } catch (_) {}
       }
       return null;
-    } catch (e) {
-      debugPrint("EMPLOYMENT INFO API ERROR: $e");
+    } catch (_) {
       return null;
     }
   }

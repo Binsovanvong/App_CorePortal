@@ -1,4 +1,5 @@
 import 'package:core_portal/screens/application/application_view.dart';
+import 'package:core_portal/widgets/empty_apps_widget.dart';
 import 'package:core_portal/screens/home/home_controller.dart';
 import 'package:core_portal/controllers/nav_controller.dart';
 import 'package:core_portal/core/localization/app_translations.dart';
@@ -74,7 +75,6 @@ class HomeView extends GetView<HomeController> {
                     _buildUserGreeting(),
                     const SizedBox(height: 16),
                     _buildGeneralApplicationsSection(context),
-                    const SizedBox(height: 20),
                     _buildDepartmentApplicationsSection(context),
                     const SizedBox(height: 20),
                     _buildLatestAnnouncementsSection(context),
@@ -124,11 +124,17 @@ class HomeView extends GetView<HomeController> {
               final hasName = rawName.isNotEmpty && rawName != 'guest'.tr && rawName != 'officer'.tr;
 
               final String greetingText;
+              final String fallbackUsername =
+                  GetStorage().read('username')?.toString() ?? '';
               if (isKh) {
-                final displayKhName = hasName ? rawName : 'ប៊ិន សុវណ្ណវង្ស';
+                final displayKhName = hasName
+                    ? rawName
+                    : (fallbackUsername.isNotEmpty ? fallbackUsername : 'មន្ត្រី');
                 greetingText = "អរុណសួស្ដី លោក $displayKhName";
               } else {
-                final displayEnName = hasName ? rawName : 'Bin Sovanvong';
+                final displayEnName = hasName
+                    ? rawName
+                    : (fallbackUsername.isNotEmpty ? fallbackUsername : 'Officer');
                 greetingText = "Good morning, Mr. $displayEnName";
               }
 
@@ -162,16 +168,16 @@ class HomeView extends GetView<HomeController> {
   // =========================================================================
   Widget _buildGeneralApplicationsSection(BuildContext context) {
     return Obx(() {
-      final bool isKh = LocalizationService.currentLanguageCode.value == 'km';
       final liveGeneralApps = controller.generalServices;
+      if (liveGeneralApps.isEmpty) {
+        return const SizedBox.shrink();
+      }
 
-      // Mock/Default fallback general apps if backend has none
-      final List<Map<String, dynamic>> generalItems = liveGeneralApps.isNotEmpty
-          ? liveGeneralApps
-          : HomeController.defaultGeneralApps;
+      final bool isKh = LocalizationService.currentLanguageCode.value == 'km';
+      final List<Map<String, dynamic>> generalItems = liveGeneralApps;
 
       return Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16),
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 20),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: AppColors.warmCream,
@@ -426,44 +432,6 @@ class HomeView extends GetView<HomeController> {
       final bool isKh = LocalizationService.currentLanguageCode.value == 'km';
       final liveApps = controller.departmentServices;
 
-      // Default 4 department apps from concept design if API has none
-      final List<Map<String, dynamic>> displayList = liveApps.isNotEmpty
-          ? liveApps
-          : [
-              {
-                'id': 'hr_system',
-                'titleKh': 'ប្រព័ន្ធគ្រប់គ្រងបុគ្គលិក',
-                'titleEn': 'HR Management System',
-                'iconBg': const Color(0xFF1E293B),
-                'fallbackIcon': Icons.people_alt_rounded,
-                'route': '',
-              },
-              {
-                'id': 'doc_system',
-                'titleKh': 'ប្រព័ន្ធគ្រប់គ្រងឯកសារ',
-                'titleEn': 'Document Management',
-                'iconBg': const Color(0xFF107C41),
-                'fallbackIcon': Icons.description_rounded,
-                'route': '',
-              },
-              {
-                'id': 'stat_system',
-                'titleKh': 'ប្រព័ន្ធស្ថិតិ',
-                'titleEn': 'Statistics System',
-                'iconBg': const Color(0xFF2563EB),
-                'fallbackIcon': Icons.bar_chart_rounded,
-                'route': '',
-              },
-              {
-                'id': 'finance_system',
-                'titleKh': 'ប្រព័ន្ធហិរញ្ញវត្ថុ',
-                'titleEn': 'Financial System',
-                'iconBg': const Color(0xFF9E2A2B),
-                'fallbackIcon': Icons.account_balance_wallet_rounded,
-                'route': '',
-              },
-            ];
-
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Column(
@@ -494,93 +462,102 @@ class HomeView extends GetView<HomeController> {
                           ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                GestureDetector(
-                  onTap: () => _navigateToAllApps(),
-                  behavior: HitTestBehavior.opaque,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'view_all'.tr,
-                        style: isKh
-                            ? GoogleFonts.kantumruyPro(
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.royalGold,
-                                height: 1.3,
-                              )
-                            : GoogleFonts.poppins(
-                                fontSize: 12.0,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.royalGold,
-                                height: 1.3,
-                              ),
-                      ),
-                      const SizedBox(width: 4),
-                      const Icon(
-                        Icons.arrow_forward_rounded,
-                        size: 13,
-                        color: AppColors.royalGold,
-                      ),
-                    ],
+                if (liveApps.isNotEmpty) ...[
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: () => _navigateToAllApps(),
+                    behavior: HitTestBehavior.opaque,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'view_all'.tr,
+                          style: isKh
+                              ? GoogleFonts.kantumruyPro(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.royalGold,
+                                  height: 1.3,
+                                )
+                              : GoogleFonts.poppins(
+                                  fontSize: 12.0,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.royalGold,
+                                  height: 1.3,
+                                ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 13,
+                          color: AppColors.royalGold,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
             const SizedBox(height: 12),
 
-            // 2-Column Grid
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final double cardWidth = (constraints.maxWidth - 12) / 2;
+            // If user has no department applications, show the standard empty apps widget
+            if (liveApps.isEmpty)
+              EmptyAppsWidget(
+                isCompact: true,
+                onAction: () => controller.fetchPortalApps(),
+              )
+            else
+              // 2-Column Grid
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final double cardWidth = (constraints.maxWidth - 12) / 2;
 
-                // Chunk into rows of 2
-                final List<List<Map<String, dynamic>>> rows = [];
-                for (var i = 0; i < displayList.length; i += 2) {
-                  rows.add(
-                    displayList.sublist(
-                      i,
-                      i + 2 > displayList.length ? displayList.length : i + 2,
-                    ),
-                  );
-                }
-
-                return Column(
-                  children: List.generate(rows.length, (rowIndex) {
-                    final rowItems = rows[rowIndex];
-
-                    return Padding(
-                      padding: EdgeInsets.only(
-                        bottom: rowIndex < rows.length - 1 ? 12.0 : 0.0,
+                  // Chunk into rows of 2
+                  final List<List<Map<String, dynamic>>> rows = [];
+                  for (var i = 0; i < liveApps.length; i += 2) {
+                    rows.add(
+                      liveApps.sublist(
+                        i,
+                        i + 2 > liveApps.length ? liveApps.length : i + 2,
                       ),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: cardWidth,
-                            child: _buildDepartmentCard(
-                              rowItems[0],
-                              ApplicationView.resolveAppTheme(rowItems[0]),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          if (rowItems.length > 1)
+                    );
+                  }
+
+                  return Column(
+                    children: List.generate(rows.length, (rowIndex) {
+                      final rowItems = rows[rowIndex];
+
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          bottom: rowIndex < rows.length - 1 ? 12.0 : 0.0,
+                        ),
+                        child: Row(
+                          children: [
                             SizedBox(
                               width: cardWidth,
                               child: _buildDepartmentCard(
-                                rowItems[1],
-                                ApplicationView.resolveAppTheme(rowItems[1]),
+                                rowItems[0],
+                                ApplicationView.resolveAppTheme(rowItems[0]),
                               ),
-                            )
-                          else
-                            SizedBox(width: cardWidth),
-                        ],
-                      ),
-                    );
-                  }),
-                );
-              },
-            ),
+                            ),
+                            const SizedBox(width: 12),
+                            if (rowItems.length > 1)
+                              SizedBox(
+                                width: cardWidth,
+                                child: _buildDepartmentCard(
+                                  rowItems[1],
+                                  ApplicationView.resolveAppTheme(rowItems[1]),
+                                ),
+                              )
+                            else
+                              SizedBox(width: cardWidth),
+                          ],
+                        ),
+                      );
+                    }),
+                  );
+                },
+              ),
           ],
         ),
       );

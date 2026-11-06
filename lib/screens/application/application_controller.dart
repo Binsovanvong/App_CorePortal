@@ -384,7 +384,7 @@ class ApplicationViewController extends GetxController {
         return homeCtrl.generalServices;
       }
     }
-    return HomeController.defaultGeneralApps;
+    return [];
   }
 
   List<Map<String, dynamic>> get sourceApps {
