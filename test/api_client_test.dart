@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:core_portal/core/api/api_client.dart';
+import 'package:core_portal/core/api/api_config.dart';
 import 'package:core_portal/core/api/token_store.dart';
 import 'package:core_portal/core/api/auth_interceptor.dart';
 import 'package:dio/dio.dart';
@@ -243,6 +244,12 @@ void main() {
 
       expect(accessToken, isNull);
       expect(refreshToken, isNull);
+    });
+
+    test('ApiConfig defaults to secure production URL and parses host correctly', () {
+      expect(ApiConfig.baseUrl, equals('https://core-app.interior.gov.kh'));
+      expect(ApiConfig.bffHost, equals('core-app.interior.gov.kh'));
+      expect(ApiConfig.baseUrl.startsWith('https://'), isTrue);
     });
   });
 }

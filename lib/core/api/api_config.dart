@@ -8,6 +8,10 @@ class ApiConfig {
   static const String uatBaseUrl = 'http://uat-app-core.interior.gov.kh';
   static const String productionBaseUrl = 'https://core-app.interior.gov.kh';
 
+  // Build-time environment variable overrides (e.g., flutter build apk --dart-define=API_BASE_URL=https://... --dart-define=ENV=production)
+  static const String _envBaseUrl = String.fromEnvironment('API_BASE_URL');
+  static const String _envMode = String.fromEnvironment('ENV', defaultValue: 'production');
+
   // Set to true to use the active UAT backend (UAT gateway currently verified & working)
   static const bool useUat = false;
 
@@ -49,6 +53,12 @@ class ApiConfig {
   }
 
   static String get baseUrl {
+    if (_envBaseUrl.isNotEmpty) {
+      return _envBaseUrl;
+    }
+    if (_envMode == 'uat') {
+      return uatBaseUrl;
+    }
     if (useCustomServer) {
       return customServerUrl;
     }

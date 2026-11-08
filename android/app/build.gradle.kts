@@ -1,8 +1,17 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+val keystorePropertiesFile = rootProject.file("key.properties")
+val keystoreProperties = Properties()
+if (keystorePropertiesFile.exists()) {
+    FileInputStream(keystorePropertiesFile).use { keystoreProperties.load(it) }
 }
 
 android {
@@ -20,20 +29,39 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "kh.gov.interior.core.prod"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            keyAlias = keystoreProperties.getProperty("keyAlias")
+            keyPassword = keystoreProperties.getProperty("keyPassword")
+            val rawStorePath = keystoreProperties.getProperty("storeFile")
+            if (rawStorePath != null) {
+                val candidateFile = file(rawStorePath)
+                storeFile = if (candidateFile.exists()) {
+                    candidateFile
+                } else {
+                    rootProject.file(rawStorePath)
+                }
+            }
+            storePassword = keystoreProperties.getProperty("storePassword")
+        }
+    }
+
     buildTypes {
         release {
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            val releaseSigning = signingConfigs.getByName("release")
+            signingConfig = if (keystorePropertiesFile.exists() && releaseSigning.storeFile?.exists() == true) {
+                releaseSigning
+            } else {
+                // Graceful fallback to debug signing if release key is not configured locally
+                signingConfigs.getByName("debug")
+            }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -42,6 +70,12 @@ android {
             )
         }
     }
+}
+
+// Ensure AGP bundle packaging completes before IDE model listing checks for the .aab artifact
+tasks.matching { it.name == "produceReleaseBundleIdeListingFile" }.configureEach {
+    mustRunAfter(tasks.matching { it.name == "packageReleaseBundle" || it.name == "signReleaseBundle" })
+    dependsOn(tasks.matching { it.name == "packageReleaseBundle" || it.name == "signReleaseBundle" })
 }
 
 flutter {

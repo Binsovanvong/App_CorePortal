@@ -15,7 +15,8 @@ Future<String> _determineInitialRoute(
   bool skipAuth = false,
   String devRole = 'portal_user',
 }) async {
-  if (skipAuth) {
+  // Authentication bypass is strictly restricted to debug mode builds
+  if (skipAuth && kDebugMode) {
     final bool isAdm =
         devRole == 'admin' ||
         devRole == 'general_department_admin' ||

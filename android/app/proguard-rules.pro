@@ -19,3 +19,6 @@
 # RootBeer (used by flutter_jailbreak_detection for root check)
 -keep class com.scottyab.rootbeer.** { *; }
 -dontwarn com.scottyab.rootbeer.**
+
+# Google Play Core (Flutter Deferred Components)
+-dontwarn com.google.android.play.core.**

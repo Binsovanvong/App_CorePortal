@@ -1,0 +1,18 @@
+# Android Release Keystore Configuration Template
+# ------------------------------------------------------------
+# Copy this file to 'android/key.properties' and fill in your secure credentials:
+#   cp android/key.properties.example android/key.properties
+#
+# To generate a new production upload keystore:
+#   keytool -genkey -v -keystore android/upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+#
+# IMPORTANT:
+# - Never commit 'key.properties' or '*.jks' / '*.keystore' to version control!
+# - Keep a secure backup of your keystore and passwords in your organization's secret manager.
+# ------------------------------------------------------------
+
+storePassword=your_store_password_here
+keyPassword=your_key_password_here
+keyAlias=upload
+storeFile=upload-keystore.jks
+
