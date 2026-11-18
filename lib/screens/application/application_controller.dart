@@ -17,6 +17,7 @@ class ApplicationViewController extends GetxController {
   final apiApps = <Map<String, dynamic>>[].obs;
   final isLoading = false.obs;
   final isExpanded = true.obs;
+  final hasFetchedFromApi = false.obs;
   static const int initialItemLimit = 2;
 
   void toggleExpanded() {
@@ -268,12 +269,12 @@ class ApplicationViewController extends GetxController {
     final rawRoles = box.read('roles');
     final List list = (rawRoles is List && rawRoles.isNotEmpty) ? rawRoles : [];
     final roles = list.map((e) => e.toString().toUpperCase().trim()).toList();
-    final isPortalAdmin = roles.any((r) =>
+    final hasPortalAdmin = roles.any((r) =>
         (r.contains('PORTAL') && (r.contains('ADMIN') || r.contains('ADMINISTRATOR'))) ||
-        r == 'ADMIN' ||
-        r == 'ADMINISTRATOR' ||
         r == 'SUPER_ADMIN' ||
         r == 'SUPERADMIN');
+    final hasGdAdmin = roles.any((r) => r.contains('GENERAL_DEPARTMENT'));
+    final isPortalAdmin = hasPortalAdmin || (!hasGdAdmin && roles.any((r) => r == 'ADMIN' || r == 'ADMINISTRATOR'));
     if (isPortalAdmin) return true;
     if (app['isGeneral'] == true) return true;
 
@@ -411,7 +412,9 @@ class ApplicationViewController extends GetxController {
       }
     }
 
-    if (apiApps.isNotEmpty) {
+    if (hasFetchedFromApi.value) {
+      addApps(apiApps);
+    } else if (apiApps.isNotEmpty) {
       addApps(apiApps);
     } else if (homeController.services.isNotEmpty) {
       addApps(homeController.services);
@@ -421,10 +424,6 @@ class ApplicationViewController extends GetxController {
       final cachedPortal = GetStorage().read('cached_portal_services');
       if (cachedPortal is List && cachedPortal.isNotEmpty) {
         addApps(cachedPortal);
-      }
-      final cached = GetStorage().read('cached_admin_apps_list');
-      if (cached is List && cached.isNotEmpty) {
-        addApps(cached);
       }
       final cachedTiles = GetStorage().read('cached_tiles');
       if (cachedTiles is List && cachedTiles.isNotEmpty) {
@@ -505,7 +504,7 @@ class ApplicationViewController extends GetxController {
     super.onInit();
 
     ever(homeController.services, (_) {
-      if (apiApps.isEmpty) {
+      if (apiApps.isEmpty && !hasFetchedFromApi.value) {
         _filterApps();
       }
     });
@@ -513,7 +512,7 @@ class ApplicationViewController extends GetxController {
     if (Get.isRegistered<AdminController>()) {
       final adminCtrl = Get.find<AdminController>();
       ever(adminCtrl.appsList, (_) {
-        if (apiApps.isEmpty) {
+        if (apiApps.isEmpty && !hasFetchedFromApi.value) {
           _filterApps();
         }
       });
@@ -592,85 +591,96 @@ class ApplicationViewController extends GetxController {
         }
       }
 
-      bool isAdmin = false;
-      if (Get.isRegistered<AdminController>()) {
-        isAdmin = Get.find<AdminController>().isPortalAdministrator();
-      } else {
-        final box = GetStorage();
-        final rawRoles = box.read('roles');
-        final List list = (rawRoles is List && rawRoles.isNotEmpty) ? rawRoles : [];
-        final roles = list.map((e) => e.toString().toUpperCase().trim()).toList();
-        isAdmin = roles.any((r) =>
-            (r.contains('PORTAL') && (r.contains('ADMIN') || r.contains('ADMINISTRATOR'))) ||
-            r == 'ADMIN' ||
-            r == 'ADMINISTRATOR' ||
-            r == 'SUPER_ADMIN' ||
-            r == 'SUPERADMIN');
-      }
+      final box = GetStorage();
+      final rawRoles = box.read('roles');
+      final List list = (rawRoles is List && rawRoles.isNotEmpty) ? rawRoles : [];
+      final roles = list.map((e) => e.toString().toUpperCase().trim()).toList();
 
-      // Fetch admin portal apps (/admin/portal-apps) only if admin, with fallback to /portals/apps
-      dynamic adminAppsRes;
-      if (isAdmin) {
+      final hasPortalAdmin = roles.any((r) =>
+          (r.contains('PORTAL') && (r.contains('ADMIN') || r.contains('ADMINISTRATOR'))) ||
+          r == 'SUPER_ADMIN' ||
+          r == 'SUPERADMIN');
+      final hasGdAdmin = roles.any((r) => r.contains('GENERAL_DEPARTMENT'));
+      final bool isPortalAdmin = Get.isRegistered<AdminController>()
+          ? Get.find<AdminController>().isPortalAdministrator()
+          : (hasPortalAdmin || (!hasGdAdmin && roles.any((r) => r == 'ADMIN' || r == 'ADMINISTRATOR')));
+
+      dynamic appsRes;
+
+      if (isPortalAdmin) {
+        // Portal Administrator manages all apps across the ministry
         try {
-          adminAppsRes = await _authService.fetchAdminApps();
+          appsRes = await _authService.fetchAdminApps();
         } catch (e) {
           debugPrint("ApplicationViewController fetchAdminApps error: $e");
         }
-      }
-
-      // If not admin or admin portal apps was null or empty, fallback to /portals/apps
-      if (adminAppsRes == null || (adminAppsRes is List && adminAppsRes.isEmpty)) {
+        if (appsRes == null || (appsRes is List && appsRes.isEmpty)) {
+          try {
+            appsRes = await _authService.fetchPortalApps();
+          } catch (e) {
+            debugPrint("ApplicationViewController fallback fetchPortalApps error: $e");
+          }
+        }
+      } else if (hasGdAdmin && Get.isRegistered<AdminController>()) {
+        // General Department Admin: strictly use AdminController's scoped apps
+        final adminCtrl = Get.find<AdminController>();
+        if (adminCtrl.appsList.isNotEmpty) {
+          appsRes = adminCtrl.appsList;
+        } else {
+          try {
+            appsRes = await _authService.fetchAdminApps();
+          } catch (e) {
+            debugPrint("ApplicationViewController GD Admin fetchAdminApps error: $e");
+          }
+          if (appsRes == null || (appsRes is List && appsRes.isEmpty)) {
+            try {
+              appsRes = await _authService.fetchPortalApps();
+            } catch (e) {
+              debugPrint("ApplicationViewController GD Admin fallback fetchPortalApps error: $e");
+            }
+          }
+        }
+      } else {
+        // Regular Portal User: strictly fetch assigned user tiles (/portals/tiles)
         try {
-          adminAppsRes = await _authService.fetchPortalApps();
+          appsRes = await _authService.fetchApps();
         } catch (e) {
-          debugPrint("ApplicationViewController fallback fetchPortalApps error: $e");
+          debugPrint("ApplicationViewController fetchApps (tiles) error: $e");
         }
       }
 
-      // If still null or empty, fallback to /portals/tiles
-      if (adminAppsRes == null || (adminAppsRes is List && adminAppsRes.isEmpty)) {
-        try {
-          adminAppsRes = await _authService.fetchApps();
-        } catch (e) {
-          debugPrint("ApplicationViewController fallback fetchApps (tiles) error: $e");
-        }
-      }
-
-      if (adminAppsRes != null) {
-        List list = [];
-        if (adminAppsRes is List) {
-          list = adminAppsRes;
-        } else if (adminAppsRes is Map) {
-          final data = adminAppsRes['data'] ??
-              adminAppsRes['value'] ??
-              adminAppsRes['items'] ??
-              adminAppsRes['content'] ??
-              adminAppsRes['apps'] ??
-              [];
-          if (data is List) list = data;
-        }
-        for (var item in list) {
+      if (appsRes != null) {
+        final extractedList = HomeController.extractListFromResponse(appsRes);
+        for (var item in extractedList) {
           addAppIfNew(item);
         }
       }
 
-      if (rawApps.isNotEmpty) {
-        final List<Map<String, dynamic>> parsed = [];
-        for (var app in rawApps) {
-          final normalized = _normalizeApp(app, token);
-          if (normalized.isNotEmpty) {
-            parsed.add(normalized);
-          }
+      final List<Map<String, dynamic>> parsed = [];
+      for (var app in rawApps) {
+        final normalized = _normalizeApp(app, token);
+        if (normalized.isNotEmpty) {
+          parsed.add(normalized);
         }
-        final filteredByDept = parsed.where((app) => isAppAllowedForCurrentUser(app)).toList();
-        apiApps.assignAll(filteredByDept);
-        ApplicationView.clearUserCountCache();
+      }
+
+      final filteredByDept = isPortalAdmin
+          ? parsed
+          : parsed.where((app) => isAppAllowedForCurrentUser(app)).toList();
+
+      apiApps.assignAll(filteredByDept);
+      hasFetchedFromApi.value = true;
+      ApplicationView.clearUserCountCache();
+
+      if (isPortalAdmin) {
         GetStorage().write('cached_admin_apps_list', filteredByDept);
+      } else {
         GetStorage().write('cached_portal_services', filteredByDept);
       }
     } catch (e) {
       debugPrint("ApplicationViewController fetchAppsFromApi error: $e");
     } finally {
+      hasFetchedFromApi.value = true;
       isLoading.value = false;
       _filterApps();
     }

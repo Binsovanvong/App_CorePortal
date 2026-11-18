@@ -453,6 +453,37 @@ void main() {
       appCtrl.setFilterTab('all');
       expect(appCtrl.filteredServices.length, equals(2));
     });
+
+    test('sourceApps does not load unassigned apps or stale cache when hasFetchedFromApi is true and user has no apps', () {
+      final box = GetStorage();
+      box.write('cached_admin_apps_list', [
+        {'id': 'unassigned_app', 'titleKh': 'កម្មវិធីមិនមានសិទ្ធិ', 'isActive': true}
+      ]);
+      box.write('cached_portal_services', [
+        {'id': 'stale_app', 'titleKh': 'Stale App', 'isActive': true}
+      ]);
+
+      final appCtrl = ApplicationViewController();
+      appCtrl.apiApps.clear();
+      appCtrl.hasFetchedFromApi.value = true;
+
+      // When hasFetchedFromApi is true, sourceApps must strictly reflect apiApps (empty) and NOT load stale caches
+      expect(appCtrl.sourceApps.isEmpty, isTrue);
+      expect(appCtrl.displayedServices.isEmpty, isTrue);
+    });
+
+    test('isPortalAdministrator distinguishes Portal Admin from General Department Admin', () {
+      final box = GetStorage();
+
+      // GD Admin
+      box.write('roles', ['portal_user', 'general_department_admin', 'admin']);
+      final adminCtrl = AdminController();
+      expect(adminCtrl.isPortalAdministrator(), isFalse);
+
+      // Portal Administrator
+      box.write('roles', ['portal_user', 'portal_administrator', 'admin']);
+      expect(adminCtrl.isPortalAdministrator(), isTrue);
+    });
   });
 
   group('Admin Department Mapping Tests', () {

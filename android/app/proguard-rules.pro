@@ -22,3 +22,17 @@
 
 # Google Play Core (Flutter Deferred Components)
 -dontwarn com.google.android.play.core.**
+
+# Strip android.util.Log calls in release builds to eliminate log leakage
+-assumenosideeffects class android.util.Log {
+    public static boolean isLoggable(java.lang.String, int);
+    public static int v(...);
+    public static int d(...);
+    public static int i(...);
+    public static int w(...);
+    public static int e(...);
+}
+
+# Obfuscate source file metadata
+-renamesourcefileattribute SourceFile
+-keepattributes Exceptions,InnerClasses,Signature,Deprecated,SourceFile,LineNumberTable,*Annotation*,EnclosingMethod

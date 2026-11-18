@@ -119,7 +119,7 @@ class HomeController extends GetxController {
   }
 
   /// Robustly extracts List items from any API wrapper structure
-  static List _extractListFromResponse(dynamic res) {
+  static List extractListFromResponse(dynamic res) {
     if (res == null) return [];
     if (res is List) return res;
     if (res is Map) {
@@ -158,6 +158,8 @@ class HomeController extends GetxController {
     }
     return [];
   }
+
+  static List _extractListFromResponse(dynamic res) => extractListFromResponse(res);
 
   Future<void> fetchPortalApps() async {
     // 1. Wait until login or session restoration finishes before fetching apps
@@ -227,28 +229,21 @@ class HomeController extends GetxController {
         debugPrint("fetchApps (tiles) error: $e");
       }
 
-      // 2. Fallback to /portals/apps
-      if (rawApps.isEmpty && !is401) {
-        try {
-          final portalAppsRes = await _authService.fetchPortalApps();
-          debugPrint("👉 /portals/apps raw response: $portalAppsRes");
-          final list = _extractListFromResponse(portalAppsRes);
-          for (var item in list) {
-            addAppIfNew(item, isGeneral: false);
-          }
-        } catch (e) {
-          debugPrint("Fallback fetchPortalApps in home controller error: $e");
-        }
-      }
-
-      // 3. Fallback to /admin/portal-apps if admin and tiles/apps were empty
+      // 2. Only global Portal Administrators fall back to admin portal apps if tiles were empty
       final box = GetStorage();
-      final bool isAdmin = box.read('isAdmin') == true;
-      if (rawApps.isEmpty && !is401 && isAdmin) {
+      final rawRoles = box.read('roles');
+      final List roleList = (rawRoles is List && rawRoles.isNotEmpty) ? rawRoles : [];
+      final roles = roleList.map((e) => e.toString().toUpperCase().trim()).toList();
+      final hasPortalAdmin = roles.any((r) =>
+          (r.contains('PORTAL') && (r.contains('ADMIN') || r.contains('ADMINISTRATOR'))) ||
+          r == 'SUPER_ADMIN' ||
+          r == 'SUPERADMIN');
+
+      if (rawApps.isEmpty && !is401 && hasPortalAdmin) {
         try {
           final adminAppsRes = await _authService.fetchAdminApps();
           debugPrint("👉 /admin/portal-apps raw response: $adminAppsRes");
-          final list = _extractListFromResponse(adminAppsRes);
+          final list = extractListFromResponse(adminAppsRes);
           for (var item in list) {
             addAppIfNew(item, isGeneral: false);
           }

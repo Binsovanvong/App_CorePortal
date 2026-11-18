@@ -115,5 +115,7 @@
 	</dict>
 	<key>NSFaceIDUsageDescription</key>
 	<string>សូមប្រើ Face ID / Touch ID ដើម្បីផ្ទៀងផ្ទាត់អត្តសញ្ញាណ (Please use Face ID / Touch ID to verify your identity)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>

@@ -195,12 +195,18 @@ class AdminController extends GetxController {
     final List list = (rawRoles is List && rawRoles.isNotEmpty) ? rawRoles : [];
     final roles = list.map((e) => e.toString().toUpperCase().trim()).toList();
 
-    return roles.any((r) =>
+    final hasPortalAdmin = roles.any((r) =>
         (r.contains('PORTAL') && (r.contains('ADMIN') || r.contains('ADMINISTRATOR'))) ||
-        r == 'ADMIN' ||
-        r == 'ADMINISTRATOR' ||
         r == 'SUPER_ADMIN' ||
         r == 'SUPERADMIN');
+    if (hasPortalAdmin) return true;
+
+    final hasGdAdmin = roles.any((r) => r.contains('GENERAL_DEPARTMENT'));
+    if (hasGdAdmin) return false;
+
+    return roles.any((r) =>
+        r == 'ADMIN' ||
+        r == 'ADMINISTRATOR');
   }
 
   /// Returns the admin's formatted display name

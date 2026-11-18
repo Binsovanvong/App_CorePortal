@@ -1,1 +1,1 @@
-{"device_unique_uuid":"e4a1445b-b788-4ccd-8cde-eecf10c835b5","biometric_registered_test_user_conditions":true,"is_face_enrolled":true}
+{"device_unique_uuid":"a52a7763-7d7f-4aa3-915e-37ae8ad61d14","biometric_registered_test_user_conditions":true,"is_face_enrolled":true,"cached_admin_apps_list":[{"id":"unassigned_app","titleKh":"កម្មវិធីមិនមានសិទ្ធិ","isActive":true}],"cached_portal_services":[{"id":"stale_app","titleKh":"Stale App","isActive":true}],"read_announcements":["concept_ann_1"]}

@@ -59,7 +59,11 @@ class DevHttpOverrides extends HttpOverrides {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (kDebugMode) {
+
+  // In release builds, completely mute console logging to prevent PII or token leakage
+  if (!kDebugMode) {
+    debugPrint = (String? message, {int? wrapWidth}) {};
+  } else {
     HttpOverrides.global = DevHttpOverrides();
   }
 

@@ -13,7 +13,12 @@ import 'package:core_portal/core/services/app_lock_service.dart';
 import 'package:core_portal/routes/page_route.dart';
 
 class ApiClient {
-  static const storage = FlutterSecureStorage();
+  static const storage = FlutterSecureStorage(
+    aOptions: AndroidOptions(resetOnError: false),
+    iOptions: IOSOptions(
+      accessibility: KeychainAccessibility.first_unlock_this_device,
+    ),
+  );
 
   static final TokenStore tokenStore = TokenStore(storage);
 
@@ -276,6 +281,8 @@ class ApiClient {
       await box.remove('roles');
       await box.remove('username');
       await box.remove('cached_portal_services');
+      await box.remove('cached_admin_apps_list');
+      await box.remove('cached_tiles');
     } catch (_) {}
   }
 }
